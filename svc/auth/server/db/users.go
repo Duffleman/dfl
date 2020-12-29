@@ -9,15 +9,14 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-func (qw *QueryableWrapper) GetUserByName(ctx context.Context, username string) (*auth.User, error) {
+func (qw *QueryableWrapper) findOne(ctx context.Context, field, value string) (*auth.User, error) {
 	qb := NewQueryBuilder()
 	query, values, err := qb.
 		Select("u.id, u.username, u.email, u.password, u.created_at, u.invite_code, u.invite_expiry, u.invite_redeemed_at, u.scopes").
 		From("users u").
 		Where(sq.Eq{
-			"u.username": username,
+			field: value,
 		}).
-		OrderBy("id").
 		ToSql()
 	if err != nil {
 		return nil, err
@@ -32,6 +31,14 @@ func (qw *QueryableWrapper) GetUserByName(ctx context.Context, username string) 
 	}
 
 	return &u, nil
+}
+
+func (qw *QueryableWrapper) FindUser(ctx context.Context, id string) (*auth.User, error) {
+	return qw.findOne(ctx, "id", id)
+}
+
+func (qw *QueryableWrapper) GetUserByName(ctx context.Context, username string) (*auth.User, error) {
+	return qw.findOne(ctx, "username", username)
 }
 
 func (qw *QueryableWrapper) RedeemInvite(ctx context.Context, userID, password string) error {

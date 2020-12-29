@@ -23,6 +23,18 @@ var suite = []struct {
 		Result: true,
 	},
 	{
+		Name:   "match within category",
+		Action: "short:upload short:moderate",
+		Scopes: "short:*",
+		Result: true,
+	},
+	{
+		Name:   "match within",
+		Action: "short:upload short:meta",
+		Scopes: "short:upload short:meta short:moderate",
+		Result: true,
+	},
+	{
 		Name:   "do no match down",
 		Action: "dflauth:*",
 		Scopes: "dflauth:login",

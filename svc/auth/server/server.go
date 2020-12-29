@@ -33,11 +33,11 @@ TrMsvUPc49bzqKTl4xWJWuQ7FR03RlebBx5xBIxLE5BeLjqkmhaq7ar55oRcq44X
 type Config struct {
 	Logger *logrus.Logger
 
-	Port int    `json:"port"`
-	DSN  string `json:"dsn"`
+	Port int    `envconfig:"port"`
+	DSN  string `envconfig:"dsn"`
 
-	PrivateKey string `json:"private_key"`
-	PublicKey  string `json:"public_key"`
+	PrivateKey string `envconfig:"private_key"`
+	PublicKey  string `envconfig:"public_key"`
 }
 
 func DefaultConfig() Config {
@@ -65,8 +65,8 @@ func Run(cfg Config) error {
 	db := db.New(pgDb)
 
 	sk, err := app.ParseKeys(&app.SigningKeysInput{
-		Public:  publicKey,
-		Private: privateKey,
+		Public:  cfg.PublicKey,
+		Private: cfg.PrivateKey,
 	})
 	if err != nil {
 		return err
@@ -86,9 +86,12 @@ func Run(cfg Config) error {
 	router.Use(dflmw.AuthMiddleware(sk.Public()))
 
 	router.Get("/get_public_cert", rpc.GetPublicCert(app))
+	router.Get("/authorize", rpc.AuthorizeGet(app))
+	router.Post("/authorize", rpc.AuthorizePost(app))
 	router.Post("/create_client", rpc.CreateClient(app))
 	router.Post("/login", rpc.Login(app))
 	router.Post("/register", rpc.Register(app))
+	router.Post("/token", rpc.Token(app))
 	router.Post("/whoami", rpc.WhoAmI(app))
 
 	cfg.Logger.Infof("Server running on port %d", cfg.Port)

@@ -13,9 +13,11 @@ import (
 )
 
 var unauthenticatedPaths = map[string]struct{}{
+	"/authorize":       {},
 	"/get_public_cert": {},
 	"/login":           {},
 	"/register":        {},
+	"/token":           {},
 }
 
 type DFLClaims struct {

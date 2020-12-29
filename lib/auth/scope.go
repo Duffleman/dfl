@@ -4,24 +4,28 @@ import (
 	"strings"
 )
 
-func Can(action string, scopes string) bool {
-	blanket := map[string]struct{}{}
+func Can(requested string, scopes string) bool {
+	actions := strings.Fields(requested)
+	allowed := make(map[string]struct{})
 
 	for _, scope := range strings.Fields(scopes) {
-		if action == scope {
-			return true
-		}
-
 		if strings.HasSuffix(scope, ":*") {
-			blanket[strings.TrimSuffix(scope, ":*")] = struct{}{}
+			allowed[strings.TrimSuffix(scope, ":*")] = struct{}{}
+		} else {
+			allowed[scope] = struct{}{}
 		}
 	}
 
-	category := strings.Split(action, ":")[0]
+	for _, scope := range actions {
+		parts := strings.Split(scope, ":")
 
-	if _, ok := blanket[category]; ok {
-		return true
+		_, directMatch := allowed[scope]
+		_, categoryMatch := allowed[parts[0]]
+
+		if !directMatch && !categoryMatch {
+			return false
+		}
 	}
 
-	return false
+	return true
 }

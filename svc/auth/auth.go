@@ -1,6 +1,8 @@
 package auth
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
 	ID               string     `json:"id"`
@@ -12,6 +14,12 @@ type User struct {
 	InviteExpiry     *time.Time `json:"invite_expiry"`
 	InviteRedeemedAt *time.Time `json:"invite_redeemed_at"`
 	Scopes           string     `json:"scopes"`
+}
+
+type Client struct {
+	ID        string    `json:"client_id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type LoginRequest struct {
@@ -46,4 +54,51 @@ type CreateClientRequest struct {
 
 type CreateClientResponse struct {
 	ClientID string `json:"client_id"`
+}
+
+type AuthorizationCode struct {
+	ID                  string    `json:"id"`
+	ClientID            string    `json:"client_id"`
+	ResponseType        string    `json:"response_type"`
+	RedirectURI         *string   `json:"redirect_uri"`
+	State               string    `json:"state"`
+	CodeChallengeMethod string    `json:"code_challenge_method"`
+	CodeChallenge       string    `json:"code_challenge"`
+	UserID              string    `json:"user_id"`
+	CreatedAt           time.Time `json:"created_at"`
+	ExpiresAt           time.Time `json:"expires_at"`
+	Scope               string    `json:"scope"`
+}
+
+type AuthorizationRequest struct {
+	ClientID            string  `json:"client_id"`
+	ResponseType        string  `json:"response_type"`
+	RedirectURI         *string `json:"redirect_uri"`
+	State               string  `json:"state"`
+	CodeChallengeMethod string  `json:"code_challenge_method"`
+	CodeChallenge       string  `json:"code_challenge"`
+	Username            string  `json:"username"`
+	Password            string  `json:"password"`
+	Scope               string  `json:"scope"`
+}
+
+type AuthorizationResponse struct {
+	AuthorizationCode string `json:"authorization_code"`
+	ExpiresAt         string `json:"expires_at"`
+	ExpiresIn         int    `json:"expires_in"`
+	State             string `json:"state"`
+}
+
+type TokenRequest struct {
+	ClientID     string  `json:"client_id"`
+	GrantType    string  `json:"grant_type"`
+	RedirectURI  *string `json:"redirect_uri"`
+	Code         string  `json:"code"`
+	CodeVerifier string  `json:"code_verifier"`
+}
+
+type TokenResponse struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	Expires     int    `json:"expires"`
 }

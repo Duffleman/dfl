@@ -3,9 +3,35 @@ package db
 import (
 	"context"
 
+	"dfl/svc/auth"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/cuvva/ksuid-go"
 )
+
+func (qw *QueryableWrapper) FindClient(ctx context.Context, id string) (*auth.Client, error) {
+	qb := NewQueryBuilder()
+	query, values, err := qb.
+		Select("id", "name", "created_at").
+		From("clients").
+		Where(sq.Eq{
+			"id": id,
+		}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	c := &auth.Client{}
+
+	row := qw.q.QueryRowContext(ctx, query, values...)
+
+	if err := row.Scan(&c.ID, &c.Name, &c.CreatedAt); err != nil {
+		return nil, coerceNotFound(err)
+	}
+
+	return c, nil
+}
 
 func (qw *QueryableWrapper) GetClientByName(ctx context.Context, name string) (string, error) {
 	qb := NewQueryBuilder()
