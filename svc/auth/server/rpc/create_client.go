@@ -44,7 +44,7 @@ func CreateClient(a *app.App) func(http.ResponseWriter, *http.Request) {
 		}
 
 		user := authlib.GetFromContext(r.Context())
-		if !user.Can("dflauth:create_client") {
+		if !user.Can("auth:create_client") {
 			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
 			return
 		}

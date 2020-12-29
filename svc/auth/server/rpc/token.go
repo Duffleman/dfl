@@ -29,7 +29,7 @@ var tokenSchema = gojsonschema.NewStringLoader(`{
 
 		"grant_type": {
 			"type": "string",
-			"enum": ["authorization_code"]
+			"enum": ["code"]
 		},
 
 		"redirect_uri": {

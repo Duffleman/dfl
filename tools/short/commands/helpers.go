@@ -12,7 +12,7 @@ import (
 )
 
 // AppName for notifications
-const AppName = "DFL IMG"
+const AppName = "DFL Short"
 
 func notify(title, body string) {
 	err := b.Notify(title, body, "")
@@ -28,7 +28,7 @@ func makeClient() short.Service {
 }
 
 func rootURL() string {
-	return fmt.Sprintf("%s/", viper.Get("ROOT_URL").(string))
+	return fmt.Sprintf("%s/", viper.Get("SHORT_URL").(string))
 }
 
 func writeClipboard(in string) {

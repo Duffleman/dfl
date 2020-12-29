@@ -83,7 +83,7 @@ func AuthMiddleware(publicKey interface{}) func(h http.Handler) http.Handler {
 				Scopes:   claims.Scope,
 			}
 
-			if !authUser.Can("dflauth:login") {
+			if !authUser.Can("auth:login") {
 				rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
 				return
 			}

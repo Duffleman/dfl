@@ -28,14 +28,14 @@ func (a *App) Login(ctx context.Context, req *auth.LoginRequest) (*auth.LoginRes
 		return nil, cher.New(cher.Unauthorized, nil)
 	}
 
-	if !authlib.Can("dflauth:*", user.Scopes) {
+	if !authlib.Can("auth:*", user.Scopes) {
 		return nil, cher.New(cher.AccessDenied, nil)
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodES384, middleware.DFLClaims{
-		user.Scopes,
-		user.Username,
-		jwt.StandardClaims{
+		Scope:    user.Scopes,
+		Username: user.Username,
+		StandardClaims: jwt.StandardClaims{
 			Id:        ksuid.Generate("accesstoken").String(),
 			ExpiresAt: time.Now().Add(1 * time.Hour).Unix(),
 			IssuedAt:  time.Now().Unix(),

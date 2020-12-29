@@ -24,8 +24,8 @@ func init() {
 
 func main() {
 	// Load env variables
-	viper.SetEnvPrefix("SHORT")
-	viper.SetDefault("ROOT_URL", "https://dfl.mn")
+	viper.SetEnvPrefix("DFL")
+	viper.SetDefault("SHORT_URL", "https://dfl.mn")
 
 	viper.AutomaticEnv()
 

@@ -1,8 +1,17 @@
 package auth
 
 import (
+	"context"
 	"time"
 )
+
+type Service interface {
+	CreateClient(context.Context, *CreateClientRequest) (*CreateClientResponse, error)
+	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	Register(context.Context, *RegisterRequest) error
+	Token(context.Context, *TokenRequest) (*TokenResponse, error)
+	WhoAmI(context.Context, *WhoAmIRequest) (*WhoAmIResponse, error)
+}
 
 type User struct {
 	ID               string     `json:"id"`
@@ -60,7 +69,7 @@ type AuthorizationCode struct {
 	ID                  string    `json:"id"`
 	ClientID            string    `json:"client_id"`
 	ResponseType        string    `json:"response_type"`
-	RedirectURI         *string   `json:"redirect_uri"`
+	RedirectURI         *string   `json:"redirect_uri,omitempty"`
 	State               string    `json:"state"`
 	CodeChallengeMethod string    `json:"code_challenge_method"`
 	CodeChallenge       string    `json:"code_challenge"`
@@ -73,7 +82,7 @@ type AuthorizationCode struct {
 type AuthorizationRequest struct {
 	ClientID            string  `json:"client_id"`
 	ResponseType        string  `json:"response_type"`
-	RedirectURI         *string `json:"redirect_uri"`
+	RedirectURI         *string `json:"redirect_uri,omitempty"`
 	State               string  `json:"state"`
 	CodeChallengeMethod string  `json:"code_challenge_method"`
 	CodeChallenge       string  `json:"code_challenge"`
@@ -92,7 +101,7 @@ type AuthorizationResponse struct {
 type TokenRequest struct {
 	ClientID     string  `json:"client_id"`
 	GrantType    string  `json:"grant_type"`
-	RedirectURI  *string `json:"redirect_uri"`
+	RedirectURI  *string `json:"redirect_uri,omitempty"`
 	Code         string  `json:"code"`
 	CodeVerifier string  `json:"code_verifier"`
 }
