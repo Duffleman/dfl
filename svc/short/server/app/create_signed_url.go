@@ -1,0 +1,55 @@
+package app
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"dfl/lib/cher"
+	"dfl/svc/short"
+
+	"github.com/cuvva/ksuid-go"
+	pkgerr "github.com/pkg/errors"
+)
+
+// CreateSignedURL creates a file resource, but instead of accepting the file
+// it generates a signed URL
+func (a *App) CreateSignedURL(ctx context.Context, username string, name *string, contentType string) (*short.CreateSignedURLResponse, error) {
+	if !a.SP.SupportsSignedURLs() {
+		return nil, cher.New("signed_urls_unsupported", nil)
+	}
+
+	fileID := ksuid.Generate("file").String()
+	fileKey := a.SP.GenerateKey(fileID)
+
+	fileRes, err := a.DB.Q.NewPendingFile(ctx, fileID, fileKey, username, name, contentType)
+	if err != nil {
+		return nil, err
+	}
+
+	url, err := a.SP.PrepareUpload(ctx, fileKey, contentType, 15*time.Minute)
+	if err != nil {
+		return nil, pkgerr.Wrap(err, "unable to create presigned url")
+	}
+
+	hash := a.makeHash(fileRes.Serial)
+	fullURL := fmt.Sprintf("%s/%s", a.RootURL, hash)
+
+	gctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	go a.saveHash(gctx, cancel, fileRes.Serial, hash)
+
+	return &short.CreateSignedURLResponse{
+		ResourceID: fileRes.ID,
+		Type:       fileRes.Type,
+		Hash:       hash,
+		Name:       name,
+		URL:        fullURL,
+		S3Link:     url,
+	}, nil
+}
+
+func (a *App) saveHash(ctx context.Context, c context.CancelFunc, serial int, hash string) error {
+	defer c()
+
+	return a.DB.Q.SaveHash(ctx, serial, hash)
+}

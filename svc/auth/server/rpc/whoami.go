@@ -3,11 +3,11 @@ package rpc
 import (
 	"net/http"
 
+	authlib "dfl/lib/auth"
 	"dfl/lib/cher"
+	"dfl/lib/rpc"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/app"
-	authlib "dfl/svc/auth/server/lib/auth"
-	"dfl/svc/auth/server/lib/rpc"
 
 	"github.com/xeipuuv/gojsonschema"
 )

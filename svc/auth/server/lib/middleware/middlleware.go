@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
+	"dfl/lib/auth"
 	"dfl/lib/cher"
-	"dfl/svc/auth/server/lib/auth"
-	"dfl/svc/auth/server/lib/rpc"
+	"dfl/lib/rpc"
 
 	"github.com/dgrijalva/jwt-go"
 )

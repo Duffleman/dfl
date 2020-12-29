@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	auth "dfl/svc/auth/server/cmd"
+	short "dfl/svc/short/server/cmd"
 )
 
 // RootCmd is the initial entrypoint where all services are mounted.
@@ -15,6 +16,7 @@ var RootCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(auth.RootCmd)
+	RootCmd.AddCommand(short.RootCmd)
 }
 
 func main() {

@@ -3,9 +3,9 @@ package rpc
 import (
 	"net/http"
 
+	"dfl/lib/rpc"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/app"
-	"dfl/svc/auth/server/lib/rpc"
 
 	"github.com/xeipuuv/gojsonschema"
 )

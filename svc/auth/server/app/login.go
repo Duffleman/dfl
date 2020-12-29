@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
+	authlib "dfl/lib/auth"
 	"dfl/lib/cher"
 	"dfl/svc/auth"
-	authlib "dfl/svc/auth/server/lib/auth"
 	"dfl/svc/auth/server/lib/middleware"
 
 	"github.com/cuvva/ksuid-go"

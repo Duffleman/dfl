@@ -6,8 +6,8 @@ import (
 	"encoding/pem"
 	"net/http"
 
+	"dfl/lib/rpc"
 	"dfl/svc/auth/server/app"
-	"dfl/svc/auth/server/lib/rpc"
 )
 
 func GetPublicCert(a *app.App) func(http.ResponseWriter, *http.Request) {
