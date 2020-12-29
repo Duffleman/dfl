@@ -1,8 +1,12 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"path"
 
+	"dfl/svc/auth"
 	"dfl/svc/short"
 
 	"github.com/atotto/clipboard"
@@ -22,13 +26,33 @@ func notify(title, body string) {
 }
 
 func makeClient() short.Service {
-	authToken := viper.Get("AUTH_TOKEN").(string)
-
-	return short.NewClient(rootURL(), authToken)
+	return short.NewClient(rootURL(), getAuthHeader())
 }
 
 func rootURL() string {
 	return fmt.Sprintf("%s/", viper.Get("SHORT_URL").(string))
+}
+
+func getRootPath() string {
+	return viper.Get("FS").(string)
+}
+
+func getAuthHeader() string {
+	path := path.Join(getRootPath(), "auth.json")
+
+	bytes, err := ioutil.ReadFile(path)
+	if err != nil {
+		panic(err)
+	}
+
+	res := auth.TokenResponse{}
+
+	err = json.Unmarshal(bytes, &res)
+	if err != nil {
+		panic(err)
+	}
+
+	return fmt.Sprintf("%s %s", res.TokenType, res.AccessToken)
 }
 
 func writeClipboard(in string) {

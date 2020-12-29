@@ -3,33 +3,39 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"regexp"
 	"strings"
 
-	"dfl/lib/auth"
+	authlib "dfl/lib/auth"
 	"dfl/lib/cher"
+	dfljwt "dfl/lib/jwt"
 	"dfl/lib/rpc"
 
 	"github.com/dgrijalva/jwt-go"
 )
 
-var unauthenticatedPaths = map[string]struct{}{
-	"/authorize":       {},
-	"/get_public_cert": {},
-	"/login":           {},
-	"/register":        {},
-	"/token":           {},
+type HTTPResource struct {
+	Verb  *string
+	Path  *string
+	Regex *regexp.Regexp
 }
 
-type DFLClaims struct {
-	Scope    string `json:"scope"`
-	Username string `json:"username"`
-	jwt.StandardClaims
-}
-
-func AuthMiddleware(publicKey interface{}) func(h http.Handler) http.Handler {
+func AuthMiddleware(publicKey interface{}, bypassPaths []HTTPResource) func(h http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			if _, ok := unauthenticatedPaths[r.URL.Path]; ok {
+			for _, path := range bypassPaths {
+				if path.Verb != nil && *path.Verb != r.Method {
+					continue
+				}
+
+				if path.Path != nil && *path.Path != r.URL.Path {
+					continue
+				}
+
+				if path.Regex != nil && !path.Regex.MatchString(r.URL.Path) {
+					continue
+				}
+
 				h.ServeHTTP(w, r)
 				return
 			}
@@ -54,7 +60,7 @@ func AuthMiddleware(publicKey interface{}) func(h http.Handler) http.Handler {
 
 			tokenString := parts[1]
 
-			var dflclaims DFLClaims
+			var dflclaims dfljwt.DFLClaims
 
 			token, err := jwt.ParseWithClaims(tokenString, &dflclaims, func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
@@ -75,20 +81,15 @@ func AuthMiddleware(publicKey interface{}) func(h http.Handler) http.Handler {
 				return
 			}
 
-			claims := token.Claims.(*DFLClaims)
+			claims := token.Claims.(*dfljwt.DFLClaims)
 
-			authUser := auth.AuthUser{
+			authUser := authlib.AuthUser{
 				UserID:   claims.Id,
 				Username: claims.Username,
 				Scopes:   claims.Scope,
 			}
 
-			if !authUser.Can("auth:login") {
-				rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
-				return
-			}
-
-			ctx := context.WithValue(r.Context(), auth.UserContextKey, authUser)
+			ctx := context.WithValue(r.Context(), authlib.UserContextKey, authUser)
 
 			h.ServeHTTP(w, r.WithContext(ctx))
 		}

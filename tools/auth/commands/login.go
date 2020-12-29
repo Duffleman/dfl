@@ -33,6 +33,11 @@ func Login(clientID, scope string) *cobra.Command {
 			original, hashed := makeCodeChallenge()
 			state := makeState()
 
+			_, err := loadFromFile("auth.json")
+			if err != nil {
+				return err
+			}
+
 			params := url.Values{
 				"client_id":             []string{clientID},
 				"scope":                 []string{scope},
@@ -54,7 +59,7 @@ func Login(clientID, scope string) *cobra.Command {
 			c.Printf(": %s: ", "Don't forget to look for the state! It should match")
 			ca.Println(state)
 
-			err := openBrowser(url)
+			err = openBrowser(url)
 			if err != nil {
 				cw.Print("Warning")
 				c.Printf(": %s\n\n", "Cannot open your browser for you, type in this URL:")

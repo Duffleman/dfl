@@ -49,6 +49,11 @@ func WhoAmI(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
+		if !user.Can("auth:whoami") {
+			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
+			return
+		}
+
 		res, err := a.WhoAmI(r.Context(), req)
 		if err != nil {
 			rpc.HandleError(w, r, err)

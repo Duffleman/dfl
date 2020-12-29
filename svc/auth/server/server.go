@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
+	dflmw "dfl/lib/middleware"
+	"dfl/lib/ptr"
 	"dfl/svc/auth/server/app"
 	"dfl/svc/auth/server/db"
-	dflmw "dfl/svc/auth/server/lib/middleware"
 	"dfl/svc/auth/server/rpc"
 
 	"github.com/go-chi/chi"
@@ -83,7 +84,13 @@ func Run(cfg Config) error {
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
 	router.Use(cors.AllowAll().Handler)
-	router.Use(dflmw.AuthMiddleware(sk.Public()))
+	router.Use(dflmw.AuthMiddleware(sk.Public(), []dflmw.HTTPResource{
+		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/authorize")},
+		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/get_public_cert")},
+		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/authorize")},
+		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/login")},
+		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/token")},
+	}))
 
 	router.Get("/get_public_cert", rpc.GetPublicCert(app))
 	router.Get("/authorize", rpc.AuthorizeGet(app))

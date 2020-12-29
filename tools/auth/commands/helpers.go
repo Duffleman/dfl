@@ -1,7 +1,10 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path"
 
 	"dfl/svc/auth"
 
@@ -18,4 +21,17 @@ func rootURL() string {
 
 func getRootPath() string {
 	return viper.Get("FS").(string)
+}
+
+func loadFromFile(filename string) (res *auth.TokenResponse, err error) {
+	path := path.Join(getRootPath(), filename)
+
+	file, err := os.OpenFile(path, os.O_CREATE, 0644)
+	if err != nil {
+		return nil, err
+	}
+
+	json.NewDecoder(file).Decode(&res)
+
+	return
 }

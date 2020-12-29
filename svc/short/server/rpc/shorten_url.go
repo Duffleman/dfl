@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	authlib "dfl/lib/auth"
+	"dfl/lib/cher"
 	"dfl/lib/rpc"
 	"dfl/svc/short"
 	"dfl/svc/short/server/app"
@@ -45,9 +46,13 @@ func ShortenURL(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		username := ctx.Value(authlib.UserContextKey).(string)
+		authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
+		if !authUser.Can("short:upload") {
+			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
+			return
+		}
 
-		res, err := a.ShortenURL(ctx, req.URL, username)
+		res, err := a.ShortenURL(ctx, req.URL, authUser.Username)
 		if err != nil {
 			rpc.HandleError(w, r, err)
 			return

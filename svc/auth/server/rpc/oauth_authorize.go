@@ -53,7 +53,13 @@ func AuthorizePost(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		client, err := a.DB.Q.FindClient(r.Context(), params.ClientID)
+		client, err := a.FindClient(r.Context(), params.ClientID)
+		if err != nil {
+			rpc.HandleError(w, r, err)
+			return
+		}
+
+		user, err := a.GetUserByName(r.Context(), authCredentials.Username)
 		if err != nil {
 			rpc.HandleError(w, r, err)
 			return
@@ -69,7 +75,7 @@ func AuthorizePost(a *app.App) func(http.ResponseWriter, *http.Request) {
 			Username:            authCredentials.Username,
 			Password:            authCredentials.Password,
 			Scope:               params.Scope,
-		})
+		}, user)
 		if err != nil {
 			rpc.HandleError(w, r, err)
 			return

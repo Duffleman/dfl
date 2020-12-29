@@ -1,16 +1,19 @@
 package server
 
 import (
+	"crypto/x509"
 	"database/sql"
+	"encoding/pem"
 	"fmt"
 	"net/http"
 	"os"
 
 	"dfl/lib/cache"
 	"dfl/lib/cher"
+	dflmw "dfl/lib/middleware"
+	"dfl/lib/ptr"
 	"dfl/svc/short/server/app"
 	"dfl/svc/short/server/db"
-	dflmw "dfl/svc/short/server/lib/middleware"
 	"dfl/svc/short/server/lib/storageproviders"
 	"dfl/svc/short/server/rpc"
 
@@ -23,15 +26,21 @@ import (
 	"github.com/speps/go-hashids"
 )
 
+const publicKey = `-----BEGIN PUBLIC KEY-----
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEVCaFRARRhg/N7eBOkG3LxsnZg22pPSa/
+TrMsvUPc49bzqKTl4xWJWuQ7FR03RlebBx5xBIxLE5BeLjqkmhaq7ar55oRcq44X
+5X+MwKLgptsSvJF+7nkYs1cNROvQFAIb
+-----END PUBLIC KEY-----`
+
 type Config struct {
 	Logger *logrus.Logger
 
-	Port int    `envconfig:"port"`
-	DSN  string `envconfig:"dsn"`
+	Port      int    `envconfig:"port"`
+	DSN       string `envconfig:"dsn"`
+	PublicKey string `envconfig:"public_key"`
 
-	Salt    string            `envconfig:"salt"`
-	RootURL string            `envconfig:"root_url"`
-	Users   map[string]string `envconfig:"users"`
+	Salt    string `envconfig:"salt"`
+	RootURL string `envconfig:"root_url"`
 
 	StorageProvider string `envconfig:"storage_provider"`
 
@@ -49,14 +58,12 @@ func DefaultConfig() Config {
 	return Config{
 		Logger: logrus.New(),
 
-		Port: 3000,
-		DSN:  "postgresql://postgres@localhost/dflimg?sslmode=disable",
+		Port:      3000,
+		DSN:       "postgresql://postgres@localhost/dflimg?sslmode=disable",
+		PublicKey: publicKey,
 
 		Salt:    "savour-shingle-sidney-rajah-punk-lead-jenny-scot",
 		RootURL: "http://localhost:3000",
-		Users: map[string]string{
-			"Duffleman": "test",
-		},
 
 		StorageProvider: "lfs",
 
@@ -99,6 +106,14 @@ func Run(cfg Config) error {
 		return err
 	}
 
+	publicBlock, _ := pem.Decode([]byte(cfg.PublicKey))
+	x509EncodedPub := publicBlock.Bytes
+
+	publicCert, err := x509.ParsePKIXPublicKey(x509EncodedPub)
+	if err != nil {
+		return err
+	}
+
 	db := db.New(pgDb)
 
 	hd := hashids.NewData()
@@ -137,7 +152,11 @@ func Run(cfg Config) error {
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
 	router.Use(cors.AllowAll().Handler)
-	router.Use(dflmw.AuthMiddleware(cfg.Users))
+	router.Use(dflmw.AuthMiddleware(publicCert, []dflmw.HTTPResource{
+		{Verb: ptr.String(http.MethodGet)},
+		{Verb: ptr.String(http.MethodHead)},
+		{Verb: ptr.String(http.MethodOptions)},
+	}))
 
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "") // Needed for redirect to work

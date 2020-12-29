@@ -4,22 +4,16 @@ import (
 	"context"
 	"time"
 
-	authlib "dfl/lib/auth"
 	"dfl/lib/cher"
+	dfljwt "dfl/lib/jwt"
 	"dfl/svc/auth"
-	"dfl/svc/auth/server/lib/middleware"
 
 	"github.com/cuvva/ksuid-go"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (a *App) Login(ctx context.Context, req *auth.LoginRequest) (*auth.LoginResponse, error) {
-	user, err := a.DB.Q.GetUserByName(ctx, req.Username)
-	if err != nil {
-		return nil, err
-	}
-
+func (a *App) Login(ctx context.Context, req *auth.LoginRequest, user *auth.User) (*auth.LoginResponse, error) {
 	if user.Password == nil || user.InviteCode != nil {
 		return nil, cher.New("pending_invite", nil)
 	}
@@ -28,11 +22,7 @@ func (a *App) Login(ctx context.Context, req *auth.LoginRequest) (*auth.LoginRes
 		return nil, cher.New(cher.Unauthorized, nil)
 	}
 
-	if !authlib.Can("auth:*", user.Scopes) {
-		return nil, cher.New(cher.AccessDenied, nil)
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodES384, middleware.DFLClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodES384, dfljwt.DFLClaims{
 		Scope:    user.Scopes,
 		Username: user.Username,
 		StandardClaims: jwt.StandardClaims{

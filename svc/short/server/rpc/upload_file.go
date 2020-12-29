@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	authlib "dfl/lib/auth"
+	"dfl/lib/cher"
 	"dfl/lib/rpc"
 	"dfl/svc/short"
 	"dfl/svc/short/server/app"
@@ -17,7 +18,11 @@ func UploadFile(a *app.App) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		username := ctx.Value(authlib.UserContextKey).(string)
+		authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
+		if !authUser.Can("short:upload") {
+			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
+			return
+		}
 
 		file, header, err := r.FormFile("file")
 		if err != nil {
@@ -36,7 +41,7 @@ func UploadFile(a *app.App) func(http.ResponseWriter, *http.Request) {
 		var buf bytes.Buffer
 		io.Copy(&buf, file)
 
-		res, err := a.UploadFile(ctx, username, &short.CreateFileRequest{
+		res, err := a.UploadFile(ctx, authUser.Username, &short.CreateFileRequest{
 			File: buf,
 			Name: name,
 		})

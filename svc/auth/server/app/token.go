@@ -7,9 +7,9 @@ import (
 
 	authlib "dfl/lib/auth"
 	"dfl/lib/cher"
+	dfljwt "dfl/lib/jwt"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/db"
-	"dfl/svc/auth/server/lib/middleware"
 
 	"github.com/cuvva/ksuid-go"
 	"github.com/dgrijalva/jwt-go"
@@ -58,7 +58,7 @@ func (a *App) Token(ctx context.Context, req *auth.TokenRequest) (*auth.TokenRes
 	expiresAt := time.Now().Add(atExpiry)
 	atID := ksuid.Generate("accesstoken").String()
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES384, middleware.DFLClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodES384, dfljwt.DFLClaims{
 		Scope:    user.Scopes,
 		Username: user.Username,
 		StandardClaims: jwt.StandardClaims{

@@ -7,7 +7,7 @@ import (
 )
 
 func (a *App) WhoAmI(ctx context.Context, req *auth.WhoAmIRequest) (*auth.WhoAmIResponse, error) {
-	user, err := a.DB.Q.GetUserByName(ctx, req.Username)
+	user, err := a.GetUserByName(ctx, req.Username)
 	if err != nil {
 		return nil, err
 	}

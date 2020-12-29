@@ -11,8 +11,9 @@ Install it into your PATH
 ## Env variables to set
 
 ```
-SHORT_ROOT_URL=https://dfl.mn
-SHORT_AUTH_TOKEN=some-token-thats-on-the-short-server
+export DFL_SHORT_URL=https://dfl.mn
+export DFL_AUTH_URL=https://auth.dfl.mn
+export DFL_FS=/Users/duffleman/.dfl
 ```
 
 ### Upload a file

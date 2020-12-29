@@ -60,9 +60,13 @@ func ListResources(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		username := ctx.Value(authlib.UserContextKey).(string)
+		authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
+		if !authUser.Can("short:upload") {
+			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
+			return
+		}
 
-		if req.Username == nil || *req.Username != username {
+		if req.Username == nil || *req.Username != authUser.Username {
 			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
 			return
 		}

@@ -51,7 +51,11 @@ func AddShortcut(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		username := ctx.Value(authlib.UserContextKey).(string)
+		authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
+		if !authUser.Can("short:upload") {
+			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
+			return
+		}
 
 		qi := a.ParseQueryType(req.Query)
 
@@ -71,7 +75,7 @@ func AddShortcut(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		if resource.Owner != username {
+		if resource.Owner != authUser.Username {
 			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
 			return
 		}

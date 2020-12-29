@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	authCommands "dfl/tools/auth/commands"
 	"dfl/tools/short/commands"
 
 	"github.com/spf13/cobra"
@@ -20,6 +21,8 @@ func init() {
 	rootCmd.AddCommand(commands.ShortenURLCmd)
 	rootCmd.AddCommand(commands.UploadSignedCmd)
 	rootCmd.AddCommand(commands.ViewDetailsCmd)
+
+	rootCmd.AddCommand(authCommands.Login("client_000000C3Ld09V54CEqHi6IGD4N7CK", "short:upload short:delete"))
 }
 
 func main() {

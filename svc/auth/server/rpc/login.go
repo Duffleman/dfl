@@ -3,6 +3,8 @@ package rpc
 import (
 	"net/http"
 
+	authlib "dfl/lib/auth"
+	"dfl/lib/cher"
 	"dfl/lib/rpc"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/app"
@@ -47,7 +49,18 @@ func Login(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		res, err := a.Login(r.Context(), req)
+		user, err := a.GetUserByName(r.Context(), req.Username)
+		if err != nil {
+			rpc.HandleError(w, r, err)
+			return
+		}
+
+		if !authlib.Can("auth:login", user.Scopes) {
+			rpc.HandleError(w, r, cher.New(cher.Unauthorized, nil))
+			return
+		}
+
+		res, err := a.Login(r.Context(), req, user)
 		if err != nil {
 			rpc.HandleError(w, r, err)
 			return
