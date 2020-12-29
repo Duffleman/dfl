@@ -20,7 +20,7 @@ type LocalFileSystem struct {
 	permissions os.FileMode
 }
 
-// NewLFSProviderFromEnv makes a new FileSystem provider from env vars
+// NewLFSProviderFromCfg makes a new FileSystem provider from env vars
 func NewLFSProviderFromCfg(folder string, permissions os.FileMode) (StorageProvider, error) {
 	return &LocalFileSystem{
 		folder:      folder,

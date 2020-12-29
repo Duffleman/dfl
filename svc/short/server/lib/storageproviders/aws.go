@@ -42,9 +42,9 @@ func NewAWSProvider(driver *session.Session, bucket, root string) StorageProvide
 	}
 }
 
-// NewAWSProvider builds an AWS driver from ENV variables
-func NewAWSProviderFromCfg(awsConfig *aws.Config, bucketName, root string) (StorageProvider, error) {
-	awsDriver, err := session.NewSession(awsConfig)
+// NewAWSProviderFromCfg builds an AWS driver from ENV variables
+func NewAWSProviderFromCfg(awsRegion, bucketName, root string) (StorageProvider, error) {
+	awsDriver, err := session.NewSession(&aws.Config{Region: aws.String(awsRegion)})
 	if err != nil {
 		return nil, err
 	}

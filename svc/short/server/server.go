@@ -8,14 +8,12 @@ import (
 
 	"dfl/lib/cache"
 	"dfl/lib/cher"
-	"dfl/lib/config"
 	"dfl/svc/short/server/app"
 	"dfl/svc/short/server/db"
 	dflmw "dfl/svc/short/server/lib/middleware"
 	"dfl/svc/short/server/lib/storageproviders"
 	"dfl/svc/short/server/rpc"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-redis/redis"
@@ -28,23 +26,23 @@ import (
 type Config struct {
 	Logger *logrus.Logger
 
-	Port int    `json:"port"`
-	DSN  string `json:"dsn"`
+	Port int    `envconfig:"port"`
+	DSN  string `envconfig:"dsn"`
 
-	Salt    string            `json:"salt"`
-	RootURL string            `json:"root_url"`
-	Users   map[string]string `json:"users"`
+	Salt    string            `envconfig:"salt"`
+	RootURL string            `envconfig:"root_url"`
+	Users   map[string]string `envconfig:"users"`
 
-	StorageProvider string `json:"storage_provider"`
+	StorageProvider string `envconfig:"storage_provider"`
 
-	LFSFolder      string      `json:"lfs_folder"`
-	LFSPermissions os.FileMode `json:"lfs_permissions"`
+	LFSFolder      string      `envconfig:"lfs_folder"`
+	LFSPermissions os.FileMode `envconfig:"lfs_permissions"`
 
-	AWS       *aws.Config `json:"aws"`
-	AWSBucket string      `json:"aws_bucket"`
-	AWSRoot   string      `json:"aws_root"`
+	AWSRegion string `envconfig:"aws_region"`
+	AWSBucket string `envconfig:"aws_bucket"`
+	AWSRoot   string `envconfig:"aws_root"`
 
-	Redis config.Redis `json:"redis"`
+	RedisURI string `envconfig:"redis_uri"`
 }
 
 func DefaultConfig() Config {
@@ -65,15 +63,11 @@ func DefaultConfig() Config {
 		LFSFolder:      "/Users/duffleman/Downloads/short",
 		LFSPermissions: 0644,
 
-		AWS: &aws.Config{
-			Region: aws.String("eu-west-1"),
-		},
+		AWSRegion: "eu-west-1",
 		AWSBucket: "s3.duffleman.co.uk",
 		AWSRoot:   "i.dfl.mn",
 
-		Redis: config.Redis{
-			URI: "redis://localhost:6379",
-		},
+		RedisURI: "redis://localhost:6379",
 	}
 }
 
@@ -87,7 +81,7 @@ func Run(cfg Config) error {
 
 	switch cfg.StorageProvider {
 	case "aws":
-		sp, err = storageproviders.NewAWSProviderFromCfg(cfg.AWS, cfg.AWSBucket, cfg.AWSRoot)
+		sp, err = storageproviders.NewAWSProviderFromCfg(cfg.AWSRegion, cfg.AWSBucket, cfg.AWSRoot)
 		if err != nil {
 			return err
 		}
@@ -116,7 +110,7 @@ func Run(cfg Config) error {
 		return err
 	}
 
-	redisOpts, err := redis.ParseURL(cfg.Redis.URI)
+	redisOpts, err := redis.ParseURL(cfg.RedisURI)
 	if err != nil {
 		return err
 	}
