@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"os"
-
-	"dfl/lib/config"
 	"dfl/svc/auth/server"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +15,7 @@ var RootCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cfg := server.DefaultConfig()
 
-		err := config.FromEnvironment(os.Getenv, &cfg)
+		err := envconfig.Process("auth", &cfg)
 		if err != nil {
 			return err
 		}
