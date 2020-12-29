@@ -24,7 +24,7 @@ var setNSFWSchema = gojsonschema.NewStringLoader(`{
 	"properties": {
 		"query": {
 			"type": "string",
-			"minLength": 1
+			"minLength": 3
 		},
 
 		"nsfw": {

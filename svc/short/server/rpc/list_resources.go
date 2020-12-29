@@ -27,7 +27,7 @@ var listResourcesSchema = gojsonschema.NewStringLoader(`{
 
 		"username": {
 			"type": "string",
-			"minLenth": 1
+			"minLength": 1
 		},
 
 		"limit": {
@@ -38,7 +38,7 @@ var listResourcesSchema = gojsonschema.NewStringLoader(`{
 
 		"filter_mime": {
 			"type": "string",
-			"minLenth": 1
+			"minLength": 1
 		}
 	}
 }`)

@@ -28,7 +28,7 @@ var createSignedURLSchema = gojsonschema.NewStringLoader(`{
 
 		"content_type": {
 			"type": "string",
-			"minLenth": 1
+			"minLength": 1
 		}
 	}
 }`)

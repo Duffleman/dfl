@@ -24,12 +24,12 @@ var removeShortcutSchema = gojsonschema.NewStringLoader(`{
 	"properties": {
 		"query": {
 			"type": "string",
-			"minLength": 1
+			"minLength": 3
 		},
 
 		"shortcut": {
 			"type": "string",
-			"minLenth": 1
+			"minLength": 3
 		}
 	}
 }`)
