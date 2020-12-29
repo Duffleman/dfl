@@ -12,8 +12,6 @@ RUN go install -v ./cmd/...
 
 FROM alpine
 RUN apk add --no-cache ca-certificates tzdata
-ENV ADDR=":80"
-EXPOSE 80
 RUN mkdir -p /usr/local/app
 WORKDIR /usr/local/app
 ENTRYPOINT ["./svc"]
