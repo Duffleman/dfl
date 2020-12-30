@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	authlib "dfl/lib/auth"
 	"dfl/lib/cher"
 	"dfl/lib/ptr"
 	"dfl/lib/rpc"
@@ -85,6 +86,11 @@ func AuthorizePost(a *app.App) func(http.ResponseWriter, *http.Request) {
 		user, err := a.GetUserByName(r.Context(), authCredentials.Username)
 		if err != nil {
 			rpc.HandleError(w, r, err)
+			return
+		}
+
+		if !authlib.Can(params.Scope, user.Scopes) {
+			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil, cher.New("invalid_scopes", nil)))
 			return
 		}
 
