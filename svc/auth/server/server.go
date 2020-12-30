@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"dfl/lib/key"
 	dflmw "dfl/lib/middleware"
 	"dfl/lib/ptr"
 	"dfl/svc/auth/server/app"
@@ -65,13 +66,10 @@ func Run(cfg Config) error {
 
 	db := db.New(pgDb)
 
-	sk, err := app.ParseKeys(&app.SigningKeysInput{
-		Public:  cfg.PublicKey,
-		Private: cfg.PrivateKey,
-	})
-	if err != nil {
-		return err
-	}
+	sk := app.NewSK(
+		key.MustParseECDSAPrivate([]byte(cfg.PrivateKey)),
+		key.MustParseECDSAPublic([]byte(cfg.PublicKey)),
+	)
 
 	app := &app.App{
 		SK: sk,

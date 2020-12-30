@@ -1,15 +1,14 @@
 package server
 
 import (
-	"crypto/x509"
 	"database/sql"
-	"encoding/pem"
 	"fmt"
 	"net/http"
 	"os"
 
 	"dfl/lib/cache"
 	"dfl/lib/cher"
+	"dfl/lib/key"
 	dflmw "dfl/lib/middleware"
 	"dfl/lib/ptr"
 	"dfl/svc/short/server/app"
@@ -106,13 +105,7 @@ func Run(cfg Config) error {
 		return err
 	}
 
-	publicBlock, _ := pem.Decode([]byte(cfg.PublicKey))
-	x509EncodedPub := publicBlock.Bytes
-
-	publicCert, err := x509.ParsePKIXPublicKey(x509EncodedPub)
-	if err != nil {
-		return err
-	}
+	public := key.MustParseECDSAPublic([]byte(cfg.PublicKey))
 
 	db := db.New(pgDb)
 
@@ -152,7 +145,7 @@ func Run(cfg Config) error {
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
 	router.Use(cors.AllowAll().Handler)
-	router.Use(dflmw.AuthMiddleware(publicCert, []dflmw.HTTPResource{
+	router.Use(dflmw.AuthMiddleware(public, []dflmw.HTTPResource{
 		{Verb: ptr.String(http.MethodGet)},
 		{Verb: ptr.String(http.MethodHead)},
 		{Verb: ptr.String(http.MethodOptions)},

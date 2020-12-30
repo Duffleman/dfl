@@ -4,13 +4,11 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"crypto/sha256"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"path"
 
-	"dfl/lib/cher"
+	"dfl/lib/key"
 	"dfl/tools/certgen"
 
 	"github.com/fatih/color"
@@ -44,28 +42,14 @@ func (a *App) VerifyKeyPair(name string) error {
 		return err
 	}
 
-	privateBytes, _ := pem.Decode(privatePemBytes)
-	privBlock := privateBytes.Bytes
-
-	publicBytes, _ := pem.Decode(publicPemBytes)
-	pubBlock := publicBytes.Bytes
-
-	private, err := x509.ParseECPrivateKey(privBlock)
+	private, err := key.ParseECDSAPrivate(privatePemBytes)
 	if err != nil {
 		return err
 	}
 
-	publicInt, err := x509.ParsePKIXPublicKey(pubBlock)
+	public, err := key.ParseECDSAPublic(publicPemBytes)
 	if err != nil {
 		return err
-	}
-
-	var public *ecdsa.PublicKey
-
-	if v, ok := publicInt.(*ecdsa.PublicKey); ok {
-		public = v
-	} else {
-		return cher.New("public_key_malformed", nil)
 	}
 
 	message := makeMessage()
