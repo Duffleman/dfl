@@ -60,6 +60,8 @@ func Login(clientID, scope string) *cobra.Command {
 			c.Printf(": %s: ", "Don't forget to look for the state! It should match")
 			ca.Println(state)
 
+			c.Printf("\n%s\n\n", url)
+
 			err = openBrowser(url)
 			if err != nil {
 				cw.Print("Warning")
