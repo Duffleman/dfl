@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"crypto/sha256"
+	"strings"
 	"time"
 
 	authlib "dfl/lib/auth"
@@ -16,7 +17,8 @@ import (
 	"github.com/dvsekhvalnov/jose2go/base64url"
 )
 
-const atExpiry = 365 * 24 * time.Hour // 365 days
+const defaultExpiry = 365 * 24 * time.Hour // 365 days
+const authExpiry = 1 * time.Hour
 
 func (a *App) Token(ctx context.Context, req *auth.TokenRequest) (*auth.TokenResponse, error) {
 	client, err := a.DB.Q.FindClient(ctx, req.ClientID)
@@ -61,11 +63,11 @@ func (a *App) Token(ctx context.Context, req *auth.TokenRequest) (*auth.TokenRes
 		return nil, cher.New("unsupported_challenge_method", nil)
 	}
 
-	expiresAt := time.Now().Add(atExpiry)
+	expiresAt := time.Now().Add(calculateExpiryAt(ac.Scope))
 	atID := ksuid.Generate("accesstoken").String()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodES384, dfljwt.DFLClaims{
-		Scope:    user.Scopes,
+		Scope:    ac.Scope,
 		Username: user.Username,
 		StandardClaims: jwt.StandardClaims{
 			Id:        atID,
@@ -98,4 +100,12 @@ func (a *App) Token(ctx context.Context, req *auth.TokenRequest) (*auth.TokenRes
 		TokenType:   "Bearer",
 		Expires:     int(expiresAt.Sub(time.Now()).Seconds()),
 	}, nil
+}
+
+func calculateExpiryAt(scope string) time.Duration {
+	if strings.Contains(scope, "auth:") {
+		return authExpiry
+	}
+
+	return defaultExpiry
 }

@@ -15,7 +15,6 @@ require (
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/gomarkdown/markdown v0.0.0-20201113031856-722100d81a8e
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kr/pretty v0.1.0
 	github.com/lib/pq v1.9.0
 	github.com/manifoldco/promptui v0.8.0
 	github.com/onsi/ginkgo v1.14.2 // indirect
