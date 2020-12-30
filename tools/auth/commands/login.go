@@ -43,6 +43,7 @@ func Login(clientID, scope string) *cobra.Command {
 				"scope":                 []string{scope},
 				"response_type":         []string{"code"},
 				"state":                 []string{state},
+				"nonce":                 []string{makeNonce()},
 				"code_challenge_method": []string{"S256"},
 				"code_challenge":        []string{hashed},
 			}
@@ -130,6 +131,15 @@ func makeCodeChallenge() (original, hashed string) {
 	hashed = base64url.Encode(h.Sum(nil))
 
 	return
+}
+
+func makeNonce() string {
+	bytes, err := generateRandomBytes(32)
+	if err != nil {
+		panic(err)
+	}
+
+	return base64url.Encode(bytes)
 }
 
 func generateRandomBytes(n int) ([]byte, error) {

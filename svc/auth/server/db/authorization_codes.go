@@ -10,14 +10,24 @@ import (
 	"github.com/cuvva/ksuid-go"
 )
 
+func (qw *QueryableWrapper) GetAuthorizationCodeByNonce(ctx context.Context, nonce string) (*auth.AuthorizationCode, error) {
+	return qw.findOneAuthorizationCode(ctx, sq.Eq{
+		"nonce": nonce,
+	})
+}
+
 func (qw *QueryableWrapper) FindAuthorizationCode(ctx context.Context, id string) (*auth.AuthorizationCode, error) {
+	return qw.findOneAuthorizationCode(ctx, sq.Eq{
+		"id": id,
+	})
+}
+
+func (qw *QueryableWrapper) findOneAuthorizationCode(ctx context.Context, where map[string]interface{}) (*auth.AuthorizationCode, error) {
 	qb := NewQueryBuilder()
 	query, values, err := qb.
-		Select("id", "client_id", "user_id", "state", "code_challenge_method", "code_challenge", "scope", "response_type", "created_at", "expires_at").
+		Select("id", "client_id", "user_id", "state", "nonce", "code_challenge_method", "code_challenge", "scope", "response_type", "created_at", "expires_at").
 		From("authorization_codes").
-		Where(sq.Eq{
-			"id": id,
-		}).
+		Where(where).
 		ToSql()
 	if err != nil {
 		return nil, err
@@ -27,7 +37,7 @@ func (qw *QueryableWrapper) FindAuthorizationCode(ctx context.Context, id string
 
 	row := qw.q.QueryRowContext(ctx, query, values...)
 
-	err = row.Scan(&ac.ID, &ac.ClientID, &ac.UserID, &ac.State, &ac.CodeChallengeMethod, &ac.CodeChallenge, &ac.Scope, &ac.ResponseType, &ac.CreatedAt, &ac.ExpiresAt)
+	err = row.Scan(&ac.ID, &ac.ClientID, &ac.UserID, &ac.State, &ac.Nonce, &ac.CodeChallengeMethod, &ac.CodeChallenge, &ac.Scope, &ac.ResponseType, &ac.CreatedAt, &ac.ExpiresAt)
 	if err != nil {
 		return nil, coerceNotFound(err)
 	}
@@ -66,6 +76,7 @@ func (qw *QueryableWrapper) CreateAuthorizationCode(ctx context.Context, userID 
 			"user_id",
 			"response_type",
 			"state",
+			"nonce",
 			"code_challenge_method",
 			"code_challenge",
 			"scope",
@@ -77,6 +88,7 @@ func (qw *QueryableWrapper) CreateAuthorizationCode(ctx context.Context, userID 
 			userID,
 			req.ResponseType,
 			req.State,
+			req.Nonce,
 			req.CodeChallengeMethod,
 			req.CodeChallenge,
 			req.Scope,

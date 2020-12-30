@@ -46,6 +46,7 @@
 							{{ end }}
 							<input type="hidden" name="response_type" value="{{ .params.ResponseType }}">
 							<input type="hidden" name="state" value="{{ .params.State }}">
+							<input type="hidden" name="nonce" value="{{ .params.Nonce }}">
 							<input type="hidden" name="scope" value="{{ .params.Scope }}">
 							<input type="hidden" name="client_id" value="{{ .params.ClientID }}">
 							<input type="hidden" name="code_challenge" value="{{ .params.CodeChallenge }}">

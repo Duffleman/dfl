@@ -44,3 +44,16 @@ func checkPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
+
+func (a *App) AuthCodeNoNonceExists(ctx context.Context, nonce string) error {
+	_, err := a.DB.Q.GetAuthorizationCodeByNonce(ctx, nonce)
+	if err != nil {
+		if v, ok := err.(cher.E); ok {
+			if v.Code == cher.NotFound {
+				return nil
+			}
+		}
+	}
+
+	return cher.New("nonce_used", nil)
+}

@@ -73,6 +73,7 @@ type AuthorizationCode struct {
 	ResponseType        string    `json:"response_type"`
 	RedirectURI         *string   `json:"redirect_uri"`
 	State               string    `json:"state"`
+	Nonce               string    `json:"nonce"`
 	CodeChallengeMethod string    `json:"code_challenge_method"`
 	CodeChallenge       string    `json:"code_challenge"`
 	UserID              string    `json:"user_id"`
@@ -86,6 +87,7 @@ type AuthorizationRequest struct {
 	ResponseType        string  `json:"response_type"`
 	RedirectURI         *string `json:"redirect_uri"`
 	State               string  `json:"state"`
+	Nonce               string  `json:"nonce"`
 	CodeChallengeMethod string  `json:"code_challenge_method"`
 	CodeChallenge       string  `json:"code_challenge"`
 	Username            string  `json:"username"`

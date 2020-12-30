@@ -24,8 +24,13 @@ func AuthorizeGet(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		client, err := a.DB.Q.FindClient(r.Context(), params.ClientID)
+		client, err := a.FindClient(r.Context(), params.ClientID)
 		if err != nil {
+			rpc.HandleError(w, r, err)
+			return
+		}
+
+		if err = a.AuthCodeNoNonceExists(r.Context(), params.Nonce); err != nil {
 			rpc.HandleError(w, r, err)
 			return
 		}
@@ -67,6 +72,11 @@ func AuthorizePost(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
+		if err = a.AuthCodeNoNonceExists(r.Context(), params.Nonce); err != nil {
+			rpc.HandleError(w, r, err)
+			return
+		}
+
 		if params.RedirectURI != nil && !slicecontains.String(client.RedirectURIs, *params.RedirectURI) {
 			rpc.HandleError(w, r, cher.New("invalid_redirect_uri", nil))
 			return
@@ -83,6 +93,7 @@ func AuthorizePost(a *app.App) func(http.ResponseWriter, *http.Request) {
 			ResponseType:        params.ResponseType,
 			RedirectURI:         params.RedirectURI,
 			State:               params.State,
+			Nonce:               params.Nonce,
 			CodeChallengeMethod: params.CodeChallengeMethod,
 			CodeChallenge:       params.CodeChallenge,
 			Username:            authCredentials.Username,
@@ -138,6 +149,7 @@ type params struct {
 	ClientID            string  `json:"client_id"`
 	Scope               string  `json:"scope"`
 	State               string  `json:"state"`
+	Nonce               string  `json:"nonce"`
 	CodeChallenge       string  `json:"code_challenge"`
 	CodeChallengeMethod string  `json:"code_challenge_method"`
 }
@@ -160,6 +172,7 @@ func parseAuthorizeParams(r *http.Request) (*params, error) {
 		ClientID:            r.URL.Query().Get("client_id"),
 		Scope:               r.URL.Query().Get("scope"),
 		State:               r.URL.Query().Get("state"),
+		Nonce:               r.URL.Query().Get("nonce"),
 		CodeChallenge:       r.URL.Query().Get("code_challenge"),
 		CodeChallengeMethod: r.URL.Query().Get("code_challenge_method"),
 	}
@@ -186,6 +199,7 @@ func parseAuthorizeResponse(r *http.Request) (*authCredentials, *params, error) 
 		ClientID:            r.FormValue("client_id"),
 		Scope:               r.FormValue("scope"),
 		State:               r.FormValue("state"),
+		Nonce:               r.FormValue("nonce"),
 		CodeChallenge:       r.FormValue("code_challenge"),
 		CodeChallengeMethod: r.FormValue("code_challenge_method"),
 	}
@@ -205,10 +219,10 @@ func parseAuthorizeResponse(r *http.Request) (*authCredentials, *params, error) 
 }
 
 func (p params) validate() bool {
-	if !slicecontains.String([]string{"code"}, p.ResponseType) {
+	if p.ResponseType == "" {
 		return false
 	}
-	if p.ResponseType == "" {
+	if !slicecontains.String([]string{"code"}, p.ResponseType) {
 		return false
 	}
 	if p.RedirectURI != nil && *p.RedirectURI == "" {
@@ -223,10 +237,16 @@ func (p params) validate() bool {
 	if p.State == "" {
 		return false
 	}
+	if p.Nonce == "" {
+		return false
+	}
 	if p.CodeChallenge == "" {
 		return false
 	}
 	if p.CodeChallengeMethod == "" {
+		return false
+	}
+	if !slicecontains.String([]string{"S256"}, p.CodeChallengeMethod) {
 		return false
 	}
 	return true
