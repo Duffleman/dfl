@@ -6,6 +6,7 @@ require (
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/atotto/clipboard v0.1.2
 	github.com/aws/aws-sdk-go v1.36.16
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/cuvva/ksuid-go v0.0.0-20190704133525-91309d40e0f0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dvsekhvalnov/jose2go v0.0.0-20201001154944-b09cfaf05951
@@ -29,4 +30,5 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
+	software.sslmate.com/src/go-pkcs12 v0.0.0-20201103104416-57fc603b7f52
 )
