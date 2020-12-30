@@ -7,6 +7,8 @@ import (
 	"dfl/lib/cher"
 	"dfl/lib/ptr"
 	"dfl/svc/auth"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (a *App) Authorization(ctx context.Context, req *auth.AuthorizationRequest, user *auth.User) (*auth.AuthorizationResponse, error) {
@@ -36,4 +38,9 @@ func (a *App) Authorization(ctx context.Context, req *auth.AuthorizationRequest,
 		ExpiresIn:         int(expiresIn.Seconds()),
 		State:             req.State,
 	}, nil
+}
+
+func checkPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }

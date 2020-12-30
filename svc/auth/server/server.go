@@ -96,7 +96,6 @@ func Run(cfg Config) error {
 	router.Get("/authorize", rpc.AuthorizeGet(app))
 	router.Post("/authorize", rpc.AuthorizePost(app))
 	router.Post("/create_client", rpc.CreateClient(app))
-	router.Post("/login", rpc.Login(app))
 	router.Post("/register", rpc.Register(app))
 	router.Post("/token", rpc.Token(app))
 	router.Post("/whoami", rpc.WhoAmI(app))
