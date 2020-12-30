@@ -22,6 +22,10 @@ var GenerateKeyPairCmd = &cobra.Command{
 			RootDirectory: rootDirectory,
 		}
 
-		return app.GenerateKeyPair(name)
+		if err := app.GenerateKeyPair(name); err != nil {
+			return err
+		}
+
+		return app.VerifyKeyPair(name)
 	},
 }

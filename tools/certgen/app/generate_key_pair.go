@@ -27,7 +27,7 @@ func (a *App) GenerateKeyPair(name string) error {
 
 	public := private.PublicKey
 
-	x509Encoded, err := x509.MarshalPKCS8PrivateKey(private)
+	x509Encoded, err := x509.MarshalECPrivateKey(private)
 	if err != nil {
 		return err
 	}
