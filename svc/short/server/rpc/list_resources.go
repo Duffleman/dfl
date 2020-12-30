@@ -61,13 +61,13 @@ func ListResources(a *app.App) func(http.ResponseWriter, *http.Request) {
 		}
 
 		authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
-		if !authUser.Can("short:upload") {
+		if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
 			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
 			return
 		}
 
-		if req.Username == nil || *req.Username != authUser.Username {
-			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
+		if err = authorizeRequest(req, authUser); err != nil {
+			rpc.HandleError(w, r, err)
 			return
 		}
 
@@ -78,5 +78,16 @@ func ListResources(a *app.App) func(http.ResponseWriter, *http.Request) {
 		}
 
 		rpc.WriteOut(w, r, resources)
+	}
+}
+
+func authorizeRequest(req *short.ListResourcesRequest, u authlib.AuthUser) error {
+	switch {
+	case u.Can("short:admin"):
+		return nil
+	case req.Username != nil && *req.Username == u.Username:
+		return nil
+	default:
+		return cher.New(cher.AccessDenied, nil)
 	}
 }

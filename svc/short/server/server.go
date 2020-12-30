@@ -165,7 +165,7 @@ func Run(cfg Config) error {
 
 	router.Get("/robots.txt", rpc.Robots())
 
-	router.Get("/resave_hashes", rpc.ResaveHashes(app))
+	router.Post("/resave_hashes", rpc.ResaveHashes(app))
 	router.Post("/add_shortcut", rpc.AddShortcut(app))
 	router.Post("/create_signed_url", rpc.CreateSignedURL(app))
 	router.Post("/delete_resource", rpc.DeleteResource(app))

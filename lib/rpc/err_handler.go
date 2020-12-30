@@ -20,6 +20,8 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 			w.WriteHeader(404)
 		case cher.AccessDenied:
 			w.WriteHeader(403)
+		case cher.Unauthorized:
+			w.WriteHeader(401)
 		default:
 			w.WriteHeader(500)
 		}

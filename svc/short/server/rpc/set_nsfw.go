@@ -51,7 +51,7 @@ func SetNSFW(a *app.App) func(http.ResponseWriter, *http.Request) {
 		}
 
 		authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
-		if !authUser.Can("short:upload") {
+		if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
 			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
 			return
 		}
@@ -74,7 +74,7 @@ func SetNSFW(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		if resource.Owner != authUser.Username {
+		if resource.Owner != authUser.Username && !authUser.Can("short:admin") {
 			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
 			return
 		}

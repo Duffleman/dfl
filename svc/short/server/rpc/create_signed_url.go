@@ -53,7 +53,7 @@ func CreateSignedURL(a *app.App) func(http.ResponseWriter, *http.Request) {
 		}
 
 		authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
-		if !authUser.Can("short:upload") {
+		if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
 			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
 			return
 		}
