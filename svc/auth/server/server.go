@@ -88,7 +88,7 @@ func Run(cfg Config) error {
 		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/authorize")},
 		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/get_public_cert")},
 		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/authorize")},
-		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/login")},
+		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/register")},
 		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/token")},
 	}))
 
