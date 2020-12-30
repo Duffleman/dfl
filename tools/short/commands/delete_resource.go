@@ -13,7 +13,7 @@ import (
 )
 
 var DeleteResourceCmd = &cobra.Command{
-	Use:     "delete {query}",
+	Use:     "delete [query]",
 	Aliases: []string{"d"},
 	Short:   "Delete a resource",
 	Args: func(cmd *cobra.Command, args []string) error {

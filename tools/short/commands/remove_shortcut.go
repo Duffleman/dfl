@@ -12,7 +12,7 @@ import (
 )
 
 var RemoveShortcutCmd = &cobra.Command{
-	Use:     "remove-shortcut {query} {shortcut}",
+	Use:     "remove-shortcut [query] [shortcut]",
 	Aliases: []string{"rsc"},
 	Short:   "Remove a shortcut",
 	Args: func(cmd *cobra.Command, args []string) error {

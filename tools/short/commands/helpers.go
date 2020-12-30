@@ -42,6 +42,7 @@ func getAuthHeader() string {
 
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
+		fmt.Println("Run `short login` first!")
 		panic(err)
 	}
 
@@ -49,6 +50,7 @@ func getAuthHeader() string {
 
 	err = json.Unmarshal(bytes, &res)
 	if err != nil {
+		fmt.Println("Run `short login` first!")
 		panic(err)
 	}
 

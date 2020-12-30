@@ -12,7 +12,7 @@ import (
 )
 
 var SetNSFWCmd = &cobra.Command{
-	Use:     "nsfw {query}",
+	Use:     "nsfw [query]",
 	Aliases: []string{"n"},
 	Short:   "Toggle the NSFW flag",
 	Args: func(cmd *cobra.Command, args []string) error {

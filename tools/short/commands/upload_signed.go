@@ -19,7 +19,7 @@ import (
 )
 
 var UploadSignedCmd = &cobra.Command{
-	Use:     "signed-upload {file}",
+	Use:     "signed-upload [file]",
 	Aliases: []string{"u"},
 	Short:   "Upload a file to a signed URL",
 	Long:    "Upload a file from your local machine to AWS",

@@ -13,7 +13,7 @@ import (
 )
 
 var CopyURLCmd = &cobra.Command{
-	Use:     "copy {url}",
+	Use:     "copy [url]",
 	Aliases: []string{"c"},
 	Short:   "Copy from a URL",
 	Long:    "Copy from a URL to the dflimg server",

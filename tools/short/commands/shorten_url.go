@@ -12,7 +12,7 @@ import (
 )
 
 var ShortenURLCmd = &cobra.Command{
-	Use:     "shorten {url}",
+	Use:     "shorten [url]",
 	Aliases: []string{"s"},
 	Short:   "Shorten a URL",
 	Long:    "Shorten a URL",

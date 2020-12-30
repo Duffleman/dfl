@@ -12,7 +12,7 @@ import (
 )
 
 var ViewDetailsCmd = &cobra.Command{
-	Use:     "view {query}",
+	Use:     "view [query]",
 	Aliases: []string{"v"},
 	Short:   "View details of a resource",
 	Args: func(cmd *cobra.Command, args []string) error {

@@ -14,7 +14,7 @@ import (
 )
 
 var AddShortcutCmd = &cobra.Command{
-	Use:     "add-shortcut {query} {shortcut}",
+	Use:     "add-shortcut [query] [shortcut]",
 	Aliases: []string{"asc"},
 	Short:   "Add a shortcut",
 	Args: func(cmd *cobra.Command, args []string) error {
