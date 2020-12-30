@@ -26,9 +26,9 @@ import (
 )
 
 const publicKey = `-----BEGIN PUBLIC KEY-----
-MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEVCaFRARRhg/N7eBOkG3LxsnZg22pPSa/
-TrMsvUPc49bzqKTl4xWJWuQ7FR03RlebBx5xBIxLE5BeLjqkmhaq7ar55oRcq44X
-5X+MwKLgptsSvJF+7nkYs1cNROvQFAIb
+MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEMc43MCK/BZKT+tfeOre/tAhNzi2OvrEy
+ivDKI4ixaJhKSdjGKLvkoz3O5tGUgPWItugWuUMohzYDqOnDVUAaza2HeO3SUOGG
+KeKIzFcp4NSDmjdLUjt+8a6/wY3EAqxM
 -----END PUBLIC KEY-----`
 
 type Config struct {

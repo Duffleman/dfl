@@ -24,7 +24,7 @@ import (
 )
 
 func Login(clientID, scope string) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:     "login",
 		Aliases: []string{"l"},
 		Short:   "Login",
@@ -100,6 +100,10 @@ func Login(clientID, scope string) *cobra.Command {
 			return nil
 		},
 	}
+
+	cmd.Flags().StringVarP(&scope, "scope", "s", scope, "Scopes to request, space delimited")
+
+	return cmd
 }
 
 var authTokenPrompt = promptui.Prompt{
