@@ -74,7 +74,7 @@ func Login(clientID, scope string) *cobra.Command {
 
 			res, err := makeClient().Token(context.Background(), &auth.TokenRequest{
 				ClientID:     clientID,
-				GrantType:    "code",
+				GrantType:    "authorization_code",
 				Code:         authToken,
 				CodeVerifier: original,
 			})

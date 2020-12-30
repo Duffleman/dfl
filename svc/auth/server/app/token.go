@@ -24,6 +24,12 @@ func (a *App) Token(ctx context.Context, req *auth.TokenRequest) (*auth.TokenRes
 		return nil, err
 	}
 
+	switch req.GrantType {
+	case "authorization_code":
+	default:
+		return nil, cher.New("unsupported_grant_type", nil)
+	}
+
 	ac, err := a.DB.Q.FindAuthorizationCode(ctx, req.Code)
 	if err != nil {
 		return nil, err

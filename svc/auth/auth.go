@@ -26,9 +26,10 @@ type User struct {
 }
 
 type Client struct {
-	ID        string    `json:"client_id"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
+	ID           string    `json:"client_id"`
+	Name         string    `json:"name"`
+	RedirectURIs []string  `json:"redirect_uris"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type LoginRequest struct {
@@ -58,7 +59,8 @@ type WhoAmIResponse struct {
 }
 
 type CreateClientRequest struct {
-	Name string `json:"name"`
+	Name         string   `json:"name"`
+	RedirectURIs []string `json:"redirect_uris"`
 }
 
 type CreateClientResponse struct {
@@ -69,7 +71,7 @@ type AuthorizationCode struct {
 	ID                  string    `json:"id"`
 	ClientID            string    `json:"client_id"`
 	ResponseType        string    `json:"response_type"`
-	RedirectURI         *string   `json:"redirect_uri,omitempty"`
+	RedirectURI         *string   `json:"redirect_uri"`
 	State               string    `json:"state"`
 	CodeChallengeMethod string    `json:"code_challenge_method"`
 	CodeChallenge       string    `json:"code_challenge"`
@@ -82,7 +84,7 @@ type AuthorizationCode struct {
 type AuthorizationRequest struct {
 	ClientID            string  `json:"client_id"`
 	ResponseType        string  `json:"response_type"`
-	RedirectURI         *string `json:"redirect_uri,omitempty"`
+	RedirectURI         *string `json:"redirect_uri"`
 	State               string  `json:"state"`
 	CodeChallengeMethod string  `json:"code_challenge_method"`
 	CodeChallenge       string  `json:"code_challenge"`
@@ -101,7 +103,7 @@ type AuthorizationResponse struct {
 type TokenRequest struct {
 	ClientID     string  `json:"client_id"`
 	GrantType    string  `json:"grant_type"`
-	RedirectURI  *string `json:"redirect_uri,omitempty"`
+	RedirectURI  *string `json:"redirect_uri"`
 	Code         string  `json:"code"`
 	CodeVerifier string  `json:"code_verifier"`
 }

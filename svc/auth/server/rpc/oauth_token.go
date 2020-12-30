@@ -1,8 +1,14 @@
 package rpc
 
 import (
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 
+	"dfl/lib/ptr"
 	"dfl/lib/rpc"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/app"
@@ -17,6 +23,7 @@ var tokenSchema = gojsonschema.NewStringLoader(`{
 	"required": [
 		"client_id",
 		"grant_type",
+		"redirect_uri",
 		"code",
 		"code_verifier"
 	],
@@ -29,11 +36,11 @@ var tokenSchema = gojsonschema.NewStringLoader(`{
 
 		"grant_type": {
 			"type": "string",
-			"enum": ["code"]
+			"enum": ["authorization_code"]
 		},
 
 		"redirect_uri": {
-			"type": "string",
+			"type": ["string", "null"],
 			"minLength": 1
 		},
 
@@ -51,7 +58,13 @@ var tokenSchema = gojsonschema.NewStringLoader(`{
 
 func Token(a *app.App) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := rpc.ValidateRequest(r, tokenSchema)
+		err := modifyBody(r)
+		if err != nil {
+			rpc.HandleError(w, r, err)
+			return
+		}
+
+		err = rpc.ValidateRequest(r, tokenSchema)
 		if err != nil {
 			rpc.HandleError(w, r, err)
 			return
@@ -73,4 +86,43 @@ func Token(a *app.App) func(http.ResponseWriter, *http.Request) {
 		rpc.WriteOut(w, r, res)
 		return
 	}
+}
+
+func modifyBody(r *http.Request) error {
+	if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/x-www-form-urlencoded") {
+		return nil
+	}
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+
+	vals, err := url.ParseQuery(string(body))
+	if err != nil {
+		return err
+	}
+
+	var redirectURI *string
+
+	if v, ok := vals["redirect_uri"]; ok {
+		redirectURI = ptr.String(v[0])
+	}
+
+	req := &auth.TokenRequest{
+		ClientID:     vals.Get("client_id"),
+		GrantType:    vals.Get("grant_type"),
+		RedirectURI:  redirectURI,
+		Code:         vals.Get("code"),
+		CodeVerifier: vals.Get("code_verifier"),
+	}
+
+	jsonBytes, err := json.Marshal(req)
+	if err != nil {
+		return err
+	}
+
+	r.Body = ioutil.NopCloser(bytes.NewReader(jsonBytes))
+
+	return nil
 }

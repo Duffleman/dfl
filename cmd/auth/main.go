@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const clientID = "client_000000C3LLC0atbRyYdTsadcVM3JQ"
+const clientID = "client_000000C3N8sN2HPqTVeqfOTsnjBJI"
 
 func init() {
 	rootCmd.AddCommand(commands.Login(clientID, "auth:login"))

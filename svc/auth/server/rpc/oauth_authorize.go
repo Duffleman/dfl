@@ -1,14 +1,17 @@
 package rpc
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
 	"dfl/lib/cher"
 	"dfl/lib/ptr"
 	"dfl/lib/rpc"
+	"dfl/lib/slicecontains"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/app"
 )
@@ -24,6 +27,11 @@ func AuthorizeGet(a *app.App) func(http.ResponseWriter, *http.Request) {
 		client, err := a.DB.Q.FindClient(r.Context(), params.ClientID)
 		if err != nil {
 			rpc.HandleError(w, r, err)
+			return
+		}
+
+		if params.RedirectURI != nil && !slicecontains.String(client.RedirectURIs, *params.RedirectURI) {
+			rpc.HandleError(w, r, cher.New("invalid_redirect_uri", nil))
 			return
 		}
 
@@ -59,6 +67,11 @@ func AuthorizePost(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
+		if params.RedirectURI != nil && !slicecontains.String(client.RedirectURIs, *params.RedirectURI) {
+			rpc.HandleError(w, r, cher.New("invalid_redirect_uri", nil))
+			return
+		}
+
 		user, err := a.GetUserByName(r.Context(), authCredentials.Username)
 		if err != nil {
 			rpc.HandleError(w, r, err)
@@ -81,25 +94,42 @@ func AuthorizePost(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		tpl, err := template.ParseFiles("./resources/auth_code.html")
-		if err != nil {
-			rpc.HandleError(w, r, err)
+		if params.RedirectURI == nil {
+			displayAuthToken(w, r, res, client)
 			return
 		}
 
-		t, _ := time.Parse(time.RFC3339, res.ExpiresAt)
+		urlVals := &url.Values{
+			"code":  []string{res.AuthorizationCode},
+			"state": []string{res.State},
+		}
 
-		err = tpl.Execute(w, map[string]interface{}{
-			"client_name":          client.Name,
-			"code":                 res.AuthorizationCode,
-			"expires_at":           res.ExpiresAt,
-			"expires_in":           res.ExpiresIn,
-			"expires_at_formatted": t.Format(time.RFC822),
-			"state":                res.State,
-		})
+		url := fmt.Sprintf("%s?%s", *params.RedirectURI, urlVals.Encode())
 
-		rpc.HandleError(w, r, err)
+		w.Header().Set("Content-Type", "")
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	}
+}
+
+func displayAuthToken(w http.ResponseWriter, r *http.Request, res *auth.AuthorizationResponse, client *auth.Client) {
+	tpl, err := template.ParseFiles("./resources/auth_code.html")
+	if err != nil {
+		rpc.HandleError(w, r, err)
+		return
+	}
+
+	t, _ := time.Parse(time.RFC3339, res.ExpiresAt)
+
+	err = tpl.Execute(w, map[string]interface{}{
+		"client_name":          client.Name,
+		"code":                 res.AuthorizationCode,
+		"expires_at":           res.ExpiresAt,
+		"expires_in":           res.ExpiresIn,
+		"expires_at_formatted": t.Format(time.RFC822),
+		"state":                res.State,
+	})
+
+	rpc.HandleError(w, r, err)
 }
 
 type params struct {
@@ -146,8 +176,8 @@ func parseAuthorizeParams(r *http.Request) (*params, error) {
 func parseAuthorizeResponse(r *http.Request) (*authCredentials, *params, error) {
 	var redirectURI *string
 
-	if v, ok := r.Form["redirect_uri"]; ok {
-		redirectURI = ptr.String(v[0])
+	if v := r.FormValue("redirect_uri"); v != "" {
+		redirectURI = ptr.String(v)
 	}
 
 	p := &params{
@@ -175,6 +205,9 @@ func parseAuthorizeResponse(r *http.Request) (*authCredentials, *params, error) 
 }
 
 func (p params) validate() bool {
+	if !slicecontains.String([]string{"code"}, p.ResponseType) {
+		return false
+	}
 	if p.ResponseType == "" {
 		return false
 	}

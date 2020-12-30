@@ -2,19 +2,32 @@ package app
 
 import (
 	"context"
+	"fmt"
+	"net/url"
 
 	"dfl/lib/cher"
 	"dfl/svc/auth"
 )
 
 func (a *App) CreateClient(ctx context.Context, req *auth.CreateClientRequest) (*auth.CreateClientResponse, error) {
-	var clientID string
+	var client *auth.Client
 	var err error
 
-	clientID, err = a.DB.Q.GetClientByName(ctx, req.Name)
+	uris := []string{}
+
+	for _, uri := range req.RedirectURIs {
+		u, err := url.Parse(uri)
+		if err != nil {
+			return nil, err
+		}
+
+		uris = append(uris, fmt.Sprintf("%s://%s%s", u.Scheme, u.Host, u.Path))
+	}
+
+	client, err = a.DB.Q.GetClientByName(ctx, req.Name)
 	if err != nil {
 		if v, ok := err.(cher.E); ok && v.Code == cher.NotFound {
-			clientID, err = a.DB.Q.CreateClient(ctx, req.Name)
+			client, err = a.DB.Q.CreateClient(ctx, req.Name, uris)
 		}
 	}
 	if err != nil {
@@ -22,6 +35,6 @@ func (a *App) CreateClient(ctx context.Context, req *auth.CreateClientRequest) (
 	}
 
 	return &auth.CreateClientResponse{
-		ClientID: clientID,
+		ClientID: client.ID,
 	}, nil
 }

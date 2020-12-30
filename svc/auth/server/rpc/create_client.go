@@ -17,13 +17,24 @@ var createClientSchema = gojsonschema.NewStringLoader(`{
 	"additionalProperties": false,
 
 	"required": [
-		"name"
+		"name",
+		"redirect_uris"
 	],
 
 	"properties": {
 		"name": {
 			"type": "string",
 			"minLength": 3
+		},
+
+		"redirect_uris": {
+			"type": "array",
+			"minItems": 0,
+
+			"items": {
+				"type": "string",
+				"minLength": 1
+			}
 		}
 	}
 }`)

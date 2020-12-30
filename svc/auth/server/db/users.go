@@ -9,7 +9,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 )
 
-func (qw *QueryableWrapper) findOne(ctx context.Context, field, value string) (*auth.User, error) {
+func (qw *QueryableWrapper) findOneUser(ctx context.Context, field, value string) (*auth.User, error) {
 	qb := NewQueryBuilder()
 	query, values, err := qb.
 		Select("u.id, u.username, u.email, u.password, u.created_at, u.invite_code, u.invite_expiry, u.invite_redeemed_at, u.scopes").
@@ -34,11 +34,11 @@ func (qw *QueryableWrapper) findOne(ctx context.Context, field, value string) (*
 }
 
 func (qw *QueryableWrapper) FindUser(ctx context.Context, id string) (*auth.User, error) {
-	return qw.findOne(ctx, "id", id)
+	return qw.findOneUser(ctx, "id", id)
 }
 
 func (qw *QueryableWrapper) GetUserByName(ctx context.Context, username string) (*auth.User, error) {
-	return qw.findOne(ctx, "username", username)
+	return qw.findOneUser(ctx, "username", username)
 }
 
 func (qw *QueryableWrapper) RedeemInvite(ctx context.Context, userID, password string) error {

@@ -7,16 +7,15 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/cuvva/ksuid-go"
+	"github.com/lib/pq"
 )
 
-func (qw *QueryableWrapper) FindClient(ctx context.Context, id string) (*auth.Client, error) {
+func (qw *QueryableWrapper) findOneClient(ctx context.Context, where map[string]interface{}) (*auth.Client, error) {
 	qb := NewQueryBuilder()
 	query, values, err := qb.
-		Select("id", "name", "created_at").
+		Select("id", "name", "redirect_uris", "created_at").
 		From("clients").
-		Where(sq.Eq{
-			"id": id,
-		}).
+		Where(where).
 		ToSql()
 	if err != nil {
 		return nil, err
@@ -26,56 +25,44 @@ func (qw *QueryableWrapper) FindClient(ctx context.Context, id string) (*auth.Cl
 
 	row := qw.q.QueryRowContext(ctx, query, values...)
 
-	if err := row.Scan(&c.ID, &c.Name, &c.CreatedAt); err != nil {
+	if err := row.Scan(&c.ID, &c.Name, pq.Array(&c.RedirectURIs), &c.CreatedAt); err != nil {
 		return nil, coerceNotFound(err)
 	}
 
 	return c, nil
 }
 
-func (qw *QueryableWrapper) GetClientByName(ctx context.Context, name string) (string, error) {
-	qb := NewQueryBuilder()
-	query, values, err := qb.
-		Select("id").
-		From("clients").
-		Where(sq.Eq{
-			"name": name,
-		}).
-		ToSql()
-	if err != nil {
-		return "", err
-	}
-
-	var clientID string
-
-	row := qw.q.QueryRowContext(ctx, query, values...)
-
-	if err := row.Scan(&clientID); err != nil {
-		return "", coerceNotFound(err)
-	}
-
-	return clientID, nil
+func (qw *QueryableWrapper) FindClient(ctx context.Context, id string) (*auth.Client, error) {
+	return qw.findOneClient(ctx, sq.Eq{
+		"id": id,
+	})
 }
 
-func (qw *QueryableWrapper) CreateClient(ctx context.Context, name string) (string, error) {
+func (qw *QueryableWrapper) GetClientByName(ctx context.Context, name string) (*auth.Client, error) {
+	return qw.findOneClient(ctx, sq.Eq{
+		"name": name,
+	})
+}
+
+func (qw *QueryableWrapper) CreateClient(ctx context.Context, name string, uris []string) (*auth.Client, error) {
 	qb := NewQueryBuilder()
 	query, values, err := qb.
 		Insert("clients").
-		Columns("id", "name").
-		Values(ksuid.Generate("client").String(), name).
-		Suffix("RETURNING \"id\"").
+		Columns("id", "name", "redirect_uris").
+		Values(ksuid.Generate("client").String(), name, pq.Array(uris)).
+		Suffix(`RETURNING "id", "name", "redirect_uris", "created_at"`).
 		ToSql()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	var id string
+	c := &auth.Client{}
 
 	row := qw.q.QueryRowContext(ctx, query, values...)
 
-	if err := row.Scan(&id); err != nil {
-		return "", err
+	if err := row.Scan(&c.ID, &c.Name, pq.Array(&c.RedirectURIs), &c.CreatedAt); err != nil {
+		return nil, coerceNotFound(err)
 	}
 
-	return id, nil
+	return c, nil
 }
