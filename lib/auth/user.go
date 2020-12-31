@@ -2,11 +2,11 @@ package auth
 
 import (
 	"context"
+
+	"dfl/lib/rpc"
 )
 
-type contextKey string
-
-var UserContextKey contextKey = "user"
+var UserContextKey rpc.ContextKey = "user"
 
 type AuthUser struct {
 	UserID   string

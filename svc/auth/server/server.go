@@ -8,10 +8,12 @@ import (
 	"dfl/lib/key"
 	dflmw "dfl/lib/middleware"
 	"dfl/lib/ptr"
+	rpclib "dfl/lib/rpc"
 	"dfl/svc/auth/server/app"
 	"dfl/svc/auth/server/db"
 	"dfl/svc/auth/server/rpc"
 
+	"github.com/duo-labs/webauthn/webauthn"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	_ "github.com/lib/pq" // required for the PGSQL driver to be loaded
@@ -82,6 +84,7 @@ func Run(cfg Config) error {
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
 	router.Use(cors.AllowAll().Handler)
+	router.Use(dflmw.MountAppMiddleware(app))
 	router.Use(dflmw.AuthMiddleware(sk.Public(), []dflmw.HTTPResource{
 		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/authorize")},
 		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/get_public_cert")},
@@ -90,14 +93,24 @@ func Run(cfg Config) error {
 		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/token")},
 	}))
 
-	router.Get("/get_public_cert", rpc.GetPublicCert(app))
-	router.Get("/authorize", rpc.AuthorizeGet(app))
-	router.Post("/authorize", rpc.AuthorizePost(app))
-	router.Post("/create_client", rpc.CreateClient(app))
-	router.Post("/register", rpc.Register(app))
-	router.Post("/token", rpc.Token(app))
-	router.Post("/whoami", rpc.WhoAmI(app))
+	router.Get("/authorize", wrap(rpc.AuthorizeGet))
+	router.Get("/get_public_cert", wrap(rpc.GetPublicCert))
+	router.Post("/authorize", wrap(rpc.AuthorizePost))
+	router.Post("/create_client", wrap(rpc.CreateClient))
+	router.Post("/register", wrap(rpc.Register))
+	router.Post("/token", wrap(rpc.Token))
+	router.Post("/whoami", wrap(rpc.WhoAmI))
 
 	cfg.Logger.Infof("Server running on port %d", cfg.Port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), router)
+}
+
+func wrap(fn func(*app.App, http.ResponseWriter, *http.Request) error) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := fn(r.Context().Value(dflmw.AppContext).(*app.App), w, r)
+		if err != nil {
+			rpclib.HandleError(w, r, err)
+			return
+		}
+	}
 }

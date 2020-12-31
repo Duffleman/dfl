@@ -28,39 +28,29 @@ var whoamiSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func WhoAmI(a *app.App) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		err := rpc.ValidateRequest(r, whoamiSchema)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		req := &auth.WhoAmIRequest{}
-		err = rpc.ParseBody(r, req)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		user := authlib.GetFromContext(r.Context())
-		if user.Username != req.Username {
-			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
-			return
-		}
-
-		if !user.Can("auth:whoami") {
-			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
-			return
-		}
-
-		res, err := a.WhoAmI(r.Context(), req)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		rpc.WriteOut(w, r, res)
-		return
+func WhoAmI(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	if err := rpc.ValidateRequest(r, whoamiSchema); err != nil {
+		return err
 	}
+
+	req := &auth.WhoAmIRequest{}
+	if err := rpc.ParseBody(r, req); err != nil {
+		return err
+	}
+
+	user := authlib.GetFromContext(r.Context())
+	if user.Username != req.Username {
+		return cher.New(cher.AccessDenied, nil)
+	}
+
+	if !user.Can("auth:whoami") {
+		return cher.New(cher.AccessDenied, nil)
+	}
+
+	res, err := a.WhoAmI(r.Context(), req)
+	if err != nil {
+		return err
+	}
+
+	return rpc.WriteOut(w, r, res)
 }

@@ -6,25 +6,22 @@ import (
 	"encoding/pem"
 	"net/http"
 
-	"dfl/lib/rpc"
 	"dfl/svc/auth/server/app"
 )
 
-func GetPublicCert(a *app.App) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		pk := a.SK.Public().(*ecdsa.PublicKey)
+func GetPublicCert(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	pk := a.SK.Public().(*ecdsa.PublicKey)
 
-		bytes, err := x509.MarshalPKIXPublicKey(pk)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		w.WriteHeader(200)
-		err = pem.Encode(w, &pem.Block{Type: "PUBLIC KEY", Bytes: bytes})
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
+	bytes, err := x509.MarshalPKIXPublicKey(pk)
+	if err != nil {
+		return err
 	}
+
+	w.WriteHeader(200)
+	err = pem.Encode(w, &pem.Block{Type: "PUBLIC KEY", Bytes: bytes})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

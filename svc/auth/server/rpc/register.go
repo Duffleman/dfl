@@ -43,27 +43,15 @@ var registerSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func Register(a *app.App) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		err := rpc.ValidateRequest(r, registerSchema)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		req := &auth.RegisterRequest{}
-		err = rpc.ParseBody(r, req)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		err = a.Register(r.Context(), req)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		return
+func Register(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	if err := rpc.ValidateRequest(r, registerSchema); err != nil {
+		return err
 	}
+
+	req := &auth.RegisterRequest{}
+	if err := rpc.ParseBody(r, req); err != nil {
+		return err
+	}
+
+	return a.Register(r.Context(), req)
 }

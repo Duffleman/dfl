@@ -11,133 +11,116 @@ import (
 	authlib "dfl/lib/auth"
 	"dfl/lib/cher"
 	"dfl/lib/ptr"
-	"dfl/lib/rpc"
 	"dfl/lib/slicecontains"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/app"
 )
 
-func AuthorizeGet(a *app.App) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		params, err := parseAuthorizeParams(r)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		client, err := a.FindClient(r.Context(), params.ClientID)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		if err = a.AuthCodeNoNonceExists(r.Context(), params.Nonce); err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		if params.RedirectURI != nil && !slicecontains.String(client.RedirectURIs, *params.RedirectURI) {
-			rpc.HandleError(w, r, cher.New("invalid_redirect_uri", nil))
-			return
-		}
-
-		tpl, err := template.ParseFiles("./resources/auth.html")
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		err = tpl.Execute(w, map[string]interface{}{
-			"client_name": client.Name,
-			"params":      params,
-			"scopes":      strings.Fields(params.Scope),
-		})
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
+func AuthorizeGet(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	params, err := parseAuthorizeParams(r)
+	if err != nil {
+		return err
 	}
+
+	client, err := a.FindClient(r.Context(), params.ClientID)
+	if err != nil {
+		return err
+	}
+
+	if err := a.AuthCodeNoNonceExists(r.Context(), params.Nonce); err != nil {
+		return err
+	}
+
+	if params.RedirectURI != nil && !slicecontains.String(client.RedirectURIs, *params.RedirectURI) {
+		return cher.New("invalid_redirect_uri", nil)
+	}
+
+	tpl, err := template.ParseFiles("./resources/auth.html")
+	if err != nil {
+		return err
+	}
+
+	if err := tpl.Execute(w, map[string]interface{}{
+		"client_name": client.Name,
+		"params":      params,
+		"scopes":      strings.Fields(params.Scope),
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func AuthorizePost(a *app.App) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		authCredentials, params, err := parseAuthorizeResponse(r)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		client, err := a.FindClient(r.Context(), params.ClientID)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		if err = a.AuthCodeNoNonceExists(r.Context(), params.Nonce); err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		if params.RedirectURI != nil && !slicecontains.String(client.RedirectURIs, *params.RedirectURI) {
-			rpc.HandleError(w, r, cher.New("invalid_redirect_uri", nil))
-			return
-		}
-
-		user, err := a.GetUserByName(r.Context(), authCredentials.Username)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		if !authlib.Can(params.Scope, user.Scopes) {
-			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil, cher.New("invalid_scopes", nil)))
-			return
-		}
-
-		res, err := a.Authorization(r.Context(), &auth.AuthorizationRequest{
-			ClientID:            client.ID,
-			ResponseType:        params.ResponseType,
-			RedirectURI:         params.RedirectURI,
-			State:               params.State,
-			Nonce:               params.Nonce,
-			CodeChallengeMethod: params.CodeChallengeMethod,
-			CodeChallenge:       params.CodeChallenge,
-			Username:            authCredentials.Username,
-			Password:            authCredentials.Password,
-			Scope:               params.Scope,
-		}, user)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		if params.RedirectURI == nil {
-			displayAuthToken(w, r, res, client)
-			return
-		}
-
-		urlVals := &url.Values{
-			"code":  []string{res.AuthorizationCode},
-			"state": []string{res.State},
-		}
-
-		url := fmt.Sprintf("%s?%s", *params.RedirectURI, urlVals.Encode())
-
-		w.Header().Set("Content-Type", "")
-		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+func AuthorizePost(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	authCredentials, params, err := parseAuthorizeResponse(r)
+	if err != nil {
+		return err
 	}
+
+	client, err := a.FindClient(r.Context(), params.ClientID)
+	if err != nil {
+		return err
+	}
+
+	if err := a.AuthCodeNoNonceExists(r.Context(), params.Nonce); err != nil {
+		return err
+	}
+
+	if params.RedirectURI != nil && !slicecontains.String(client.RedirectURIs, *params.RedirectURI) {
+		return cher.New("invalid_redirect_uri", nil)
+	}
+
+	user, err := a.GetUserByName(r.Context(), authCredentials.Username)
+	if err != nil {
+		return err
+	}
+
+	if !authlib.Can(params.Scope, user.Scopes) {
+		return cher.New(cher.AccessDenied, nil, cher.New("invalid_scopes", nil))
+	}
+
+	res, err := a.Authorization(r.Context(), &auth.AuthorizationRequest{
+		ClientID:            client.ID,
+		ResponseType:        params.ResponseType,
+		RedirectURI:         params.RedirectURI,
+		State:               params.State,
+		Nonce:               params.Nonce,
+		CodeChallengeMethod: params.CodeChallengeMethod,
+		CodeChallenge:       params.CodeChallenge,
+		Username:            authCredentials.Username,
+		Password:            authCredentials.Password,
+		Scope:               params.Scope,
+	}, user)
+	if err != nil {
+		return err
+	}
+
+	if params.RedirectURI == nil {
+		return displayAuthToken(w, r, res, client)
+	}
+
+	urlVals := &url.Values{
+		"code":  []string{res.AuthorizationCode},
+		"state": []string{res.State},
+	}
+
+	url := fmt.Sprintf("%s?%s", *params.RedirectURI, urlVals.Encode())
+
+	w.Header().Set("Content-Type", "")
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+
+	return nil
 }
 
-func displayAuthToken(w http.ResponseWriter, r *http.Request, res *auth.AuthorizationResponse, client *auth.Client) {
+func displayAuthToken(w http.ResponseWriter, r *http.Request, res *auth.AuthorizationResponse, client *auth.Client) error {
 	tpl, err := template.ParseFiles("./resources/auth_code.html")
 	if err != nil {
-		rpc.HandleError(w, r, err)
-		return
+		return err
 	}
 
 	t, _ := time.Parse(time.RFC3339, res.ExpiresAt)
 
-	err = tpl.Execute(w, map[string]interface{}{
+	return tpl.Execute(w, map[string]interface{}{
 		"client_name":          client.Name,
 		"code":                 res.AuthorizationCode,
 		"expires_at":           res.ExpiresAt,
@@ -145,8 +128,6 @@ func displayAuthToken(w http.ResponseWriter, r *http.Request, res *auth.Authoriz
 		"expires_at_formatted": t.Format(time.RFC822),
 		"state":                res.State,
 	})
-
-	rpc.HandleError(w, r, err)
 }
 
 type params struct {

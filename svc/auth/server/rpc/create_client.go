@@ -39,34 +39,26 @@ var createClientSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func CreateClient(a *app.App) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		err := rpc.ValidateRequest(r, createClientSchema)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		req := &auth.CreateClientRequest{}
-		err = rpc.ParseBody(r, req)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		user := authlib.GetFromContext(r.Context())
-		if !user.Can("auth:create_client") {
-			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
-			return
-		}
-
-		res, err := a.CreateClient(r.Context(), req)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		rpc.WriteOut(w, r, res)
-		return
+func CreateClient(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	if err := rpc.ValidateRequest(r, createClientSchema); err != nil {
+		return err
 	}
+
+	req := &auth.CreateClientRequest{}
+	if err := rpc.ParseBody(r, req); err != nil {
+		return err
+	}
+
+	user := authlib.GetFromContext(r.Context())
+	if !user.Can("auth:create_client") {
+		return cher.New(cher.AccessDenied, nil)
+	}
+
+	res, err := a.CreateClient(r.Context(), req)
+	if err != nil {
+		return err
+	}
+
+	rpc.WriteOut(w, r, res)
+	return nil
 }
