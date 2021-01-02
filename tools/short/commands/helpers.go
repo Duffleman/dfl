@@ -32,10 +32,6 @@ func rootURL() string {
 	return fmt.Sprintf("%s/", viper.Get("SHORT_URL").(string))
 }
 
-func getRootPath() string {
-	return viper.Get("FS").(string)
-}
-
 func getAuthHeader(keychain keychain.Keychain) string {
 	var authBytes []byte
 	var err error

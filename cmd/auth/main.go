@@ -17,7 +17,6 @@ func main() {
 	// Load env variables
 	viper.SetEnvPrefix("DFL")
 	viper.SetDefault("AUTH_URL", "https://auth.dfl.mn")
-	viper.SetDefault("FS", "/Users/duffleman/.dfl")
 
 	viper.AutomaticEnv()
 

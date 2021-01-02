@@ -13,7 +13,6 @@ Install it into your PATH
 ```
 export DFL_SHORT_URL=https://dfl.mn
 export DFL_AUTH_URL=https://auth.dfl.mn
-export DFL_FS=/Users/duffleman/.dfl
 ```
 
 ### Upload a file
