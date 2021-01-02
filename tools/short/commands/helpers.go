@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"path"
 
+	"dfl/lib/keychain"
 	"dfl/svc/auth"
 	"dfl/svc/short"
 
@@ -38,9 +39,15 @@ func getRootPath() string {
 }
 
 func getAuthHeader() string {
-	path := path.Join(getRootPath(), "auth.json")
+	var authBytes []byte
+	var err error
 
-	bytes, err := ioutil.ReadFile(path)
+	if !keychain.Supported() {
+		authBytes, err = ioutil.ReadFile(path.Join(getRootPath(), "auth.json"))
+	} else {
+		authBytes, err = keychain.GetItem("Auth")
+	}
+
 	if err != nil {
 		fmt.Println("Run `short login` first!")
 		panic(err)
@@ -48,9 +55,9 @@ func getAuthHeader() string {
 
 	res := auth.TokenResponse{}
 
-	err = json.Unmarshal(bytes, &res)
+	err = json.Unmarshal(authBytes, &res)
 	if err != nil {
-		fmt.Println("Run `short login` first!")
+		fmt.Println("Run `short login` again.")
 		panic(err)
 	}
 

@@ -6,13 +6,13 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os/exec"
 	"path"
 	"runtime"
 
 	"dfl/lib/cher"
+	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
 	"github.com/dvsekhvalnov/jose2go/base64url"
@@ -32,11 +32,6 @@ func Login(clientID, scope string) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			original, hashed := makeCodeChallenge()
 			state := makeState()
-
-			_, err := loadFromFile("auth.json")
-			if err != nil {
-				return err
-			}
 
 			params := url.Values{
 				"client_id":             []string{clientID},
@@ -62,7 +57,7 @@ func Login(clientID, scope string) *cobra.Command {
 
 			c.Printf("\n%s\n\n", url)
 
-			err = openBrowser(url)
+			err := openBrowser(url)
 			if err != nil {
 				cw.Print("Warning")
 				c.Printf(": %s\n\n", "Cannot open your browser for you, type in this URL:")
@@ -85,14 +80,19 @@ func Login(clientID, scope string) *cobra.Command {
 				return err
 			}
 
-			authBytes, err := json.MarshalIndent(res, "", "  ")
+			authBytes, err := json.Marshal(res)
 			if err != nil {
 				return err
 			}
 
-			err = ioutil.WriteFile(path.Join(getRootPath(), "auth.json"), authBytes, 0644)
-			if err != nil {
-				return err
+			if keychain.Supported() {
+				if err := keychain.NewItem("Auth", authBytes); err != nil {
+					return err
+				}
+			} else {
+				if err := writeToFile(path.Join(getRootPath(), "auth.json"), authBytes); err != nil {
+					return err
+				}
 			}
 
 			ca.Println("Logged in!")

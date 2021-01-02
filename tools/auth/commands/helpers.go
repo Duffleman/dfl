@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 
@@ -23,15 +23,20 @@ func getRootPath() string {
 	return viper.Get("FS").(string)
 }
 
-func loadFromFile(filename string) (res *auth.TokenResponse, err error) {
-	path := path.Join(getRootPath(), filename)
+func writeToFile(in string, data []byte) error {
+	dir, _ := path.Split(in)
 
-	file, err := os.OpenFile(path, os.O_CREATE, 0644)
-	if err != nil {
-		return nil, err
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return err
 	}
 
-	json.NewDecoder(file).Decode(&res)
+	if err := ioutil.WriteFile(in, data, 0700); err != nil {
+		return err
+	}
 
-	return
+	return nil
+}
+
+func readFromFile(in string) (data []byte, err error) {
+	return ioutil.ReadFile(in)
 }
