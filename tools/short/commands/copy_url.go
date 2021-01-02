@@ -7,37 +7,40 @@ import (
 	"os"
 
 	"dfl/lib/cher"
+	"dfl/lib/keychain"
 
 	"github.com/cuvva/ksuid-go"
 	"github.com/spf13/cobra"
 )
 
-var CopyURLCmd = &cobra.Command{
-	Use:     "copy [url]",
-	Aliases: []string{"c"},
-	Short:   "Copy from a URL",
-	Long:    "Copy from a URL to the dflimg server",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 1 || len(args) == 0 {
-			return nil
-		}
+func CopyURL(kc keychain.Keychain) *cobra.Command {
+	return &cobra.Command{
+		Use:     "copy [url]",
+		Aliases: []string{"c"},
+		Short:   "Copy from a URL",
+		Long:    "Copy from a URL to the dflimg server",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 1 || len(args) == 0 {
+				return nil
+			}
 
-		return cher.New("missing_arguments", nil)
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		url, err := handleURLInput(args)
-		if err != nil {
-			return err
-		}
+			return cher.New("missing_arguments", nil)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			url, err := handleURLInput(args)
+			if err != nil {
+				return err
+			}
 
-		filePath, err := downloadFile(url)
-		if err != nil {
-			return err
-		}
-		defer os.Remove(*filePath)
+			filePath, err := downloadFile(url)
+			if err != nil {
+				return err
+			}
+			defer os.Remove(*filePath)
 
-		return UploadSignedCmd.RunE(cmd, []string{*filePath})
-	},
+			return UploadSigned(kc).RunE(cmd, []string{*filePath})
+		},
+	}
 }
 
 func downloadFile(urlStr string) (*string, error) {

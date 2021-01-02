@@ -6,19 +6,12 @@ import (
 	"os"
 
 	"dfl/lib/cher"
-	"dfl/tools/auth/commands"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 const clientID = "client_000000C3N8sN2HPqTVeqfOTsnjBJI"
-
-func init() {
-	rootCmd.AddCommand(commands.Login(clientID, "auth:login"))
-	rootCmd.AddCommand(commands.LogoutCmd)
-	rootCmd.AddCommand(commands.ShowAccessTokenCmd)
-}
 
 func main() {
 	// Load env variables

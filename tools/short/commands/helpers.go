@@ -3,8 +3,6 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"path"
 
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
@@ -26,8 +24,8 @@ func notify(title, body string) {
 	}
 }
 
-func makeClient() short.Service {
-	return short.NewClient(rootURL(), getAuthHeader())
+func makeClient(keychain keychain.Keychain) short.Service {
+	return short.NewClient(rootURL(), getAuthHeader(keychain))
 }
 
 func rootURL() string {
@@ -38,16 +36,11 @@ func getRootPath() string {
 	return viper.Get("FS").(string)
 }
 
-func getAuthHeader() string {
+func getAuthHeader(keychain keychain.Keychain) string {
 	var authBytes []byte
 	var err error
 
-	if !keychain.Supported() {
-		authBytes, err = ioutil.ReadFile(path.Join(getRootPath(), "auth.json"))
-	} else {
-		authBytes, err = keychain.GetItem("Auth")
-	}
-
+	authBytes, err = keychain.GetItem("Auth")
 	if err != nil {
 		fmt.Println("Run `short login` first!")
 		panic(err)

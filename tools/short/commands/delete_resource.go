@@ -6,52 +6,55 @@ import (
 	"time"
 
 	"dfl/lib/cher"
+	"dfl/lib/keychain"
 	"dfl/svc/short"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var DeleteResourceCmd = &cobra.Command{
-	Use:     "delete [query]",
-	Aliases: []string{"d"},
-	Short:   "Delete a resource",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 1 || len(args) == 0 {
+func DeleteResource(kc keychain.Keychain) *cobra.Command {
+	return &cobra.Command{
+		Use:     "delete [query]",
+		Aliases: []string{"d"},
+		Short:   "Delete a resource",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 1 || len(args) == 0 {
+				return nil
+			}
+
+			return cher.New("missing_arguments", nil)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+
+			startTime := time.Now()
+
+			query, err := handleQueryInput(args)
+			if err != nil {
+				return err
+			}
+
+			err = deleteResource(ctx, kc, query)
+			if err != nil {
+				return err
+			}
+
+			notify("Resource deleted", query)
+
+			log.Infof("Done in %s", time.Now().Sub(startTime))
+
 			return nil
-		}
-
-		return cher.New("missing_arguments", nil)
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-
-		startTime := time.Now()
-
-		query, err := handleQueryInput(args)
-		if err != nil {
-			return err
-		}
-
-		err = deleteResource(ctx, query)
-		if err != nil {
-			return err
-		}
-
-		notify("Resource deleted", query)
-
-		log.Infof("Done in %s", time.Now().Sub(startTime))
-
-		return nil
-	},
+		},
+	}
 }
 
-func deleteResource(ctx context.Context, urlStr string) error {
+func deleteResource(ctx context.Context, kc keychain.Keychain, urlStr string) error {
 	body := &short.IdentifyResource{
 		Query: urlStr,
 	}
 
-	return makeClient().DeleteResource(ctx, body)
+	return makeClient(kc).DeleteResource(ctx, body)
 }
 
 func handleQueryInput(args []string) (string, error) {

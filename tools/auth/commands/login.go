@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/url"
 	"os/exec"
-	"path"
 	"runtime"
 
 	"dfl/lib/cher"
@@ -23,7 +22,7 @@ import (
 	"github.com/tjarratt/babble"
 )
 
-func Login(clientID, scope string) *cobra.Command {
+func Login(clientID, scope string, keychain keychain.Keychain) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "login",
 		Aliases: []string{"l"},
@@ -85,14 +84,8 @@ func Login(clientID, scope string) *cobra.Command {
 				return err
 			}
 
-			if keychain.Supported() {
-				if err := keychain.UpsertItem("Auth", authBytes); err != nil {
-					return err
-				}
-			} else {
-				if err := writeToFile(path.Join(getRootPath(), "auth.json"), authBytes); err != nil {
-					return err
-				}
+			if err := keychain.UpsertItem("Auth", authBytes); err != nil {
+				return err
 			}
 
 			ca.Println("Logged in!")

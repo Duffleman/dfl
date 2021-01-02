@@ -1,0 +1,14 @@
+package main
+
+import (
+	"dfl/lib/keychain/darwin"
+	"dfl/tools/auth/commands"
+)
+
+func init() {
+	kc := darwin.Keychain{}
+
+	rootCmd.AddCommand(commands.Login(clientID, "auth:login", kc))
+	rootCmd.AddCommand(commands.Logout(kc))
+	rootCmd.AddCommand(commands.ShowAccessToken(kc))
+}
