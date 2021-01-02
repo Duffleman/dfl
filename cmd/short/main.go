@@ -30,7 +30,6 @@ func main() {
 	viper.SetEnvPrefix("DFL")
 	viper.SetDefault("AUTH_URL", "https://auth.dfl.mn")
 	viper.SetDefault("SHORT_URL", "https://dfl.mn")
-	viper.SetDefault("FS", "/Users/duffleman/.dfl")
 
 	viper.AutomaticEnv()
 

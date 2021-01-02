@@ -72,6 +72,7 @@ func AuthMiddleware(publicKey interface{}, bypassPaths []HTTPResource) func(h ht
 				return publicKey, nil
 			})
 			if err != nil {
+				err = cher.New("jwt_error", nil, cher.Coerce(err))
 				rpc.HandleError(w, r, err, nil)
 				return
 			}

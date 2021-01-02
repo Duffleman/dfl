@@ -86,7 +86,7 @@ func Login(clientID, scope string) *cobra.Command {
 			}
 
 			if keychain.Supported() {
-				if err := keychain.NewItem("Auth", authBytes); err != nil {
+				if err := keychain.UpsertItem("Auth", authBytes); err != nil {
 					return err
 				}
 			} else {
