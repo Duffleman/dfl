@@ -159,6 +159,7 @@ type TokenRequest struct {
 }
 
 type TokenResponse struct {
+	UserID      string `json:"user_id"`
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
 	Expires     int    `json:"expires"`

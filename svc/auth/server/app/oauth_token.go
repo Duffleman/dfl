@@ -100,6 +100,7 @@ func (a *App) Token(ctx context.Context, req *auth.TokenRequest) (*auth.TokenRes
 	}
 
 	return &auth.TokenResponse{
+		UserID:      user.ID,
 		AccessToken: tokenString,
 		TokenType:   "Bearer",
 		Expires:     int(expiresAt.Sub(time.Now()).Seconds()),
