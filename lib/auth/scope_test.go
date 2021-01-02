@@ -12,14 +12,14 @@ var suite = []struct {
 }{
 	{
 		Name:   "match up",
-		Action: "dflauth:login",
-		Scopes: "dflauth:*",
+		Action: "auth:login",
+		Scopes: "auth:*",
 		Result: true,
 	},
 	{
 		Name:   "match exact",
-		Action: "dflauth:*",
-		Scopes: "dflauth:*",
+		Action: "auth:*",
+		Scopes: "auth:*",
 		Result: true,
 	},
 	{
@@ -36,20 +36,20 @@ var suite = []struct {
 	},
 	{
 		Name:   "do no match down",
-		Action: "dflauth:*",
-		Scopes: "dflauth:login",
+		Action: "auth:*",
+		Scopes: "auth:login",
 		Result: false,
 	},
 	{
 		Name:   "do not match unrelated",
-		Action: "dflauth:list",
-		Scopes: "dflauth:login",
+		Action: "auth:list",
+		Scopes: "auth:login",
 		Result: false,
 	},
 	{
 		Name:   "match in set",
-		Action: "dflauth:login",
-		Scopes: "dflauth:login dflauth:list dflimg:upload",
+		Action: "auth:login",
+		Scopes: "auth:login auth:list dflimg:upload",
 		Result: true,
 	},
 }
