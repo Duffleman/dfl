@@ -2,18 +2,39 @@ package app
 
 import (
 	"context"
+	"fmt"
+	"net/url"
 	"time"
 
+	authlib "dfl/lib/auth"
 	"dfl/lib/cher"
 	"dfl/lib/ptr"
+	"dfl/lib/slicecontains"
 	"dfl/svc/auth"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (a *App) Authorization(ctx context.Context, req *auth.AuthorizationRequest, user *auth.User) (*auth.AuthorizationResponse, error) {
-	if err := a.Login(ctx, user, req.Password); err != nil {
+func (a *App) Authorization(ctx context.Context, req *auth.AuthorizeConfirmRequest, user *auth.User) (*auth.AuthorizeConfirmResponse, error) {
+	client, err := a.FindClient(ctx, req.ClientID)
+	if err != nil {
 		return nil, err
+	}
+
+	if err := a.CheckLoginValidity(ctx, user); err != nil {
+		return nil, err
+	}
+
+	if err := a.AuthCodeNoNonceExists(ctx, req.Nonce); err != nil {
+		return nil, err
+	}
+
+	if req.RedirectURI != nil && !slicecontains.String(client.RedirectURIs, *req.RedirectURI) {
+		return nil, cher.New("invalid_redirect_uri", nil)
+	}
+
+	if !authlib.Can(req.Scope, user.Scopes) {
+		return nil, cher.New(cher.AccessDenied, nil, cher.New("invalid_scopes", nil))
 	}
 
 	authCode, expiresAt, err := a.DB.Q.CreateAuthorizationCode(ctx, user.ID, req)
@@ -26,14 +47,37 @@ func (a *App) Authorization(ctx context.Context, req *auth.AuthorizationRequest,
 		return nil, err
 	}
 
-	expiresIn := expiresAt.Sub(time.Now())
+	rType, params := buildAuthorizeParams(client, req, authCode, expiresAt)
 
-	return &auth.AuthorizationResponse{
-		AuthorizationCode: authCode,
-		ExpiresAt:         expiresAt.Format(time.RFC3339),
-		ExpiresIn:         int(expiresIn.Seconds()),
-		State:             req.State,
+	return &auth.AuthorizeConfirmResponse{
+		Type:   rType,
+		Params: params,
 	}, nil
+}
+
+func buildAuthorizeParams(client *auth.Client, req *auth.AuthorizeConfirmRequest, authCode string, expiresAt time.Time) (string, interface{}) {
+	switch {
+	case len(client.RedirectURIs) == 0:
+		expiresIn := expiresAt.Sub(time.Now())
+
+		return "display", &auth.AuthorizeWithoutRedirectParams{
+			AuthorizationCode: authCode,
+			ExpiresAt:         expiresAt.Format(time.RFC3339),
+			ExpiresIn:         int(expiresIn.Seconds()),
+			State:             req.State,
+		}
+	default:
+		urlVals := &url.Values{
+			"code":  []string{authCode},
+			"state": []string{req.State},
+		}
+
+		url := fmt.Sprintf("%s?%s", *req.RedirectURI, urlVals.Encode())
+
+		return "redirect", &auth.AuthorizeWithRedirectParams{
+			URI: url,
+		}
+	}
 }
 
 func checkPasswordHash(password, hash string) bool {

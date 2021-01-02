@@ -12,49 +12,43 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var createClientSchema = gojsonschema.NewStringLoader(`{
+var listU2FKeysSchema = gojsonschema.NewStringLoader(`{
 	"type": "object",
 	"additionalProperties": false,
 
 	"required": [
-		"name",
-		"redirect_uris"
+		"user_id",
+		"include_unsigned"
 	],
 
 	"properties": {
-		"name": {
+		"user_id": {
 			"type": "string",
-			"minLength": 3
+			"minLength": 1
 		},
 
-		"redirect_uris": {
-			"type": "array",
-			"minItems": 0,
-
-			"items": {
-				"type": "string",
-				"minLength": 1
-			}
+		"include_unsigned": {
+			"type": "boolean"
 		}
 	}
 }`)
 
-func CreateClient(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	if err := rpc.ValidateRequest(r, createClientSchema); err != nil {
+func ListU2FKeys(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	if err := rpc.ValidateRequest(r, listU2FKeysSchema); err != nil {
 		return err
 	}
 
-	req := &auth.CreateClientRequest{}
+	req := &auth.ListU2FKeysRequest{}
 	if err := rpc.ParseBody(r, req); err != nil {
 		return err
 	}
 
 	user := authlib.GetFromContext(r.Context())
-	if !user.Can("auth:create_client") {
+	if user.ID != req.UserID && !user.Can("auth:list_keys") {
 		return cher.New(cher.AccessDenied, nil)
 	}
 
-	res, err := a.CreateClient(r.Context(), req)
+	res, err := a.ListU2FKeys(r.Context(), req.UserID, req.IncludeUnsigned)
 	if err != nil {
 		return err
 	}

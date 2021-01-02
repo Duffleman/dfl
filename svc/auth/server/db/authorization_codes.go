@@ -66,7 +66,7 @@ func (qw *QueryableWrapper) ExpireAuthorizationCodes(ctx context.Context, skip *
 	return err
 }
 
-func (qw *QueryableWrapper) CreateAuthorizationCode(ctx context.Context, userID string, req *auth.AuthorizationRequest) (string, time.Time, error) {
+func (qw *QueryableWrapper) CreateAuthorizationCode(ctx context.Context, userID string, req *auth.AuthorizeConfirmRequest) (string, time.Time, error) {
 	qb := NewQueryBuilder()
 	query, values, err := qb.
 		Insert("authorization_codes").

@@ -75,7 +75,7 @@ func Token(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return rpc.WriteOut(w, r, res)
+	return rpc.WriteOut(w, res)
 }
 
 func modifyBody(r *http.Request) error {

@@ -84,7 +84,7 @@ func AuthMiddleware(publicKey interface{}, bypassPaths []HTTPResource) func(h ht
 			claims := token.Claims.(*dfljwt.DFLClaims)
 
 			authUser := authlib.AuthUser{
-				UserID:   claims.Id,
+				ID:       claims.Subject,
 				Username: claims.Username,
 				Scopes:   claims.Scope,
 			}

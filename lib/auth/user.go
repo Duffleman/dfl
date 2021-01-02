@@ -9,7 +9,7 @@ import (
 var UserContextKey rpc.ContextKey = "user"
 
 type AuthUser struct {
-	UserID   string
+	ID       string
 	Username string
 	Scopes   string
 }

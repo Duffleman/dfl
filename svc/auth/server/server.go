@@ -42,6 +42,14 @@ type Config struct {
 
 	PrivateKey string `envconfig:"private_key"`
 	PublicKey  string `envconfig:"public_key"`
+
+	WebAuthn WebAuthn `envconfig:"webauthn"`
+}
+
+type WebAuthn struct {
+	ID          string `envconfig:"rpid"`
+	Origin      string `envconfig:"rporigin"`
+	DisplayName string `envconfig:"rpdisplayname"`
 }
 
 func DefaultConfig() Config {
@@ -53,6 +61,12 @@ func DefaultConfig() Config {
 
 		PrivateKey: privateKey,
 		PublicKey:  publicKey,
+
+		WebAuthn: WebAuthn{
+			ID:          "localhost",
+			DisplayName: "DFL Auth",
+			Origin:      "http://localhost:3000",
+		},
 	}
 }
 
@@ -73,7 +87,17 @@ func Run(cfg Config) error {
 		key.MustParseECDSAPublic([]byte(cfg.PublicKey)),
 	)
 
+	web, err := webauthn.New(&webauthn.Config{
+		RPDisplayName: cfg.WebAuthn.DisplayName,
+		RPID:          cfg.WebAuthn.ID,
+		RPOrigin:      cfg.WebAuthn.Origin,
+	})
+	if err != nil {
+		return err
+	}
+
 	app := &app.App{
+		WA: web,
 		SK: sk,
 		DB: db,
 	}
@@ -87,19 +111,34 @@ func Run(cfg Config) error {
 	router.Use(dflmw.MountAppMiddleware(app))
 	router.Use(dflmw.AuthMiddleware(sk.Public(), []dflmw.HTTPResource{
 		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/authorize")},
-		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/get_public_cert")},
-		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/authorize")},
-		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/register")},
+		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/register")},
+		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/u2f_manage")},
+		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/authorize_confirm")},
+		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/authorize_prompt")},
+		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/register_confirm")},
+		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/register_prompt")},
 		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/token")},
 	}))
 
-	router.Get("/authorize", wrap(rpc.AuthorizeGet))
-	router.Get("/get_public_cert", wrap(rpc.GetPublicCert))
-	router.Post("/authorize", wrap(rpc.AuthorizePost))
+	// Internal
+	router.Get("/register", wrap(rpc.RegisterGet))
+	router.Get("/u2f_manage", wrap(rpc.U2FManageGet))
 	router.Post("/create_client", wrap(rpc.CreateClient))
-	router.Post("/register", wrap(rpc.Register))
-	router.Post("/token", wrap(rpc.Token))
+	router.Post("/create_key_confirm", wrap(rpc.CreateKeyConfirm))
+	router.Post("/create_key_prompt", wrap(rpc.CreateKeyPrompt))
+	router.Post("/delete_key", wrap(rpc.DeleteKey))
+	router.Post("/list_u2f_keys", wrap(rpc.ListU2FKeys))
+	router.Post("/register_confirm", wrap(rpc.RegisterConfirm))
+	router.Post("/register_prompt", wrap(rpc.RegisterPrompt))
+	router.Post("/sign_key_confirm", wrap(rpc.SignKeyConfirm))
+	router.Post("/sign_key_prompt", wrap(rpc.SignKeyPrompt))
 	router.Post("/whoami", wrap(rpc.WhoAmI))
+
+	// OAuth
+	router.Get("/authorize", wrap(rpc.AuthorizeGet))
+	router.Post("/authorize_confirm", wrap(rpc.AuthorizeConfirm))
+	router.Post("/authorize_prompt", wrap(rpc.AuthorizePrompt))
+	router.Post("/token", wrap(rpc.Token))
 
 	cfg.Logger.Infof("Server running on port %d", cfg.Port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), router)

@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func WriteOut(w http.ResponseWriter, r *http.Request, res interface{}) error {
+func WriteOut(w http.ResponseWriter, res interface{}) error {
 	if res == nil {
 		w.WriteHeader(204)
 		return nil

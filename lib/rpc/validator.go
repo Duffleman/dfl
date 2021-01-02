@@ -16,7 +16,7 @@ import (
 func ValidateRequest(r *http.Request, schema gojsonschema.JSONLoader) error {
 	compiledSchema, err := gojsonschema.NewSchemaLoader().Compile(schema)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	body, err := ioutil.ReadAll(r.Body)

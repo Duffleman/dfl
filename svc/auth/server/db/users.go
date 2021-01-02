@@ -12,7 +12,7 @@ import (
 func (qw *QueryableWrapper) findOneUser(ctx context.Context, field, value string) (*auth.User, error) {
 	qb := NewQueryBuilder()
 	query, values, err := qb.
-		Select("u.id, u.username, u.email, u.password, u.created_at, u.invite_code, u.invite_expiry, u.invite_redeemed_at, u.scopes").
+		Select("u.id, u.username, u.email, u.created_at, u.invite_code, u.invite_expiry, u.invite_redeemed_at, u.scopes").
 		From("users u").
 		Where(sq.Eq{
 			field: value,
@@ -26,7 +26,7 @@ func (qw *QueryableWrapper) findOneUser(ctx context.Context, field, value string
 
 	row := qw.q.QueryRowContext(ctx, query, values...)
 
-	if err := row.Scan(&u.ID, &u.Username, &u.Email, &u.Password, &u.CreatedAt, &u.InviteCode, &u.InviteExpiry, &u.InviteRedeemedAt, &u.Scopes); err != nil {
+	if err := row.Scan(&u.ID, &u.Username, &u.Email, &u.CreatedAt, &u.InviteCode, &u.InviteExpiry, &u.InviteRedeemedAt, &u.Scopes); err != nil {
 		return nil, coerceNotFound(err)
 	}
 
@@ -41,12 +41,10 @@ func (qw *QueryableWrapper) GetUserByName(ctx context.Context, username string) 
 	return qw.findOneUser(ctx, "username", username)
 }
 
-func (qw *QueryableWrapper) RedeemInvite(ctx context.Context, userID, password string) error {
+func (qw *QueryableWrapper) RedeemInvite(ctx context.Context, userID string) error {
 	qb := NewQueryBuilder()
 	query, values, err := qb.
 		Update("users u").
-		Set("password", password).
-		Set("invite_code", nil).
 		Set("invite_expiry", nil).
 		Set("invite_redeemed_at", time.Now()).
 		Where(sq.Eq{

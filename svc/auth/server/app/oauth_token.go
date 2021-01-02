@@ -46,6 +46,10 @@ func (a *App) Token(ctx context.Context, req *auth.TokenRequest) (*auth.TokenRes
 		return nil, err
 	}
 
+	if err := a.CheckLoginValidity(ctx, user); err != nil {
+		return nil, err
+	}
+
 	if !authlib.Can(ac.Scope, user.Scopes) {
 		return nil, cher.New(cher.AccessDenied, nil)
 	}

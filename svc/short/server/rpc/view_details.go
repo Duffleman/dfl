@@ -69,6 +69,6 @@ func ViewDetails(a *app.App) func(http.ResponseWriter, *http.Request) {
 			return
 		}
 
-		rpc.WriteOut(w, r, resource)
+		rpc.WriteOut(w, resource)
 	}
 }

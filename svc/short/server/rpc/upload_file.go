@@ -56,7 +56,7 @@ func UploadFile(a *app.App) func(http.ResponseWriter, *http.Request) {
 			w.Header().Set("Content-Type", "text/plain")
 			w.Write([]byte(res.URL))
 		} else {
-			rpc.WriteOut(w, r, res)
+			rpc.WriteOut(w, res)
 		}
 	}
 }

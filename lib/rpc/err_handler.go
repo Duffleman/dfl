@@ -16,12 +16,14 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 
 	if e, ok := err.(cher.E); ok {
 		switch e.Code {
-		case cher.NotFound:
-			w.WriteHeader(404)
-		case cher.AccessDenied:
-			w.WriteHeader(403)
+		case cher.BadRequest:
+			w.WriteHeader(400)
 		case cher.Unauthorized:
 			w.WriteHeader(401)
+		case cher.AccessDenied:
+			w.WriteHeader(403)
+		case cher.NotFound:
+			w.WriteHeader(404)
 		default:
 			w.WriteHeader(500)
 		}

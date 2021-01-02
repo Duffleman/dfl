@@ -6,8 +6,8 @@ import (
 	"dfl/svc/auth"
 )
 
-func (a *App) WhoAmI(ctx context.Context, req *auth.WhoAmIRequest) (*auth.WhoAmIResponse, error) {
-	user, err := a.GetUserByName(ctx, req.Username)
+func (a *App) WhoAmI(ctx context.Context, userID string) (*auth.WhoAmIResponse, error) {
+	user, err := a.FindUser(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
