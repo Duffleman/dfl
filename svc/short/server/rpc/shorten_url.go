@@ -29,42 +29,38 @@ var shortenURLSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func ShortenURL(a *app.App) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
+func ShortenURL(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	ctx := r.Context()
 
-		err := rpc.ValidateRequest(r, shortenURLSchema)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		req := &short.CreateURLRequest{}
-		err = rpc.ParseBody(r, req)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
-		if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
-			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
-			return
-		}
-
-		res, err := a.ShortenURL(ctx, req.URL, authUser.Username)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		accept := r.Header.Get("Accept")
-
-		if strings.Contains(accept, "text/plain") {
-			w.Header().Set("Content-Type", "text/plain")
-			w.Write([]byte(res.URL))
-		} else {
-			rpc.WriteOut(w, res)
-		}
+	err := rpc.ValidateRequest(r, shortenURLSchema)
+	if err != nil {
+		return err
 	}
+
+	req := &short.CreateURLRequest{}
+	err = rpc.ParseBody(r, req)
+	if err != nil {
+		return err
+	}
+
+	authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
+	if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
+		return cher.New(cher.AccessDenied, nil)
+	}
+
+	res, err := a.ShortenURL(ctx, req.URL, authUser.Username)
+	if err != nil {
+		return err
+	}
+
+	accept := r.Header.Get("Accept")
+
+	if strings.Contains(accept, "text/plain") {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(res.URL))
+	} else {
+		return rpc.WriteOut(w, res)
+	}
+
+	return nil
 }

@@ -43,42 +43,35 @@ var listResourcesSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func ListResources(a *app.App) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
+func ListResources(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	ctx := r.Context()
 
-		err := rpc.ValidateRequest(r, listResourcesSchema)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		req := &short.ListResourcesRequest{}
-		err = rpc.ParseBody(r, req)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
-		if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
-			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
-			return
-		}
-
-		if err = authorizeRequest(req, authUser); err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		resources, err := a.ListResources(ctx, req)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		rpc.WriteOut(w, resources)
+	err := rpc.ValidateRequest(r, listResourcesSchema)
+	if err != nil {
+		return err
 	}
+
+	req := &short.ListResourcesRequest{}
+	err = rpc.ParseBody(r, req)
+	if err != nil {
+		return err
+	}
+
+	authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
+	if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
+		return cher.New(cher.AccessDenied, nil)
+	}
+
+	if err = authorizeRequest(req, authUser); err != nil {
+		return err
+	}
+
+	resources, err := a.ListResources(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return rpc.WriteOut(w, resources)
 }
 
 func authorizeRequest(req *short.ListResourcesRequest, u authlib.AuthUser) error {

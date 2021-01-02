@@ -1,9 +1,8 @@
 package pipeline
 
 import (
-	"html/template"
-
 	"dfl/lib/cher"
+	"dfl/lib/rpc"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -38,13 +37,9 @@ func LoadFilesFromFS(p *Pipeline) (bool, error) {
 			return false, err
 		}
 
-		tpl, err := template.ParseFiles("./resources/not_found.html")
-		if err != nil {
-			return false, err
-		}
-
-		err = tpl.Execute(p.w, nil)
-		return false, err
+		return false, rpc.QuickTemplate(p.w, nil, []string{
+			"./resources/not_found.html",
+		})
 	}
 
 	return true, nil

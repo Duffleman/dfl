@@ -28,47 +28,39 @@ var viewDetailsSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func ViewDetails(a *app.App) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
+func ViewDetails(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	ctx := r.Context()
 
-		err := rpc.ValidateRequest(r, viewDetailsSchema)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		req := &short.IdentifyResource{}
-		err = rpc.ParseBody(r, req)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
-		if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
-			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
-			return
-		}
-
-		qi := a.ParseQueryType(req.Query)
-
-		if len(qi) != 1 {
-			rpc.HandleError(w, r, cher.New("multi_query_not_supported", cher.M{"query": qi}))
-			return
-		}
-
-		resource, err := a.GetResource(ctx, qi[0])
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		if resource.Owner != authUser.Username && !authUser.Can("short:admin") {
-			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
-			return
-		}
-
-		rpc.WriteOut(w, resource)
+	err := rpc.ValidateRequest(r, viewDetailsSchema)
+	if err != nil {
+		return err
 	}
+
+	req := &short.IdentifyResource{}
+	err = rpc.ParseBody(r, req)
+	if err != nil {
+		return err
+	}
+
+	authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
+	if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
+		return cher.New(cher.AccessDenied, nil)
+	}
+
+	qi := a.ParseQueryType(req.Query)
+
+	if len(qi) != 1 {
+		return cher.New("multi_query_not_supported", cher.M{"query": qi})
+	}
+
+	resource, err := a.GetResource(ctx, qi[0])
+	if err != nil {
+		return err
+	}
+
+	if resource.Owner != authUser.Username && !authUser.Can("short:admin") {
+		return cher.New(cher.AccessDenied, nil)
+	}
+
+	return rpc.WriteOut(w, resource)
 }

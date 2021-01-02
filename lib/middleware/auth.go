@@ -42,19 +42,19 @@ func AuthMiddleware(publicKey interface{}, bypassPaths []HTTPResource) func(h ht
 
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
-				rpc.HandleError(w, r, cher.New(cher.Unauthorized, nil))
+				rpc.HandleError(w, r, cher.New(cher.Unauthorized, nil), nil)
 				return
 			}
 
 			parts := strings.Fields(authHeader)
 
 			if len(parts) != 2 {
-				rpc.HandleError(w, r, cher.New(cher.Unauthorized, nil))
+				rpc.HandleError(w, r, cher.New(cher.Unauthorized, nil), nil)
 				return
 			}
 
 			if parts[0] != "Bearer" {
-				rpc.HandleError(w, r, cher.New(cher.Unauthorized, nil))
+				rpc.HandleError(w, r, cher.New(cher.Unauthorized, nil), nil)
 				return
 			}
 
@@ -72,12 +72,12 @@ func AuthMiddleware(publicKey interface{}, bypassPaths []HTTPResource) func(h ht
 				return publicKey, nil
 			})
 			if err != nil {
-				rpc.HandleError(w, r, err)
+				rpc.HandleError(w, r, err, nil)
 				return
 			}
 
 			if !token.Valid {
-				rpc.HandleError(w, r, cher.New(cher.Unauthorized, nil))
+				rpc.HandleError(w, r, cher.New(cher.Unauthorized, nil), nil)
 				return
 			}
 

@@ -1,9 +1,9 @@
 package pipeline
 
 import (
-	"html/template"
 	"strings"
 
+	"dfl/lib/rpc"
 	"dfl/svc/short/server/app"
 )
 
@@ -46,11 +46,6 @@ func SyntaxHighlighter(p *Pipeline) (bool, error) {
 		return true, nil
 	}
 
-	tpl, err := template.ParseFiles("./resources/syntax_highlight.html")
-	if err != nil {
-		return false, err
-	}
-
 	var titles []string
 	authorMap := make(map[string]struct{})
 
@@ -79,12 +74,13 @@ func SyntaxHighlighter(p *Pipeline) (bool, error) {
 		authors = append(authors, a)
 	}
 
-	err = tpl.Execute(p.w, map[string]interface{}{
+	return false, rpc.QuickTemplate(p.w, map[string]interface{}{
 		"resources": rs,
 		"title":     strings.Join(titles, ", "),
 		"author":    strings.Join(authors, ", "),
+	}, []string{
+		"./resources/syntax_highlight.html",
 	})
-	return false, err
 }
 
 type resourceSet struct {

@@ -8,22 +8,22 @@ import (
 )
 
 // HeadResource gets a resource and handles the response for it
-func HeadResource(a *app.App) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		fake := fakehttp.NewResponse()
+func HeadResource(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	fake := fakehttp.NewResponse()
 
-		HandleResource(a)(fake, r)
-
-		for key, value := range fake.Headers {
-			for _, v := range value {
-				w.Header().Add(key, v)
-			}
-		}
-
-		if fake.Status >= 100 && fake.Status <= 999 {
-			w.WriteHeader(fake.Status)
-		}
-
-		return
+	if err := HandleResource(a, fake, r); err != nil {
+		return err
 	}
+
+	for key, value := range fake.Headers {
+		for _, v := range value {
+			w.Header().Add(key, v)
+		}
+	}
+
+	if fake.Status >= 100 && fake.Status <= 999 {
+		w.WriteHeader(fake.Status)
+	}
+
+	return nil
 }

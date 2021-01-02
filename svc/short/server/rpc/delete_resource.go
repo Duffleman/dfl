@@ -28,53 +28,43 @@ var deleteResourceSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func DeleteResource(a *app.App) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
+func DeleteResource(a *app.App, w http.ResponseWriter, r *http.Request) error {
+	ctx := r.Context()
 
-		err := rpc.ValidateRequest(r, deleteResourceSchema)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		req := &short.IdentifyResource{}
-		err = rpc.ParseBody(r, req)
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
-		if !authUser.Can("short:delete") && !authUser.Can("short:admin") {
-			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
-			return
-		}
-
-		qi := a.ParseQueryType(req.Query)
-
-		if len(qi) != 1 {
-			rpc.HandleError(w, r, cher.New("multi_query_not_supported", cher.M{"query": qi}))
-			return
-		}
-
-		if qi[0].QueryType == app.Name {
-			rpc.HandleError(w, r, cher.New("cannot_query_resource_by_name", cher.M{"query": qi}))
-			return
-		}
-
-		resource, err := a.GetResource(ctx, qi[0])
-		if err != nil {
-			rpc.HandleError(w, r, err)
-			return
-		}
-
-		if resource.Owner != authUser.Username && !authUser.Can("short:admin") {
-			rpc.HandleError(w, r, cher.New(cher.AccessDenied, nil))
-			return
-		}
-
-		err = a.DeleteResource(ctx, resource)
-		rpc.HandleError(w, r, err)
+	err := rpc.ValidateRequest(r, deleteResourceSchema)
+	if err != nil {
+		return err
 	}
+
+	req := &short.IdentifyResource{}
+	err = rpc.ParseBody(r, req)
+	if err != nil {
+		return err
+	}
+
+	authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
+	if !authUser.Can("short:delete") && !authUser.Can("short:admin") {
+		return cher.New(cher.AccessDenied, nil)
+	}
+
+	qi := a.ParseQueryType(req.Query)
+
+	if len(qi) != 1 {
+		return cher.New("multi_query_not_supported", cher.M{"query": qi})
+	}
+
+	if qi[0].QueryType == app.Name {
+		return cher.New("cannot_query_resource_by_name", cher.M{"query": qi})
+	}
+
+	resource, err := a.GetResource(ctx, qi[0])
+	if err != nil {
+		return err
+	}
+
+	if resource.Owner != authUser.Username && !authUser.Can("short:admin") {
+		return cher.New(cher.AccessDenied, nil)
+	}
+
+	return a.DeleteResource(ctx, resource)
 }

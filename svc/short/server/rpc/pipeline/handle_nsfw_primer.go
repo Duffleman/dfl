@@ -1,7 +1,7 @@
 package pipeline
 
 import (
-	"html/template"
+	"dfl/lib/rpc"
 )
 
 // HandleNSFWPrimer will show a NSFW primer screen if a resource has NSFW content
@@ -24,13 +24,7 @@ func HandleNSFWPrimer(p *Pipeline) (bool, error) {
 		return true, nil
 	}
 
-	tpl, err := template.ParseFiles("./resources/nsfw.html")
-	if err != nil {
-		return false, err
-	}
-	err = tpl.Execute(p.w, map[string]interface{}{
-		"resource": p.r,
+	return false, rpc.QuickTemplate(p.w, nil, []string{
+		"./resources/nsfw.html",
 	})
-
-	return false, err
 }

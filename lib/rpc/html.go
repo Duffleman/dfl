@@ -14,5 +14,9 @@ func QuickTemplate(w http.ResponseWriter, data interface{}, templates []string) 
 		return err
 	}
 
+	if len(templates) == 1 {
+		return tpl.ExecuteTemplate(w, firstName, data)
+	}
+
 	return tpl.ExecuteTemplate(w, "root", data)
 }

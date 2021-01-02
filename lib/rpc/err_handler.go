@@ -5,9 +5,11 @@ import (
 	"net/http"
 
 	"dfl/lib/cher"
+
+	"github.com/sirupsen/logrus"
 )
 
-func HandleError(w http.ResponseWriter, r *http.Request, err error) {
+func HandleError(w http.ResponseWriter, r *http.Request, err error, logger *logrus.Logger) {
 	if err == nil {
 		return
 	}
@@ -17,14 +19,19 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 	if e, ok := err.(cher.E); ok {
 		switch e.Code {
 		case cher.BadRequest:
+			logInfo(logger, err)
 			w.WriteHeader(400)
 		case cher.Unauthorized:
+			logInfo(logger, err)
 			w.WriteHeader(401)
 		case cher.AccessDenied:
+			logInfo(logger, err)
 			w.WriteHeader(403)
 		case cher.NotFound:
+			logInfo(logger, err)
 			w.WriteHeader(404)
 		default:
+			logWarn(logger, err)
 			w.WriteHeader(500)
 		}
 
@@ -34,4 +41,20 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error) {
 
 	w.WriteHeader(500)
 	json.NewEncoder(w).Encode(cher.New("unknown", cher.M{"error": err.Error()}))
+}
+
+func logInfo(l *logrus.Logger, err error) {
+	if l == nil {
+		return
+	}
+
+	l.WithError(err).Info(err)
+}
+
+func logWarn(l *logrus.Logger, err error) {
+	if l == nil {
+		return
+	}
+
+	l.WithError(err).Warn(err)
 }

@@ -11,7 +11,7 @@ import (
 	"dfl/svc/short"
 )
 
-const maxFileSize = 64
+const maxFileSize = 128
 const maxCacheSize = 32
 const byteJump = 1024
 

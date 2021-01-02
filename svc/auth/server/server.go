@@ -97,9 +97,10 @@ func Run(cfg Config) error {
 	}
 
 	app := &app.App{
-		WA: web,
-		SK: sk,
-		DB: db,
+		Logger: cfg.Logger,
+		WA:     web,
+		SK:     sk,
+		DB:     db,
 	}
 
 	router := chi.NewRouter()
@@ -108,7 +109,6 @@ func Run(cfg Config) error {
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
 	router.Use(cors.AllowAll().Handler)
-	router.Use(dflmw.MountAppMiddleware(app))
 	router.Use(dflmw.AuthMiddleware(sk.Public(), []dflmw.HTTPResource{
 		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/authorize")},
 		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/register")},
@@ -121,34 +121,34 @@ func Run(cfg Config) error {
 	}))
 
 	// Internal
-	router.Get("/register", wrap(rpc.RegisterGet))
-	router.Get("/u2f_manage", wrap(rpc.U2FManageGet))
-	router.Post("/create_client", wrap(rpc.CreateClient))
-	router.Post("/create_key_confirm", wrap(rpc.CreateKeyConfirm))
-	router.Post("/create_key_prompt", wrap(rpc.CreateKeyPrompt))
-	router.Post("/delete_key", wrap(rpc.DeleteKey))
-	router.Post("/list_u2f_keys", wrap(rpc.ListU2FKeys))
-	router.Post("/register_confirm", wrap(rpc.RegisterConfirm))
-	router.Post("/register_prompt", wrap(rpc.RegisterPrompt))
-	router.Post("/sign_key_confirm", wrap(rpc.SignKeyConfirm))
-	router.Post("/sign_key_prompt", wrap(rpc.SignKeyPrompt))
-	router.Post("/whoami", wrap(rpc.WhoAmI))
+	router.Get("/register", wrap(app, rpc.RegisterGet))
+	router.Get("/u2f_manage", wrap(app, rpc.U2FManageGet))
+	router.Post("/create_client", wrap(app, rpc.CreateClient))
+	router.Post("/create_key_confirm", wrap(app, rpc.CreateKeyConfirm))
+	router.Post("/create_key_prompt", wrap(app, rpc.CreateKeyPrompt))
+	router.Post("/delete_key", wrap(app, rpc.DeleteKey))
+	router.Post("/list_u2f_keys", wrap(app, rpc.ListU2FKeys))
+	router.Post("/register_confirm", wrap(app, rpc.RegisterConfirm))
+	router.Post("/register_prompt", wrap(app, rpc.RegisterPrompt))
+	router.Post("/sign_key_confirm", wrap(app, rpc.SignKeyConfirm))
+	router.Post("/sign_key_prompt", wrap(app, rpc.SignKeyPrompt))
+	router.Post("/whoami", wrap(app, rpc.WhoAmI))
 
 	// OAuth
-	router.Get("/authorize", wrap(rpc.AuthorizeGet))
-	router.Post("/authorize_confirm", wrap(rpc.AuthorizeConfirm))
-	router.Post("/authorize_prompt", wrap(rpc.AuthorizePrompt))
-	router.Post("/token", wrap(rpc.Token))
+	router.Get("/authorize", wrap(app, rpc.AuthorizeGet))
+	router.Post("/authorize_confirm", wrap(app, rpc.AuthorizeConfirm))
+	router.Post("/authorize_prompt", wrap(app, rpc.AuthorizePrompt))
+	router.Post("/token", wrap(app, rpc.Token))
 
 	cfg.Logger.Infof("Server running on port %d", cfg.Port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), router)
 }
 
-func wrap(fn func(*app.App, http.ResponseWriter, *http.Request) error) func(http.ResponseWriter, *http.Request) {
+func wrap(a *app.App, fn func(*app.App, http.ResponseWriter, *http.Request) error) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := fn(r.Context().Value(dflmw.AppContext).(*app.App), w, r)
+		err := fn(a, w, r)
 		if err != nil {
-			rpclib.HandleError(w, r, err)
+			rpclib.HandleError(w, r, err, a.Logger)
 			return
 		}
 	}

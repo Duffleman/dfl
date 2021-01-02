@@ -11,6 +11,7 @@ import (
 	"dfl/lib/key"
 	dflmw "dfl/lib/middleware"
 	"dfl/lib/ptr"
+	rpclib "dfl/lib/rpc"
 	"dfl/svc/short/server/app"
 	"dfl/svc/short/server/db"
 	"dfl/svc/short/server/lib/storageproviders"
@@ -57,7 +58,7 @@ func DefaultConfig() Config {
 	return Config{
 		Logger: logrus.New(),
 
-		Port:      3000,
+		Port:      3001,
 		DSN:       "postgresql://postgres@localhost/dflimg?sslmode=disable",
 		PublicKey: publicKey,
 
@@ -132,6 +133,7 @@ func Run(cfg Config) error {
 	redis := cache.NewCache(redisClient)
 
 	app := &app.App{
+		Logger:  cfg.Logger,
 		SP:      sp,
 		DB:      db,
 		Hasher:  hasher,
@@ -156,22 +158,32 @@ func Run(cfg Config) error {
 		http.Redirect(w, r, "https://duffleman.co.uk", http.StatusMovedPermanently)
 	})
 
-	router.Get("/robots.txt", rpc.Robots())
+	router.Get("/robots.txt", wrap(app, rpc.Robots))
 
-	router.Post("/resave_hashes", rpc.ResaveHashes(app))
-	router.Post("/add_shortcut", rpc.AddShortcut(app))
-	router.Post("/create_signed_url", rpc.CreateSignedURL(app))
-	router.Post("/delete_resource", rpc.DeleteResource(app))
-	router.Post("/list_resources", rpc.ListResources(app))
-	router.Post("/remove_shortcut", rpc.RemoveShortcut(app))
-	router.Post("/set_nsfw", rpc.SetNSFW(app))
-	router.Post("/shorten_url", rpc.ShortenURL(app))
-	router.Post("/upload_file", rpc.UploadFile(app))
-	router.Post("/view_details", rpc.ViewDetails(app))
+	router.Post("/resave_hashes", wrap(app, rpc.ResaveHashes))
+	router.Post("/add_shortcut", wrap(app, rpc.AddShortcut))
+	router.Post("/create_signed_url", wrap(app, rpc.CreateSignedURL))
+	router.Post("/delete_resource", wrap(app, rpc.DeleteResource))
+	router.Post("/list_resources", wrap(app, rpc.ListResources))
+	router.Post("/remove_shortcut", wrap(app, rpc.RemoveShortcut))
+	router.Post("/set_nsfw", wrap(app, rpc.SetNSFW))
+	router.Post("/shorten_url", wrap(app, rpc.ShortenURL))
+	router.Post("/upload_file", wrap(app, rpc.UploadFile))
+	router.Post("/view_details", wrap(app, rpc.ViewDetails))
 
-	router.Get("/{query}", rpc.HandleResource(app))
-	router.Head("/{query}", rpc.HeadResource(app))
+	router.Get("/{query}", wrap(app, rpc.HandleResource))
+	router.Head("/{query}", wrap(app, rpc.HeadResource))
 
 	cfg.Logger.Infof("Server running on port %d", cfg.Port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), router)
+}
+
+func wrap(a *app.App, fn func(*app.App, http.ResponseWriter, *http.Request) error) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := fn(a, w, r)
+		if err != nil {
+			rpclib.HandleError(w, r, err, a.Logger)
+			return
+		}
+	}
 }
