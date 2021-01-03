@@ -89,7 +89,7 @@ CREATE TABLE u2f_credentials (
 );
 ```
 
-## `users
+## `users`
 
 ```sql
 CREATE TABLE users (
