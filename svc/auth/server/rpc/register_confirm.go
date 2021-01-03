@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"dfl/lib/cher"
 	"dfl/lib/rpc"
@@ -110,21 +109,17 @@ func RegisterConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	user, err := a.GetUserByName(r.Context(), req.Username)
+	session, err := a.FindU2FChallenge(r.Context(), req.ChallengeID)
 	if err != nil {
 		return err
 	}
 
-	if err := a.CheckRegistrationValidity(r.Context(), user, &req.InviteCode); err != nil {
-		return err
+	user := &auth.User{
+		ID:       string(session.UserID),
+		Username: req.Username,
 	}
 
 	waUser, err := a.ConvertUserForWA(r.Context(), user, true)
-	if err != nil {
-		return err
-	}
-
-	session, err := a.FindU2FChallenge(r.Context(), req.ChallengeID)
 	if err != nil {
 		return err
 	}
@@ -143,12 +138,7 @@ func RegisterConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	now := time.Now()
-	if err := a.CreateU2FCredential(r.Context(), user, req.ChallengeID, req.KeyName, credential, &now); err != nil {
-		return err
-	}
-
-	if err := a.Register(r.Context(), user); err != nil {
+	if _, err := a.Register(r.Context(), req, credential); err != nil {
 		return err
 	}
 

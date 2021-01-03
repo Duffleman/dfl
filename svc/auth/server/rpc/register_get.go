@@ -11,7 +11,7 @@ func RegisterGet(a *app.App, w http.ResponseWriter, r *http.Request) error {
 	return rpc.QuickTemplate(w, map[string]interface{}{
 		"title": "Register",
 	}, []string{
-		"./resources/register.html",
-		"./resources/layouts/root.html",
+		"./resources/auth/register.html",
+		"./resources/auth/layouts/root.html",
 	})
 }

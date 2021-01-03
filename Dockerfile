@@ -15,13 +15,5 @@ RUN apk add --no-cache ca-certificates tzdata
 RUN mkdir -p /usr/local/app
 WORKDIR /usr/local/app
 ENTRYPOINT ["./svc"]
-COPY --from=builder /usr/local/app/resources/authorize.html resources/
-COPY --from=builder /usr/local/app/resources/layouts/root.html resources/layouts/
-COPY --from=builder /usr/local/app/resources/markdown.html resources/
-COPY --from=builder /usr/local/app/resources/not_found.html resources/
-COPY --from=builder /usr/local/app/resources/nsfw.html resources/
-COPY --from=builder /usr/local/app/resources/register.html resources/
-COPY --from=builder /usr/local/app/resources/robots.txt resources/
-COPY --from=builder /usr/local/app/resources/syntax_highlight.html resources/
-COPY --from=builder /usr/local/app/resources/u2f_manage.html resources/
+COPY --from=builder /usr/local/app/resources/ resources/
 COPY --from=builder /go/bin/svc .

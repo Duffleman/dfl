@@ -42,6 +42,7 @@ type Config struct {
 
 	PrivateKey string `envconfig:"private_key"`
 	PublicKey  string `envconfig:"public_key"`
+	JWTIssuer  string `envconfig:"jwt_issuer"`
 
 	WebAuthn WebAuthn `envconfig:"webauthn"`
 }
@@ -61,6 +62,7 @@ func DefaultConfig() Config {
 
 		PrivateKey: privateKey,
 		PublicKey:  publicKey,
+		JWTIssuer:  "localhost:3000",
 
 		WebAuthn: WebAuthn{
 			ID:          "localhost",
@@ -97,10 +99,11 @@ func Run(cfg Config) error {
 	}
 
 	app := &app.App{
-		Logger: cfg.Logger,
-		WA:     web,
-		SK:     sk,
-		DB:     db,
+		Logger:    cfg.Logger,
+		WA:        web,
+		SK:        sk,
+		DB:        db,
+		JWTIssuer: cfg.JWTIssuer,
 	}
 
 	router := chi.NewRouter()
@@ -110,6 +113,7 @@ func Run(cfg Config) error {
 	router.Use(middleware.Recoverer)
 	router.Use(cors.AllowAll().Handler)
 	router.Use(dflmw.AuthMiddleware(sk.Public(), []dflmw.HTTPResource{
+		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/")},
 		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/authorize")},
 		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/register")},
 		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/u2f_manage")},
@@ -121,6 +125,7 @@ func Run(cfg Config) error {
 	}))
 
 	// Internal
+	router.Get("/", wrap(app, rpc.Index))
 	router.Get("/register", wrap(app, rpc.RegisterGet))
 	router.Get("/u2f_manage", wrap(app, rpc.U2FManageGet))
 	router.Post("/create_client", wrap(app, rpc.CreateClient))

@@ -77,7 +77,7 @@ func (a *App) Token(ctx context.Context, req *auth.TokenRequest) (*auth.TokenRes
 			Id:        atID,
 			ExpiresAt: expiresAt.Unix(),
 			IssuedAt:  time.Now().Unix(),
-			Issuer:    "auth.dfl.mn",
+			Issuer:    a.JWTIssuer,
 			NotBefore: time.Now().Add(-1 * time.Second).Unix(),
 			Subject:   user.ID,
 			Audience:  client.ID,

@@ -136,7 +136,11 @@ func CreateKeyConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error 
 		return err
 	}
 
-	return a.CreateU2FCredential(r.Context(), user, req.ChallengeID, req.KeyName, credential, nil)
+	if _, err := a.CreateU2FCredential(r.Context(), user.ID, req.ChallengeID, req.KeyName, credential, nil); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ParseCredentialCreateKey(req *auth.CreateKeyConfirmRequest) (*protocol.ParsedCredentialCreationData, error) {

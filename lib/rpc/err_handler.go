@@ -40,6 +40,7 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error, logger *logr
 	}
 
 	w.WriteHeader(500)
+	logWarn(logger, err)
 	json.NewEncoder(w).Encode(cher.New("unknown", cher.M{"error": err.Error()}))
 }
 

@@ -13,4 +13,6 @@ type App struct {
 	WA *webauthn.WebAuthn
 	DB *db.DB
 	SK *SigningKeys
+
+	JWTIssuer string
 }

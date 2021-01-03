@@ -52,6 +52,12 @@ var suite = []struct {
 		Scopes: "auth:login auth:list dflimg:upload",
 		Result: true,
 	},
+	{
+		Name:   "super root works",
+		Action: "auth:login",
+		Scopes: "*:*",
+		Result: true,
+	},
 }
 
 func TestCan(t *testing.T) {

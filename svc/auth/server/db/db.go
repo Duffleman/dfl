@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"dfl/lib/cher"
 
@@ -43,4 +44,26 @@ func coerceNotFound(err error) error {
 
 func NewQueryBuilder() sq.StatementBuilderType {
 	return sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+}
+
+func (d *DB) DoTx(ctx context.Context, fn func(qw *QueryableWrapper) error) (err error) {
+	tx, err := d.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("could not start transaction: %w", err)
+	}
+
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p) // re-throw panic for exception handler
+		} else if err != nil {
+			tx.Rollback() // dont set err, keep err = error from fn
+		} else {
+			err = tx.Commit()
+		}
+	}()
+
+	err = fn(&QueryableWrapper{tx})
+
+	return err
 }

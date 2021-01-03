@@ -2,17 +2,45 @@ package db
 
 import (
 	"context"
-	"time"
 
+	"dfl/lib/cher"
 	"dfl/svc/auth"
 
 	sq "github.com/Masterminds/squirrel"
 )
 
+func (qw *QueryableWrapper) SearchByUsername(ctx context.Context, username string) error {
+	qb := NewQueryBuilder()
+	query, values, err := qb.
+		Select("COUNT(*)").
+		From("users").
+		Where(sq.ILike{
+			"username": username,
+		}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+
+	var c int
+
+	row := qw.q.QueryRowContext(ctx, query, values...)
+
+	if err := row.Scan(&c); err != nil {
+		return err
+	}
+
+	if c == 0 {
+		return nil
+	}
+
+	return cher.New("username_taken", nil)
+}
+
 func (qw *QueryableWrapper) findOneUser(ctx context.Context, field, value string) (*auth.User, error) {
 	qb := NewQueryBuilder()
 	query, values, err := qb.
-		Select("u.id, u.username, u.email, u.created_at, u.invite_code, u.invite_expiry, u.invite_redeemed_at, u.scopes").
+		Select("u.id, u.username, u.email, u.scopes,u.created_at").
 		From("users u").
 		Where(sq.Eq{
 			field: value,
@@ -26,7 +54,7 @@ func (qw *QueryableWrapper) findOneUser(ctx context.Context, field, value string
 
 	row := qw.q.QueryRowContext(ctx, query, values...)
 
-	if err := row.Scan(&u.ID, &u.Username, &u.Email, &u.CreatedAt, &u.InviteCode, &u.InviteExpiry, &u.InviteRedeemedAt, &u.Scopes); err != nil {
+	if err := row.Scan(&u.ID, &u.Username, &u.Email, &u.Scopes, &u.CreatedAt); err != nil {
 		return nil, coerceNotFound(err)
 	}
 
@@ -41,23 +69,25 @@ func (qw *QueryableWrapper) GetUserByName(ctx context.Context, username string) 
 	return qw.findOneUser(ctx, "username", username)
 }
 
-func (qw *QueryableWrapper) RedeemInvite(ctx context.Context, userID string) error {
+func (qw *QueryableWrapper) CreateUser(ctx context.Context, id, username, scopes string) (*auth.User, error) {
 	qb := NewQueryBuilder()
 	query, values, err := qb.
-		Update("users u").
-		Set("invite_expiry", nil).
-		Set("invite_redeemed_at", time.Now()).
-		Where(sq.Eq{
-			"id": userID,
-		}).
+		Insert("users").
+		Columns("id", "username", "scopes").
+		Values(id, username, scopes).
+		Suffix(`RETURNING "id", "username", "email", "scopes", "created_at"`).
 		ToSql()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if _, err = qw.q.ExecContext(ctx, query, values...); err != nil {
-		return err
+	var u auth.User
+
+	row := qw.q.QueryRowContext(ctx, query, values...)
+
+	if err := row.Scan(&u.ID, &u.Username, &u.Email, &u.Scopes, &u.CreatedAt); err != nil {
+		return nil, coerceNotFound(err)
 	}
 
-	return nil
+	return &u, nil
 }

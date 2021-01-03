@@ -42,8 +42,8 @@ func AuthorizeGet(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		"params":      string(paramBytes),
 		"scopes":      strings.Fields(params.Scope),
 	}, []string{
-		"./resources/authorize.html",
-		"./resources/layouts/root.html",
+		"./resources/auth/authorize.html",
+		"./resources/auth/layouts/root.html",
 	})
 }
 

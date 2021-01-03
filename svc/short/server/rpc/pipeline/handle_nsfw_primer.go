@@ -25,6 +25,7 @@ func HandleNSFWPrimer(p *Pipeline) (bool, error) {
 	}
 
 	return false, rpc.QuickTemplate(p.w, nil, []string{
-		"./resources/nsfw.html",
+		"./resources/short/nsfw.html",
+		"./resources/short/layouts/root.html",
 	})
 }

@@ -79,7 +79,7 @@ func SyntaxHighlighter(p *Pipeline) (bool, error) {
 		"title":     strings.Join(titles, ", "),
 		"author":    strings.Join(authors, ", "),
 	}, []string{
-		"./resources/syntax_highlight.html",
+		"./resources/short/syntax_highlight.html",
 	})
 }
 

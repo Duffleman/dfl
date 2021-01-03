@@ -7,11 +7,11 @@ import (
 	"dfl/svc/auth/server/app"
 )
 
-func U2FManageGet(a *app.App, w http.ResponseWriter, r *http.Request) error {
+func Index(a *app.App, w http.ResponseWriter, r *http.Request) error {
 	return rpc.QuickTemplate(w, map[string]interface{}{
-		"title": "Manage U2F",
+		"title": "DFL Auth",
 	}, []string{
-		"./resources/auth/u2f_manage.html",
+		"./resources/auth/index.html",
 		"./resources/auth/layouts/root.html",
 	})
 }

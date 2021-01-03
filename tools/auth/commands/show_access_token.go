@@ -3,11 +3,17 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"time"
 
-	"github.com/spf13/cobra"
-
+	"dfl/lib/cher"
+	dfljwt "dfl/lib/jwt"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/fatih/color"
+	"github.com/spf13/cobra"
 )
 
 func ShowAccessToken(keychain keychain.Keychain) *cobra.Command {
@@ -26,12 +32,37 @@ func ShowAccessToken(keychain keychain.Keychain) *cobra.Command {
 			}
 
 			var res auth.TokenResponse
+			var dflclaims dfljwt.DFLClaims
 
 			if err := json.Unmarshal(authBytes, &res); err != nil {
 				return err
 			}
 
-			fmt.Println(res.AccessToken)
+			if token, _ := jwt.ParseWithClaims(res.AccessToken, &dflclaims, nil); token == nil {
+				return cher.New("cannot_parse_token", nil)
+			}
+
+			fmt.Fprintf(os.Stdout, res.AccessToken)
+
+			fmt.Fprintf(os.Stderr, "\n\n")
+			fmt.Fprintf(os.Stderr, "User ID:    %s\n", dflclaims.Subject)
+			fmt.Fprintf(os.Stderr, "Username:   %s\n", dflclaims.Username)
+			fmt.Fprintf(os.Stderr, "Scopes:     %s\n", dflclaims.Scope)
+			fmt.Fprintf(os.Stderr, "Client ID:  %s\n", dflclaims.Audience)
+			fmt.Fprintf(os.Stderr, "Issuer:     %s\n", dflclaims.Issuer)
+			fmt.Fprintf(os.Stderr, "Expires at: ")
+
+			expiresAt := time.Unix(dflclaims.ExpiresAt, 0)
+
+			c := color.New()
+
+			if time.Now().After(expiresAt) {
+				c.Add(color.BgRed)
+			} else {
+				c.Add(color.BgGreen)
+			}
+
+			c.Fprintf(os.Stderr, "%s\n", expiresAt.Format(time.RFC3339))
 
 			return nil
 		},

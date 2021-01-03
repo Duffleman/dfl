@@ -14,16 +14,22 @@ type Service interface {
 }
 
 type User struct {
-	ID               string                 `json:"id"`
-	Username         string                 `json:"username"`
-	Email            *string                `json:"email"`
-	Password         *string                `json:"password"`
-	InviteCode       string                 `json:"invite_code"`
-	CreatedAt        time.Time              `json:"created_at"`
-	InviteExpiry     *time.Time             `json:"invite_expiry"`
-	InviteRedeemedAt *time.Time             `json:"invite_redeemed_at"`
-	Scopes           string                 `json:"scopes"`
-	WebAuthnKeys     []*webauthn.Credential `json:"_"`
+	ID        string    `json:"id"`
+	Username  string    `json:"username"`
+	Email     *string   `json:"email"`
+	Scopes    string    `json:"scopes"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type Invitation struct {
+	ID         string     `json:"id"`
+	Code       string     `json:"code"`
+	Scopes     string     `json:"scopes"`
+	CreatedBy  *string    `json:"created_by"`
+	CreatedAt  time.Time  `json:"created_at"`
+	RedeemedBy *string    `json:"redeemed_by"`
+	RedeemedAt *time.Time `json:"redeemed_at"`
+	ExpiresAt  *time.Time `json:"expires_at"`
 }
 
 type Client struct {

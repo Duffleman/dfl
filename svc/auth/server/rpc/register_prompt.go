@@ -7,6 +7,7 @@ import (
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/app"
 
+	"github.com/cuvva/ksuid-go"
 	"github.com/duo-labs/webauthn/protocol"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -43,13 +44,13 @@ func RegisterPrompt(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	user, err := a.GetUserByName(r.Context(), req.Username)
-	if err != nil {
+	if _, err := a.CheckRegistrationValidity(r.Context(), req.Username, req.InviteCode); err != nil {
 		return err
 	}
 
-	if err := a.CheckRegistrationValidity(r.Context(), user, &req.InviteCode); err != nil {
-		return err
+	user := &auth.User{
+		ID:       ksuid.Generate("temp").String(),
+		Username: req.Username,
 	}
 
 	waUser, err := a.ConvertUserForWA(r.Context(), user, true)

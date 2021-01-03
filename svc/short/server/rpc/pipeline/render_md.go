@@ -67,7 +67,7 @@ func RenderMD(p *Pipeline) (bool, error) {
 	p.w.Header().Set("Content-Type", mimetype)
 	p.w.Header().Set("Content-Disposition", display)
 
-	tpl, err := tt.ParseFiles("./resources/markdown.html")
+	tpl, err := tt.ParseFiles("./resources/short/markdown.html")
 	if err != nil {
 		return false, err
 	}

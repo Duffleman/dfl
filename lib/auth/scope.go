@@ -9,6 +9,10 @@ func Can(requested string, scopes string) bool {
 	allowed := make(map[string]struct{})
 
 	for _, scope := range strings.Fields(scopes) {
+		if scope == "*:*" {
+			return true
+		}
+
 		if strings.HasSuffix(scope, ":*") {
 			allowed[strings.TrimSuffix(scope, ":*")] = struct{}{}
 		} else {

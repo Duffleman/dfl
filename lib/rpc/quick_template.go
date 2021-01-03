@@ -3,6 +3,7 @@ package rpc
 import (
 	"net/http"
 	"path"
+	"strings"
 	"text/template"
 )
 
@@ -18,5 +19,10 @@ func QuickTemplate(w http.ResponseWriter, data interface{}, templates []string) 
 		return tpl.ExecuteTemplate(w, firstName, data)
 	}
 
-	return tpl.ExecuteTemplate(w, "root", data)
+	lastItem := templates[len(templates)-1]
+	_, file := path.Split(lastItem)
+	ext := path.Ext(file)
+	file = strings.TrimSuffix(file, ext)
+
+	return tpl.ExecuteTemplate(w, file, data)
 }

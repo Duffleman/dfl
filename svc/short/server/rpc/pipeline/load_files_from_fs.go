@@ -38,7 +38,8 @@ func LoadFilesFromFS(p *Pipeline) (bool, error) {
 		}
 
 		return false, rpc.QuickTemplate(p.w, nil, []string{
-			"./resources/not_found.html",
+			"./resources/short/not_found.html",
+			"./resources/short/layouts/root.html",
 		})
 	}
 

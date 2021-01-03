@@ -76,7 +76,9 @@ func (qw *QueryableWrapper) ListU2FCredentials(ctx context.Context, userID strin
 		builder = builder.Where(sq.NotEq{"signed_at": nil})
 	}
 
-	query, values, err := builder.ToSql()
+	query, values, err := builder.
+		OrderBy("created_at DESC").
+		ToSql()
 	if err != nil {
 		return nil, err
 	}
@@ -129,10 +131,10 @@ func (qw *QueryableWrapper) ListU2FCredentials(ctx context.Context, userID strin
 	return
 }
 
-func (qw *QueryableWrapper) CreateU2FCredential(ctx context.Context, user *auth.User, challengeID string, keyName *string, credential *webauthn.Credential, signedAt *time.Time) error {
+func (qw *QueryableWrapper) CreateU2FCredential(ctx context.Context, userID, challengeID string, keyName *string, credential *webauthn.Credential, signedAt *time.Time) (string, error) {
 	bytes, err := json.Marshal(credential.Authenticator)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	id := ksuid.Generate("u2fkey").String()
@@ -143,7 +145,7 @@ func (qw *QueryableWrapper) CreateU2FCredential(ctx context.Context, user *auth.
 		Columns("id", "user_id", "name", "key_id", "public_key", "attestation_type", "authenticator", "u2f_challenge_id", "signed_at").
 		Values(
 			id,
-			user.ID,
+			userID,
 			keyName,
 			base64url.Encode(credential.ID),
 			base64url.Encode(credential.PublicKey),
@@ -155,10 +157,10 @@ func (qw *QueryableWrapper) CreateU2FCredential(ctx context.Context, user *auth.
 		ToSql()
 
 	if _, err = qw.q.ExecContext(ctx, query, values...); err != nil {
-		return err
+		return id, err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (qw *QueryableWrapper) DeleteU2FCredential(ctx context.Context, userID, keyID string) error {

@@ -126,10 +126,6 @@ func SignKeyConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	if err := a.CanSign(r.Context(), user.ID, req.KeyToSign); err != nil {
-		return err
-	}
-
 	waUser, err := a.ConvertUserForWA(r.Context(), user, false)
 	if err != nil {
 		return err

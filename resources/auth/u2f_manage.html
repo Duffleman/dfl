@@ -73,6 +73,9 @@
 		},
 
 		async mounted() {
+			if (window.localStorage)
+				this.accessToken = window.localStorage.getItem('dfl_access_token');
+
 			await this.tokenUpdated();
 		},
 
@@ -85,6 +88,9 @@
 					this.success = null;
 					this.u2fKeys = [];
 
+					if (window.localStorage)
+						window.localStorage.removeItem('dfl_access_token');
+
 					return;
 				};
 
@@ -92,6 +98,9 @@
 
 				await this.handleWhoAmI();
 				await this.listU2fKeys(this.userId);
+
+				if (window.localStorage)
+					window.localStorage.setItem('dfl_access_token', this.accessToken);
 
 				this.loading = false;
 			},
@@ -322,6 +331,9 @@
 				} finally {
 					this.loading = false;
 				}
+
+				this.success = 'Key signed';
+				this.error = null;
 
 				await this.listU2fKeys(this.userId);
 			},
