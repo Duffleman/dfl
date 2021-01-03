@@ -42,6 +42,21 @@ CREATE TABLE clients (
 );
 ```
 
+## `invitations`
+
+```sql
+CREATE TABLE invitations (
+    id text PRIMARY KEY,
+    code text NOT NULL UNIQUE,
+    scopes text NOT NULL,
+    created_by text REFERENCES users(id),
+    created_at timestamp without time zone NOT NULL,
+    redeemed_by text REFERENCES users(id) UNIQUE,
+    redeemed_at timestamp without time zone,
+    expires_at timestamp without time zone
+);
+```
+
 ## `u2f_challenges`
 
 ```sql
@@ -81,10 +96,7 @@ CREATE TABLE users (
     id text PRIMARY KEY,
     username text NOT NULL UNIQUE,
     email text UNIQUE,
-    invite_code text NOT NULL UNIQUE,
-    created_at timestamp without time zone NOT NULL,
-    invite_expiry timestamp without time zone,
-    invite_redeemed_at timestamp without time zone,
+    created_at timestamp without time zone NOT NULL DEFAULT now(),
     scopes text
 );
 ```
