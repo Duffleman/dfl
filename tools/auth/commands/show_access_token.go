@@ -56,13 +56,18 @@ func ShowAccessToken(keychain keychain.Keychain) *cobra.Command {
 
 			c := color.New()
 
-			if time.Now().After(expiresAt) {
+			now := time.Now()
+
+			if now.After(expiresAt) {
 				c.Add(color.BgRed)
 			} else {
 				c.Add(color.BgGreen)
 			}
 
-			c.Fprintf(os.Stderr, "%s\n", expiresAt.Format(time.RFC3339))
+			duration := expiresAt.Sub(now)
+
+			c.Fprintf(os.Stderr, "%s", expiresAt.Format(time.RFC3339))
+			fmt.Fprintf(os.Stderr, " (%s)\n", duration.Round(time.Second))
 
 			return nil
 		},
