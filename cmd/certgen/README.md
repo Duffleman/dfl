@@ -33,3 +33,7 @@ When you run the CA command, it'll run an initiation, some folder creation and s
 ### `generate_client_certificate`
 
 `certgen gcc computername --password {password}`
+
+### `generate_key_pair`
+
+`certgen gkp pairname`
