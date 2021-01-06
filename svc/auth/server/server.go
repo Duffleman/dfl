@@ -129,6 +129,7 @@ func Run(cfg Config) error {
 	router.Get("/register", wrap(app, rpc.RegisterGet))
 	router.Get("/u2f_manage", wrap(app, rpc.U2FManageGet))
 	router.Post("/create_client", wrap(app, rpc.CreateClient))
+	router.Post("/create_invite_code", wrap(app, rpc.CreateInviteCode))
 	router.Post("/create_key_confirm", wrap(app, rpc.CreateKeyConfirm))
 	router.Post("/create_key_prompt", wrap(app, rpc.CreateKeyPrompt))
 	router.Post("/delete_key", wrap(app, rpc.DeleteKey))

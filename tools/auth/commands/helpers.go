@@ -1,42 +1,40 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path"
 
+	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
 	"github.com/spf13/viper"
 )
 
-func makeClient() auth.Service {
-	return auth.NewClient(rootURL())
+func makeClient(keychain keychain.Keychain) auth.Service {
+	return auth.NewClient(rootURL(), getAuthHeader(keychain))
 }
 
 func rootURL() string {
 	return fmt.Sprintf("%s/", viper.Get("AUTH_URL").(string))
 }
 
-func getRootPath() string {
-	return viper.Get("FS").(string)
-}
+func getAuthHeader(keychain keychain.Keychain) string {
+	var authBytes []byte
+	var err error
 
-func writeToFile(in string, data []byte) error {
-	dir, _ := path.Split(in)
-
-	if err := os.MkdirAll(dir, 0700); err != nil {
-		return err
+	authBytes, err = keychain.GetItem("Auth")
+	if err != nil {
+		fmt.Println("Run `auth login` first!")
+		panic(err)
 	}
 
-	if err := ioutil.WriteFile(in, data, 0700); err != nil {
-		return err
+	res := auth.TokenResponse{}
+
+	err = json.Unmarshal(authBytes, &res)
+	if err != nil {
+		fmt.Println("Run `auth login` again.")
+		panic(err)
 	}
 
-	return nil
-}
-
-func readFromFile(in string) (data []byte, err error) {
-	return ioutil.ReadFile(in)
+	return fmt.Sprintf("%s %s", res.TokenType, res.AccessToken)
 }

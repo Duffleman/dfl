@@ -9,6 +9,7 @@ import (
 
 type Service interface {
 	CreateClient(context.Context, *CreateClientRequest) (*CreateClientResponse, error)
+	CreateInviteCode(context.Context, *CreateInviteCodeRequest) (*CreateInviteCodeResponse, error)
 	Token(context.Context, *TokenRequest) (*TokenResponse, error)
 	WhoAmI(context.Context) (*WhoAmIResponse, error)
 }
@@ -219,4 +220,15 @@ type SignKeyConfirmRequest struct {
 	KeyToSign   string        `json:"key_to_sign"`
 	ChallengeID string        `json:"challenge_id"`
 	WebAuthn    WebAuthnLogin `json:"webauthn"`
+}
+
+type CreateInviteCodeRequest struct {
+	Code      *string    `json:"code"`
+	ExpiresAt *time.Time `json:"expires_at"`
+	Scopes    string     `json:"scopes"`
+}
+
+type CreateInviteCodeResponse struct {
+	Code      string     `json:"code"`
+	ExpiresAt *time.Time `json:"expires_at"`
 }

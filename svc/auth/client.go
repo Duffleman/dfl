@@ -6,15 +6,17 @@ import (
 	"time"
 
 	"dfl/lib/crpc"
+	"dfl/lib/jsonclient"
 )
 
 type client struct {
 	*crpc.Client
 }
 
-func NewClient(baseURL string) Service {
+func NewClient(baseURL, key string) Service {
 	httpClient := &http.Client{
-		Timeout: 5 * time.Second,
+		Transport: jsonclient.NewAuthenticatedRoundTripper(nil, key),
+		Timeout:   5 * time.Second,
 	}
 
 	return &client{
@@ -24,6 +26,10 @@ func NewClient(baseURL string) Service {
 
 func (c *client) CreateClient(ctx context.Context, req *CreateClientRequest) (res *CreateClientResponse, err error) {
 	return res, c.Do(ctx, "create_client", req, &res)
+}
+
+func (c *client) CreateInviteCode(ctx context.Context, req *CreateInviteCodeRequest) (res *CreateInviteCodeResponse, err error) {
+	return res, c.Do(ctx, "create_invite_code", req, &res)
 }
 
 func (c *client) Token(ctx context.Context, req *TokenRequest) (res *TokenResponse, err error) {

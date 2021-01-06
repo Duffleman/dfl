@@ -22,7 +22,7 @@ import (
 	"github.com/tjarratt/babble"
 )
 
-func Login(clientID, scope string, keychain keychain.Keychain) *cobra.Command {
+func Login(clientID, scope string, kc keychain.Keychain) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "login",
 		Aliases: []string{"l"},
@@ -69,7 +69,7 @@ func Login(clientID, scope string, keychain keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			res, err := makeClient().Token(context.Background(), &auth.TokenRequest{
+			res, err := makeClient(kc).Token(context.Background(), &auth.TokenRequest{
 				ClientID:     clientID,
 				GrantType:    "authorization_code",
 				Code:         authToken,
@@ -84,7 +84,7 @@ func Login(clientID, scope string, keychain keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			if err := keychain.UpsertItem("Auth", authBytes); err != nil {
+			if err := kc.UpsertItem("Auth", authBytes); err != nil {
 				return err
 			}
 
