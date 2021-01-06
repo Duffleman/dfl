@@ -2,7 +2,6 @@ package commands
 
 import (
 	"context"
-	"os"
 	"regexp"
 	"time"
 
@@ -42,11 +41,11 @@ func CreateInviteCode(kc keychain.Keychain) *cobra.Command {
 
 			c := color.New()
 
-			color.New().Add(color.BgGreen).Fprintln(os.Stderr, "Success!")
+			color.New().Add(color.BgGreen).Println("Success!")
 
-			c.Fprintf(os.Stderr, "Code: %s\n", res.Code)
+			c.Printf("Code: %s\n", res.Code)
 			if res.ExpiresAt != nil {
-				c.Fprintf(os.Stderr, "Expires at: %s\n", res.ExpiresAt.Format(time.RFC3339))
+				c.Printf("Expires at: %s\n", res.ExpiresAt.Format(time.RFC3339))
 			}
 
 			return nil
