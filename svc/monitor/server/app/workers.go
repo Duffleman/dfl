@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"dfl/svc/monitor"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -31,11 +29,11 @@ func (a *App) StartWorkers() (*sync.WaitGroup, error) {
 	go a.messageHandlerWorker(jobCh)
 
 	for i, job := range a.Jobs {
-		log.Infof("starting worker %d/%d", i+1, len(a.Jobs))
+		a.Logger.Infof("starting worker %d/%d", i+1, len(a.Jobs))
 		wg.Add(1)
 		go a.startWorker(wg, jobCh, job)
 		wait := time.Duration(rand.Intn((MaxRand - MinRand) + MinRand))
-		log.Infof("waiting for %d seconds", wait)
+		a.Logger.Infof("waiting for %d seconds", wait)
 		time.Sleep(wait * time.Second)
 	}
 
@@ -60,7 +58,7 @@ func (a *App) startWorker(wg *sync.WaitGroup, jobCh chan jobWrap, job *monitor.J
 		case "tcp":
 			outcome = a.doTCP(job)
 		default:
-			log.Warnf("job type not implemented %s", job.Type)
+			a.Logger.Warnf("job type not implemented %s", job.Type)
 			return
 		}
 

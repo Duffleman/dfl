@@ -1,15 +1,12 @@
 package app
 
 import (
-	"fmt"
-
 	sdk "github.com/andygrunwald/cachet"
-	log "github.com/sirupsen/logrus"
 )
 
 func (a *App) handleMessage(jw jobWrap) {
 	if jw.Job.ComponentID == 0 {
-		log.Warnf("cannot update component %s, no matched catchet component", jw.Job.Name)
+		a.Logger.Warnf("cannot update component %s, no matched catchet component", jw.Job.Name)
 		return
 	}
 
@@ -17,7 +14,7 @@ func (a *App) handleMessage(jw jobWrap) {
 		Status: jw.Outcome,
 	})
 	if err != nil {
-		log.Warn(fmt.Errorf("cannot update component %s: %w", jw.Job.ComponentName, err))
+		a.Logger.WithError(err).Warnf("cannot update component %s", jw.Job.ComponentName)
 		return
 	}
 }

@@ -24,7 +24,7 @@ func (a *App) doICMP(job *monitor.Job) int {
 	pinger, err := ping.NewPinger(job.Host)
 	if err != nil {
 		if strings.Contains(err.Error(), "no such host") {
-			log.Warnf("no such host, configuration error for host %s", job.Host)
+			a.Logger.Warnf("no such host, configuration error for host %s", job.Host)
 		}
 
 		return sdk.ComponentStatusMajorOutage
@@ -40,7 +40,7 @@ func (a *App) doICMP(job *monitor.Job) int {
 
 	stats := pinger.Statistics()
 
-	l := log.WithFields(log.Fields{
+	l := a.Logger.WithFields(log.Fields{
 		"stats": stats,
 	})
 

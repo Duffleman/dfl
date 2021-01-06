@@ -36,17 +36,15 @@ func (a *App) doWeb(job *monitor.Job, schema string, validate bool) int {
 	res, err := c.Get(url)
 	if err != nil {
 		if strings.Contains(err.Error(), "no such host") {
-			log.Warnf("no such host, configuration error for host %s", job.Host)
+			a.Logger.Warnf("no such host, configuration error for host %s", job.Host)
 		}
 
-		log.WithFields(log.Fields{
-			"error": err,
-		}).Infof("cannot connect to host %s", job.Host)
+		a.Logger.WithError(err).Infof("cannot connect to host %s", job.Host)
 
 		return sdk.ComponentStatusMajorOutage
 	}
 
-	l := log.WithFields(log.Fields{
+	l := a.Logger.WithFields(log.Fields{
 		"statusCode": res.StatusCode,
 		"status":     res.Status,
 	})

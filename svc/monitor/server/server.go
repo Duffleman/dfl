@@ -84,6 +84,7 @@ func Run(cfg Config) error {
 	}
 
 	app := &app.App{
+		Logger:           cfg.Logger,
 		Cachet:           &cachet.Client{Client: cachetClient},
 		Client:           client,
 		ClientNoValidate: clientNoValidate,
