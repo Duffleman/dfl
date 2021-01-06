@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/Masterminds/squirrel v1.5.0
+	github.com/andygrunwald/cachet v0.0.0-20180404195246-2a1ca51087fd
 	github.com/atotto/clipboard v0.1.2
 	github.com/aws/aws-sdk-go v1.36.19
 	github.com/blang/semver v3.5.1+incompatible
@@ -15,8 +16,10 @@ require (
 	github.com/fatih/color v1.10.0
 	github.com/gen2brain/beeep v0.0.0-20200526185328-e9c15c258e28
 	github.com/go-chi/chi v1.5.1
+	github.com/go-ping/ping v0.0.0-20201115131931-3300c582a663
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/gomarkdown/markdown v0.0.0-20201113031856-722100d81a8e
+	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/keybase/go-keychain v0.0.0-20201121013009-976c83ec27a6
 	github.com/lib/pq v1.9.0

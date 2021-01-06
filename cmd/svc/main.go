@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	auth "dfl/svc/auth/server/cmd"
+	monitor "dfl/svc/monitor/server/cmd"
 	short "dfl/svc/short/server/cmd"
 )
 
@@ -16,6 +17,7 @@ var RootCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(auth.RootCmd)
+	RootCmd.AddCommand(monitor.RootCmd)
 	RootCmd.AddCommand(short.RootCmd)
 }
 
