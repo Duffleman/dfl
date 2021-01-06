@@ -20,3 +20,15 @@ func Manage(keychain keychain.Keychain) *cobra.Command {
 		},
 	}
 }
+
+func Register(keychain keychain.Keychain) *cobra.Command {
+	return &cobra.Command{
+		Use:     "register",
+		Aliases: []string{"r"},
+		Short:   "Register for an account",
+
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return openBrowser(fmt.Sprintf("%s/register", strings.TrimSuffix(rootURL(), "/")))
+		},
+	}
+}
