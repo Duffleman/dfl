@@ -19,5 +19,5 @@ func init() {
 	rootCmd.AddCommand(commands.UploadSigned(kc))
 	rootCmd.AddCommand(commands.ViewDetails(kc))
 
-	rootCmd.AddCommand(authCommands.Login("client_000000C3NCrPNP0CxPAK3M1uMjeTY", "short:upload short:delete", kc))
+	rootCmd.AddCommand(authCommands.Login(clientID, "short:upload short:delete", kc))
 }

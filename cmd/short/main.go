@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+const clientID = "client_000000C3NCrPNP0CxPAK3M1uMjeTY"
+
 func main() {
 	// Load env variables
 	viper.SetEnvPrefix("DFL")
