@@ -25,7 +25,7 @@ type Config struct {
 	CachetURL string `envconfig:"cachet_url"`
 	CachetKey string `envconfig:"cachet_key"`
 
-	JobsFile *string `envcofnig:"jobs_file"`
+	JobsFile *string `envconfig:"jobs_file"`
 	Jobs     []byte  `envconfig:"jobs"`
 }
 
