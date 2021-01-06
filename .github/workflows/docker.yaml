@@ -30,4 +30,3 @@ jobs:
           file: ./Dockerfile
           tags: ${{ steps.docker_meta.outputs.tags }}
           platforms: linux/amd64
-      - run: echo ${{ steps.docker_meta.outputs.tags }}
