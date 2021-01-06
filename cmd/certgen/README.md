@@ -14,7 +14,7 @@ I may or not may not adjust the tool in the future to work around these assumpto
 
 No command that produces files will override any file that already exists, it's just not safe when it comes to certificates and chains.
 
-You must set the `CERTGEN_SECERTS_ROOT_DIR` so the tool knows where to save the certificates it generates.
+You must set the `CERTGEN_SECRETS_ROOT_DIR` so the tool knows where to save the certificates it generates.
 
 ## Usage
 

@@ -27,7 +27,7 @@ var GenerateClientCertificateCmd = &cobra.Command{
 			return cher.New("no_password_given", nil)
 		}
 
-		rootDirectory := viper.GetString("SECERTS_ROOT_DIR")
+		rootDirectory := viper.GetString("SECRETS_ROOT_DIR")
 
 		app := &app.App{
 			RootDirectory: rootDirectory,

@@ -16,7 +16,7 @@ var GenerateKeyPairCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 
-		rootDirectory := viper.GetString("SECERTS_ROOT_DIR")
+		rootDirectory := viper.GetString("SECRETS_ROOT_DIR")
 
 		app := &app.App{
 			RootDirectory: rootDirectory,

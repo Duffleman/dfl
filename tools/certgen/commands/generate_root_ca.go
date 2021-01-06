@@ -14,7 +14,7 @@ var GenerateRootCACmd = &cobra.Command{
 	Args:    cobra.NoArgs,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
-		rootDirectory := viper.GetString("SECERTS_ROOT_DIR")
+		rootDirectory := viper.GetString("SECRETS_ROOT_DIR")
 
 		app := &app.App{
 			RootDirectory: rootDirectory,

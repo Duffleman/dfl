@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	viper.SetDefault("SECERTS_ROOT_DIR", "/Users/duffleman/Source/infra-secrets/certificates")
+	viper.SetDefault("SECRETS_ROOT_DIR", "/Users/duffleman/Source/infra-secrets/certificates")
 
 	commands.RootCmd.AddCommand(commands.CreateCRLFileCmd)
 	commands.RootCmd.AddCommand(commands.GenerateClientCertificateCmd)
