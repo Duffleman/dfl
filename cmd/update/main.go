@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -61,17 +60,21 @@ var rootCmd = &cobra.Command{
 		var assetsForOS []Asset
 
 		for _, asset := range ghr.Assets {
+			if strings.HasSuffix(asset.Name, "update") {
+				continue
+			}
+
 			if strings.HasPrefix(asset.Name, binPrefix) && asset.State == "uploaded" {
 				assetsForOS = append(assetsForOS, asset)
 			}
 		}
 
-		updateBin, err := os.Executable()
+		homeDirectory, err := os.UserHomeDir()
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 
-		binPath, _ := path.Split(updateBin)
+		binPath := path.Join(homeDirectory, "bin")
 
 		fmt.Println("📲", len(assetsForOS), "assets to download and install")
 
