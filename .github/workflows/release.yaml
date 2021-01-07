@@ -19,7 +19,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          draft: true
+          draft: false
           prerelease: true
       - uses: alexellis/upload-assets@0.2.3
         env:
