@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  create:
+    tags:
+      - v*
+
+jobs:
+  build:
+    name: Build
+    runs-on: [self-hosted, macOS, X64]
+    steps:
+      - uses: actions/checkout@v2
+      - run: ./build.sh
+      - id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: true
+      - uses: alexellis/upload-assets@0.2.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          asset_paths: '["./build/windows/*", "./build/macos/*"]'
