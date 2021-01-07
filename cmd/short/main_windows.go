@@ -13,7 +13,6 @@ func init() {
 	rootCmd.AddCommand(commands.CopyURL(kc))
 	rootCmd.AddCommand(commands.DeleteResource(kc))
 	rootCmd.AddCommand(commands.RemoveShortcut(kc))
-	rootCmd.AddCommand(commands.Screenshot(kc))
 	rootCmd.AddCommand(commands.SetNSFW(kc))
 	rootCmd.AddCommand(commands.ShortenURL(kc))
 	rootCmd.AddCommand(commands.UploadSigned(kc))
