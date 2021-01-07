@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"path"
 	"runtime"
 	"strings"
 
@@ -64,18 +66,18 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		usrPath, err := os.UserHomeDir()
+		updateBin, err := os.Executable()
 		if err != nil {
-			return err
+			log.Println(err)
 		}
+
+		binPath, _ := path.Split(updateBin)
 
 		fmt.Println("📲", len(assetsForOS), "assets to download and install")
 
 		if err := downloadAssets(assetsForOS); err != nil {
 			return err
 		}
-
-		binPath := fmt.Sprintf("%s/bin", usrPath)
 
 		if err := moveAssets(binPrefix, binPath, assetsForOS); err != nil {
 			return err

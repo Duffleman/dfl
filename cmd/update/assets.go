@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
+	"runtime"
 	"strings"
 
 	"dfl/lib/cher"
@@ -74,18 +76,20 @@ func moveAssets(prefix, folderPath string, assets []Asset) error {
 		asset := a
 
 		fileName := strings.TrimPrefix(asset.Name, fmt.Sprintf("%s-", prefix))
-		filePath := fmt.Sprintf("%s/%s", folderPath, fileName)
+		filePath := path.Join(folderPath, fileName)
 
 		if err := copy(asset.Name, filePath); err != nil {
 			return err
 		}
 
-		if err := os.Chown(filePath, os.Getuid(), os.Getgid()); err != nil {
-			return err
-		}
+		if runtime.GOOS != "windows" {
+			if err := os.Chown(filePath, os.Getuid(), os.Getgid()); err != nil {
+				return err
+			}
 
-		if err := os.Chmod(filePath, 0774); err != nil {
-			return err
+			if err := os.Chmod(filePath, 0774); err != nil {
+				return err
+			}
 		}
 	}
 
