@@ -60,7 +60,7 @@ var rootCmd = &cobra.Command{
 		var assetsForOS []Asset
 
 		for _, asset := range ghr.Assets {
-			if strings.HasSuffix(asset.Name, "update") {
+			if strings.Contains(asset.Name, "update") {
 				continue
 			}
 
