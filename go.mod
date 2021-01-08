@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/andygrunwald/cachet v0.0.0-20180404195246-2a1ca51087fd
 	github.com/atotto/clipboard v0.1.2
-	github.com/aws/aws-sdk-go v1.36.22
+	github.com/aws/aws-sdk-go v1.36.23
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cuvva/ksuid-go v0.0.0-20190704133525-91309d40e0f0
 	github.com/danieljoos/wincred v1.1.0
