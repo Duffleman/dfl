@@ -3,6 +3,8 @@
 	<div class="col col-md-6">
 		<div class="card border">
 			<div class="card-body">
+				[[ template "_nav" . ]]
+
 				<h5 class="card-title">Register</h5>
 				<h6 class="card-subtitle mb-2 text-muted">Register to use DFL services</h6>
 
@@ -26,9 +28,6 @@
 						<button v-bind:disabled="disabled" type="submit" class="btn btn-outline-primary btn-sm btn-block">{{ btnLabel }}</button>
 					</div>
 				</form>
-			</div>
-			<div class="card-footer">
-				<small>Services ran by <a href="https://duffleman.co.uk">Duffleman</a>, WebAuthn required.</small>
 			</div>
 		</div>
 	</div>

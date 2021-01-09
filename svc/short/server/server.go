@@ -63,7 +63,7 @@ func DefaultConfig() Config {
 		PublicKey: publicKey,
 
 		Salt:    "savour-shingle-sidney-rajah-punk-lead-jenny-scot",
-		RootURL: "http://localhost:3000",
+		RootURL: "http://localhost:3001",
 
 		StorageProvider: "lfs",
 
