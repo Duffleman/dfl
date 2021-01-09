@@ -12,6 +12,11 @@ import (
 	"dfl/svc/auth/server/app"
 )
 
+var authPage = rpc.MakeTemplate([]string{
+	"./resources/auth/authorize.html",
+	"./resources/auth/layouts/root.html",
+})
+
 func AuthorizeGet(a *app.App, w http.ResponseWriter, r *http.Request) error {
 	params, err := parseAuthorizeParams(r)
 	if err != nil {
@@ -36,14 +41,11 @@ func AuthorizeGet(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return rpc.QuickTemplate(w, map[string]interface{}{
+	return authPage.Execute(w, map[string]interface{}{
 		"title":       "Authenticate",
 		"client_name": client.Name,
 		"params":      string(paramBytes),
 		"scopes":      strings.Fields(params.Scope),
-	}, []string{
-		"./resources/auth/authorize.html",
-		"./resources/auth/layouts/root.html",
 	})
 }
 

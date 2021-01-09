@@ -7,6 +7,10 @@ import (
 	"dfl/svc/short/server/app"
 )
 
+var highlightPage = rpc.MakeTemplate([]string{
+	"./resources/short/syntax_highlight.html",
+})
+
 // SyntaxHighlighter will apply syntax highlighitng to a set of files
 func SyntaxHighlighter(p *Pipeline) (bool, error) {
 	// if we want to download the files, we won't highlight them
@@ -74,12 +78,10 @@ func SyntaxHighlighter(p *Pipeline) (bool, error) {
 		authors = append(authors, a)
 	}
 
-	return false, rpc.QuickTemplate(p.w, map[string]interface{}{
+	return false, highlightPage.Execute(p.w, map[string]interface{}{
 		"resources": rs,
 		"title":     strings.Join(titles, ", "),
 		"author":    strings.Join(authors, ", "),
-	}, []string{
-		"./resources/short/syntax_highlight.html",
 	})
 }
 

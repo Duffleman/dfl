@@ -4,6 +4,11 @@ import (
 	"dfl/lib/rpc"
 )
 
+var nsfwPage = rpc.MakeTemplate([]string{
+	"./resources/short/nsfw.html",
+	"./resources/short/layouts/root.html",
+})
+
 // HandleNSFWPrimer will show a NSFW primer screen if a resource has NSFW content
 func HandleNSFWPrimer(p *Pipeline) (bool, error) {
 	if p.context.forceDownload || p.context.primed {
@@ -24,8 +29,5 @@ func HandleNSFWPrimer(p *Pipeline) (bool, error) {
 		return true, nil
 	}
 
-	return false, rpc.QuickTemplate(p.w, nil, []string{
-		"./resources/short/nsfw.html",
-		"./resources/short/layouts/root.html",
-	})
+	return false, nsfwPage.Execute(p.w, nil)
 }
