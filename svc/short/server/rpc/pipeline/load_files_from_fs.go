@@ -7,11 +7,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var notFoundPage = rpc.MakeTemplate([]string{
-	"./resources/short/not_found.html",
-	"./resources/short/layouts/root.html",
-})
-
 // LoadFilesFromFS loads files from the filesystem into memory
 func LoadFilesFromFS(p *Pipeline) (bool, error) {
 	g, gctx := errgroup.WithContext(p.ctx)
@@ -42,7 +37,10 @@ func LoadFilesFromFS(p *Pipeline) (bool, error) {
 			return false, err
 		}
 
-		return false, notFoundPage.Execute(p.w, nil)
+		return false, rpc.QuickTemplate(p.w, nil, []string{
+			"./resources/short/not_found.html",
+			"./resources/short/layouts/root.html",
+		})
 	}
 
 	return true, nil
