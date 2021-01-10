@@ -19,6 +19,10 @@ func rootURL() string {
 }
 
 func getAuthHeader(keychain keychain.Keychain) string {
+	if keychain == nil {
+		return ""
+	}
+
 	var authBytes []byte
 	var err error
 
