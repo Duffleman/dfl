@@ -59,9 +59,7 @@ func Login(clientID, scope string, kc keychain.Keychain) *cobra.Command {
 			err := openBrowser(url)
 			if err != nil {
 				cw.Print("Warning")
-				c.Printf(": %s\n\n", "Cannot open your browser for you, type in this URL:")
-				c.Add(color.FgCyan)
-				c.Printf("%s\n\n", url)
+				c.Printf(": %s\n\n", "Cannot open your browser for you, type in the URL yourself")
 			}
 
 			authToken, err := authTokenPrompt.Run()
@@ -69,7 +67,7 @@ func Login(clientID, scope string, kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			res, err := makeClient(kc).Token(context.Background(), &auth.TokenRequest{
+			res, err := makeClient(nil).Token(context.Background(), &auth.TokenRequest{
 				ClientID:     clientID,
 				GrantType:    "authorization_code",
 				Code:         authToken,
