@@ -20,6 +20,7 @@ func CreateInviteCode(kc keychain.Keychain) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "create-invite-code",
 		Aliases: []string{"cic"},
+		Short:   "Create an invite code for another user to register",
 		Args:    cobra.NoArgs,
 
 		RunE: func(cmd *cobra.Command, args []string) (err error) {
