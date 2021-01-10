@@ -17,6 +17,10 @@
 					</div>
 				</div>
 
+				<div v-show="!accessToken || accessToken == ''">
+					Run: <pre class="user-select-all">auth sat | pbcopy</pre>
+				</div>
+
 				<div class="input-group input-group-sm mb-3">
 					<span class="input-group-text" id="inputGroup-sizing-sm">Access token</span>
 					<input type="text" class="form-control" required autofocus aria-label="Access token" v-model="accessToken" v-on:keyup="tokenUpdated">
