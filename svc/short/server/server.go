@@ -21,6 +21,7 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq" // required for the PGSQL driver to be loaded
+	"github.com/nishanths/go-xkcd/v2"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 	"github.com/speps/go-hashids"
@@ -132,12 +133,18 @@ func Run(cfg Config) error {
 
 	redis := cache.NewCache(redisClient)
 
+	xkcdClient := xkcd.NewClient()
+
 	app := &app.App{
-		Logger:  cfg.Logger,
-		SP:      sp,
-		DB:      db,
-		Hasher:  hasher,
-		Redis:   redis,
+		Logger: cfg.Logger,
+
+		SP:     sp,
+		DB:     db,
+		Hasher: hasher,
+		Redis:  redis,
+
+		XKCD: xkcdClient,
+
 		RootURL: cfg.RootURL,
 	}
 
