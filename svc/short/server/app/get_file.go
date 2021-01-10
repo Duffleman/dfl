@@ -9,6 +9,7 @@ import (
 	"dfl/lib/cache"
 	"dfl/lib/cher"
 	"dfl/svc/short"
+	"dfl/svc/short/server/lib/storageproviders"
 )
 
 const maxFileSize = 128
@@ -29,7 +30,13 @@ func (a *App) GetFile(ctx context.Context, resource *short.Resource) ([]byte, *t
 		return item.Content, item.ModTime, nil
 	}
 
-	size, err := a.SP.GetSize(ctx, resource)
+	sp := a.SP
+
+	if resource.Type == "xkcd" {
+		sp = &storageproviders.XKCDFS{}
+	}
+
+	size, err := sp.GetSize(ctx, resource)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -38,7 +45,7 @@ func (a *App) GetFile(ctx context.Context, resource *short.Resource) ([]byte, *t
 		return nil, nil, cher.New("too_big", nil)
 	}
 
-	bytes, lastModified, err := a.SP.Get(ctx, resource)
+	bytes, lastModified, err := sp.Get(ctx, resource)
 	if err != nil {
 		if strings.Contains(err.Error(), "NoSuchKey") {
 			return nil, nil, cher.New(cher.NotFound, nil)

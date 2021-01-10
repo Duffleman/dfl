@@ -5,6 +5,7 @@ import (
 	"dfl/svc/short/server/db"
 	"dfl/svc/short/server/lib/storageproviders"
 
+	"github.com/nishanths/go-xkcd/v2"
 	"github.com/sirupsen/logrus"
 	hashids "github.com/speps/go-hashids"
 )
@@ -17,6 +18,8 @@ type App struct {
 	SP     storageproviders.StorageProvider
 	Hasher *hashids.HashID
 	Redis  *cache.Cache
+
+	XKCD *xkcd.Client
 
 	RootURL string
 }
