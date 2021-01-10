@@ -1,15 +1,23 @@
 package cli
 
 import (
-	"github.com/ttacon/chalk"
+	"github.com/fatih/color"
 )
 
-var Success = chalk.Green.NewStyle().
-	Style
+var Success = func(in string) string {
+	c := color.New(color.BgGreen)
 
-var Warning = chalk.Yellow.NewStyle().
-	Style
+	return c.Sprintf(in)
+}
 
-var Danger = chalk.White.NewStyle().
-	WithBackground(chalk.Red).
-	Style
+var Warning = func(in string) string {
+	c := color.New(color.FgYellow)
+
+	return c.Sprintf(in)
+}
+
+var Danger = func(in string) string {
+	c := color.New(color.BgRed)
+
+	return c.Sprintf(in)
+}
