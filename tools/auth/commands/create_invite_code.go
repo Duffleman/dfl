@@ -2,14 +2,15 @@ package commands
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"time"
 
 	"dfl/lib/cher"
+	"dfl/lib/cli"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
-	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
@@ -40,13 +41,11 @@ func CreateInviteCode(kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			c := color.New()
+			fmt.Println(cli.Success("Success!"))
 
-			color.New().Add(color.BgGreen).Println("Success!")
-
-			c.Printf("Code: %s\n", res.Code)
+			fmt.Printf("Code: %s\n", res.Code)
 			if res.ExpiresAt != nil {
-				c.Printf("Expires at: %s\n", res.ExpiresAt.Format(time.RFC3339))
+				fmt.Printf("Expires at: %s\n", res.ExpiresAt.Format(time.RFC3339))
 			}
 
 			return nil

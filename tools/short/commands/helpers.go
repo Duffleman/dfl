@@ -1,11 +1,10 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
 
+	"dfl/lib/cli"
 	"dfl/lib/keychain"
-	"dfl/svc/auth"
 	"dfl/svc/short"
 
 	"github.com/atotto/clipboard"
@@ -25,32 +24,11 @@ func notify(title, body string) {
 }
 
 func makeClient(keychain keychain.Keychain) short.Service {
-	return short.NewClient(rootURL(), getAuthHeader(keychain))
+	return short.NewClient(rootURL(), cli.AuthHeader(keychain, "short"))
 }
 
 func rootURL() string {
 	return fmt.Sprintf("%s/", viper.Get("SHORT_URL").(string))
-}
-
-func getAuthHeader(keychain keychain.Keychain) string {
-	var authBytes []byte
-	var err error
-
-	authBytes, err = keychain.GetItem("Auth")
-	if err != nil {
-		fmt.Println("Run `short login` first!")
-		panic(err)
-	}
-
-	res := auth.TokenResponse{}
-
-	err = json.Unmarshal(authBytes, &res)
-	if err != nil {
-		fmt.Println("Run `short login` again.")
-		panic(err)
-	}
-
-	return fmt.Sprintf("%s %s", res.TokenType, res.AccessToken)
 }
 
 func writeClipboard(in string) {
