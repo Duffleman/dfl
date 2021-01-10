@@ -110,6 +110,30 @@ func TestQIFileName(t *testing.T) {
 			ExpectedCount: 5,
 			OutcomeSet:    []string{"alva", "a2T.md", "kyle.md", "summin.txt", "aaB"},
 		},
+		{
+			Name:          "latest xkcd",
+			Input:         ":xkcd",
+			ExpectedCount: 1,
+			OutcomeSet:    []string{"xkcd"},
+		},
+		{
+			Name:          "specific xkcd",
+			Input:         ":xkcd-553",
+			ExpectedCount: 1,
+			OutcomeSet:    []string{"xkcd-553"},
+		},
+		{
+			Name:          "multiple xkcds",
+			Input:         ":xkcd-553,:xkcd-102",
+			ExpectedCount: 2,
+			OutcomeSet:    []string{"xkcd-553", "xkcd-102"},
+		},
+		{
+			Name:          "multiple xkcds with others",
+			Input:         ":xkcd-553,:xkcd-102,aAd",
+			ExpectedCount: 3,
+			OutcomeSet:    []string{"xkcd-553", "xkcd-102", "aAd"},
+		},
 	}
 
 	for _, test := range suite {
@@ -174,9 +198,9 @@ func TestQueryInput(t *testing.T) {
 			},
 		},
 		{
-			Name:          "multi varient",
-			Input:         "@alva.png,:kyle,a2F.md.html,@duffleman,:test.go,A2O",
-			ExpectedCount: 6,
+			Name:          "multi variant",
+			Input:         "@alva.png,:kyle,a2F.md.html,@duffleman,:test.go,A2O,:xkcd#111",
+			ExpectedCount: 7,
 			OutcomeSet: []*QueryInput{
 				{
 					QueryType: Name,
@@ -212,6 +236,12 @@ func TestQueryInput(t *testing.T) {
 					QueryType: Hash,
 					Original:  "A2O",
 					Input:     "A2O",
+					Exts:      Extensions([]string{}),
+				},
+				{
+					QueryType: Shortcut,
+					Original:  ":xkcd-111",
+					Input:     "xkcd-111",
 					Exts:      Extensions([]string{}),
 				},
 			},

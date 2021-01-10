@@ -8,10 +8,26 @@ import (
 
 	"dfl/lib/ptr"
 	"dfl/svc/short"
+
+	"github.com/nishanths/go-xkcd/v2"
 )
 
-func (a *App) GetLatestXKCD(ctx context.Context) (*short.Resource, error) {
-	comic, err := a.XKCD.Latest(ctx)
+func (a *App) GetXKCD(ctx context.Context, id string) (*short.Resource, error) {
+	var comic xkcd.Comic
+	var err error
+
+	switch id {
+	case "latest":
+		comic, err = a.XKCD.Latest(ctx)
+	default:
+		number, err := strconv.Atoi(id)
+		if err != nil {
+			return nil, err
+		}
+
+		comic, err = a.XKCD.Get(ctx, number)
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -21,11 +37,13 @@ func (a *App) GetLatestXKCD(ctx context.Context) (*short.Resource, error) {
 		return nil, err
 	}
 
+	name := fmt.Sprintf("%d-%s.png", comic.Number, comic.Title)
+
 	return &short.Resource{
 		ID:        strconv.Itoa(comic.Number),
 		Type:      "xkcd",
 		Hash:      ptr.String(fmt.Sprintf("XKCD#%d", comic.Day)),
-		Name:      &comic.Title,
+		Name:      &name,
 		Link:      comic.ImageURL,
 		MimeType:  ptr.String("image/png"),
 		Shortcuts: []string{":xkcd"},
