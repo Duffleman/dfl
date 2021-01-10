@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"dfl/lib/cher"
+	"dfl/lib/cli"
 	dfljwt "dfl/lib/jwt"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -54,19 +54,18 @@ func ShowAccessToken(keychain keychain.Keychain) *cobra.Command {
 
 			expiresAt := time.Unix(dflclaims.ExpiresAt, 0)
 
-			c := color.New()
-
 			now := time.Now()
-
-			if now.After(expiresAt) {
-				c.Add(color.BgRed)
-			} else {
-				c.Add(color.BgGreen)
-			}
-
 			duration := expiresAt.Sub(now)
 
-			c.Fprintf(os.Stderr, "%s", expiresAt.Format(time.RFC3339))
+			var style func(string) string
+
+			if now.After(expiresAt) {
+				style = cli.Danger
+			} else {
+				style = cli.Success
+			}
+
+			fmt.Fprintf(os.Stderr, style(expiresAt.Format(time.RFC3339)))
 			fmt.Fprintf(os.Stderr, " (%s)\n", duration.Round(time.Second))
 
 			return nil

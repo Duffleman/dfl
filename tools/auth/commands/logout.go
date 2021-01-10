@@ -1,9 +1,11 @@
 package commands
 
 import (
+	"fmt"
+
+	"dfl/lib/cli"
 	"dfl/lib/keychain"
 
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -17,8 +19,7 @@ func Logout(keychain keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			c := color.New(color.BgGreen)
-			c.Println("Logged out!")
+			fmt.Println(cli.Success("Logged out!"))
 
 			return nil
 		},

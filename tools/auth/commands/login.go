@@ -11,11 +11,11 @@ import (
 	"runtime"
 
 	"dfl/lib/cher"
+	"dfl/lib/cli"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
 	"github.com/dvsekhvalnov/jose2go/base64url"
-	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -46,20 +46,12 @@ func Login(clientID, scope string, kc keychain.Keychain) *cobra.Command {
 
 			url := fmt.Sprintf("%s/authorize?%s", rootURL, params.Encode())
 
-			cw := color.New(color.BgYellow)
-			ca := color.New(color.BgHiGreen)
-			c := color.New()
-
-			cw.Print("Careful")
-			c.Printf(": %s: ", "Don't forget to look for the state! It should match")
-			ca.Println(state)
-
-			c.Printf("\n%s\n\n", url)
+			fmt.Printf("%s: %s", cli.Warning("Careful"), "Ensure the state matches: ")
+			fmt.Println(cli.Success(state))
 
 			err := openBrowser(url)
 			if err != nil {
-				cw.Print("Warning")
-				c.Printf(": %s\n\n", "Cannot open your browser for you, type in the URL yourself")
+				fmt.Printf("%s: %s", cli.Warning("Warning"), "Cannot open your browser for you, type in the URL yourself.")
 			}
 
 			authToken, err := authTokenPrompt.Run()
@@ -86,7 +78,7 @@ func Login(clientID, scope string, kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			ca.Println("Logged in!")
+			fmt.Println(cli.Success("Logged in!"))
 
 			return nil
 		},

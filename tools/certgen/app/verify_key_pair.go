@@ -8,10 +8,10 @@ import (
 	"io/ioutil"
 	"path"
 
+	"dfl/lib/cli"
 	"dfl/lib/key"
 	"dfl/tools/certgen"
 
-	"github.com/fatih/color"
 	"github.com/tjarratt/babble"
 )
 
@@ -60,21 +60,17 @@ func (a *App) VerifyKeyPair(name string) error {
 		return err
 	}
 
-	c := color.New()
-
 	valid := ecdsa.VerifyASN1(public, hash[:], signature)
 
-	c.Printf("Message: %s\n", message)
-	c.Print("Signature ")
+	fmt.Printf("Message: %s\n", message)
+	fmt.Print("Signature ")
 
 	switch valid {
 	case true:
-		c.Add(color.BgGreen)
-		c.Println("VERIFIED")
+		fmt.Println(cli.Success("VERIFIED"))
 	default:
 	case true:
-		c.Add(color.BgRed)
-		c.Println("MISMATCH")
+		fmt.Println(cli.Danger("MISMATCH"))
 	}
 
 	return nil

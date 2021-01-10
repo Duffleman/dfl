@@ -64,6 +64,7 @@ github.com/duo-labs/webauthn v0.0.0-20200714211715-1daaee874e43 h1:eEEfwrmEwl0LV
 github.com/duo-labs/webauthn v0.0.0-20200714211715-1daaee874e43/go.mod h1:/X2OJiJxjQ7alqWZqX9EtBTmZc+4qQ0LvZ1k5wP67RM=
 github.com/dvsekhvalnov/jose2go v0.0.0-20201001154944-b09cfaf05951 h1:U+H8oUNmugZTzB9c3EZQzdC2B9rXCqROImRSxnwh4Ck=
 github.com/dvsekhvalnov/jose2go v0.0.0-20201001154944-b09cfaf05951/go.mod h1:QsHjhyTlD/lAVqn/NSbVZmSCGeDehTB/mPZadG+mhXU=
+github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/fatih/color v1.10.0 h1:s36xzo75JdqLaaWoiEHk767eHiwo0598uUxyfiPkDsg=
 github.com/fatih/color v1.10.0/go.mod h1:ELkj/draVOlAH/xkhN6mQ50Qd0MPOk5AAr3maGEBuJM=
