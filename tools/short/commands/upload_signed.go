@@ -39,12 +39,11 @@ func UploadSigned(kc keychain.Keychain) *cobra.Command {
 
 			return cher.New("missing_arguments", nil)
 		},
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 			mutex := sync.Mutex{}
-
 			g, gctx := errgroup.WithContext(ctx)
-
 			startTime := time.Now()
 
 			localFile, err := handleLocalFileInput(args)
@@ -77,6 +76,10 @@ func UploadSigned(kc keychain.Keychain) *cobra.Command {
 						return err
 					}
 
+					if isNude {
+						log.Infof("Nudity detected in %s", filename)
+					}
+
 					file, err := ioutil.ReadFile(filename)
 					if err != nil {
 						return err
@@ -89,7 +92,11 @@ func UploadSigned(kc keychain.Keychain) *cobra.Command {
 						return err
 					}
 
+					log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
+
 					if isNude {
+						log.Infof("Marking file as NSFW (%s)", resource.Hash)
+
 						g.Go(func() error {
 							_, err := toggleNSFW(gctx, kc, resource.Hash)
 							return err
@@ -100,14 +107,12 @@ func UploadSigned(kc keychain.Keychain) *cobra.Command {
 					all = append(all, resource.Hash)
 					mutex.Unlock()
 
-					log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
-
 					if singleFile {
 						writeClipboard(resource.URL)
 						notify("File prepared", resource.URL)
 					}
 
-					err = sendFileAWS(resource.S3Link, file)
+					err = sendFileAWS(resource.SignedLink, file)
 					if err != nil {
 						return err
 					}
@@ -128,13 +133,13 @@ func UploadSigned(kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			log.Infof("Done in %s", time.Now().Sub(startTime))
-
 			if !singleFile {
 				jointURL := fmt.Sprintf("%s%s", rootURL(), strings.Join(all, ","))
 				log.Infof("Download TAR at: %s", jointURL)
 				writeClipboard(jointURL)
 			}
+
+			log.Infof("Done in %s", time.Now().Sub(startTime))
 
 			return nil
 		},
