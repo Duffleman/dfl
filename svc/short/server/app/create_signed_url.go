@@ -44,7 +44,7 @@ func (a *App) CreateSignedURL(ctx context.Context, username string, name *string
 		Hash:       hash,
 		Name:       name,
 		URL:        fullURL,
-		S3Link:     url,
+		SignedLink: url,
 	}, nil
 }
 

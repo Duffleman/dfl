@@ -64,7 +64,7 @@ type CreateSignedURLResponse struct {
 	Name       *string `json:"name"`
 	Hash       string  `json:"hash"`
 	URL        string  `json:"url"`
-	S3Link     string  `json:"s3link"`
+	SignedLink string  `json:"link"`
 }
 
 type IdentifyResource struct {

@@ -22,6 +22,7 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/keybase/go-keychain v0.0.0-20201121013009-976c83ec27a6
+	github.com/koyachi/go-nude v0.0.1
 	github.com/lib/pq v1.9.0
 	github.com/manifoldco/promptui v0.8.0
 	github.com/nishanths/go-xkcd/v2 v2.0.0
