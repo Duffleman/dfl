@@ -9,15 +9,22 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"dfl/lib/cher"
 	"dfl/lib/keychain"
 	"dfl/svc/short"
 
+	"github.com/koyachi/go-nude"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"golang.org/x/sync/errgroup"
 )
+
+var ignoredFiles = []string{
+	".DS_Store",
+}
 
 func UploadSigned(kc keychain.Keychain) *cobra.Command {
 	return &cobra.Command{
@@ -34,6 +41,9 @@ func UploadSigned(kc keychain.Keychain) *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
+			mutex := sync.Mutex{}
+
+			g, gctx := errgroup.WithContext(ctx)
 
 			startTime := time.Now()
 
@@ -55,42 +65,67 @@ func UploadSigned(kc keychain.Keychain) *cobra.Command {
 
 			singleFile := len(filePaths) == 1
 
-			for _, filename := range filePaths {
-				log.Infof("Handling file: %s", filename)
-				innerStart := time.Now()
+			for _, fn := range filePaths {
+				filename := fn
 
-				file, err := ioutil.ReadFile(filename)
-				if err != nil {
-					return err
-				}
+				g.Go(func() error {
+					log.Infof("Handling file: %s", filename)
+					innerStart := time.Now()
 
-				filePrepStart := time.Now()
+					isNude, err := nude.IsNude(filename)
+					if err != nil {
+						return err
+					}
 
-				resource, err := prepareUpload(ctx, kc, filename, file)
-				if err != nil {
-					return err
-				}
+					file, err := ioutil.ReadFile(filename)
+					if err != nil {
+						return err
+					}
 
-				all = append(all, resource.Hash)
+					filePrepStart := time.Now()
 
-				log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
+					resource, err := prepareUpload(ctx, kc, filename, file)
+					if err != nil {
+						return err
+					}
 
-				if singleFile {
-					writeClipboard(resource.URL)
-					notify("Image prepared", resource.URL)
-				}
+					if isNude {
+						g.Go(func() error {
+							_, err := toggleNSFW(gctx, kc, resource.Hash)
+							return err
+						})
+					}
 
-				err = sendFileAWS(resource.S3Link, file)
-				if err != nil {
-					return err
-				}
-				if singleFile {
-					notify("Image uploaded", resource.URL)
-				} else {
-					log.Infof("File uploaded: %s", resource.URL)
-				}
+					mutex.Lock()
+					all = append(all, resource.Hash)
+					mutex.Unlock()
 
-				log.Infof("File handled in %s", time.Now().Sub(innerStart))
+					log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
+
+					if singleFile {
+						writeClipboard(resource.URL)
+						notify("File prepared", resource.URL)
+					}
+
+					err = sendFileAWS(resource.S3Link, file)
+					if err != nil {
+						return err
+					}
+
+					if singleFile {
+						notify("File uploaded", resource.URL)
+					} else {
+						log.Infof("File uploaded: %s", resource.URL)
+					}
+
+					log.Infof("File handled in %s", time.Now().Sub(innerStart))
+
+					return nil
+				})
+			}
+
+			if err := g.Wait(); err != nil {
+				return err
 			}
 
 			log.Infof("Done in %s", time.Now().Sub(startTime))
@@ -154,6 +189,12 @@ func scanDirectory(rootFile string) (filePaths []string, err error) {
 	err = filepath.Walk(rootFile, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
+		}
+
+		for _, f := range ignoredFiles {
+			if strings.HasSuffix(path, f) {
+				return nil
+			}
 		}
 
 		filePaths = append(filePaths, path)
