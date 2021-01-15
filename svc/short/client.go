@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"dfl/lib/crpc"
-	"dfl/lib/jsonclient"
+
+	"github.com/cuvva/cuvva-public-go/lib/jsonclient"
 )
 
 type client struct {
@@ -15,7 +16,7 @@ type client struct {
 
 func NewClient(baseURL, key string) Service {
 	httpClient := &http.Client{
-		Transport: jsonclient.NewAuthenticatedRoundTripper(nil, key),
+		Transport: jsonclient.NewAuthenticatedRoundTripper(nil, "Bearer", key),
 		Timeout:   5 * time.Second,
 	}
 

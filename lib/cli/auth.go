@@ -30,5 +30,5 @@ func AuthHeader(keychain keychain.Keychain, tool string) string {
 		panic(err)
 	}
 
-	return fmt.Sprintf("%s %s", res.TokenType, res.AccessToken)
+	return res.AccessToken
 }
