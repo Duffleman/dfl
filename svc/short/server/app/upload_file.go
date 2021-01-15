@@ -9,7 +9,7 @@ import (
 	"dfl/lib/cache"
 	"dfl/svc/short"
 
-	"github.com/cuvva/ksuid-go"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 )
 
 // UploadFile is an app method that takes in a file and stores it

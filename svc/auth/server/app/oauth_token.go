@@ -11,7 +11,7 @@ import (
 	"dfl/svc/auth/server/db"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/cuvva/ksuid-go"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dvsekhvalnov/jose2go/base64url"
 )
@@ -70,7 +70,8 @@ func (a *App) Token(ctx context.Context, req *auth.TokenRequest) (*auth.TokenRes
 	atID := ksuid.Generate("accesstoken").String()
 
 	token := jwt.NewWithClaims(jwt.SigningMethodES384, authlib.DFLClaims{
-		Scopes:   strings.Fields(ac.Scope), // TODO(gm): come back to this
+		Version:  "01",
+		Scopes:   ac.Scope,
 		Username: user.Username,
 		StandardClaims: jwt.StandardClaims{
 			Id:        atID,

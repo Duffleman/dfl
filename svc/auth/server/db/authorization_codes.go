@@ -7,7 +7,7 @@ import (
 	"dfl/svc/auth"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/cuvva/ksuid-go"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 )
 
 func (qw *QueryableWrapper) GetAuthorizationCodeByNonce(ctx context.Context, nonce string) (*auth.AuthorizationCode, error) {

@@ -155,20 +155,23 @@ func Run(cfg Config) error {
 		RootURL: cfg.RootURL,
 	}
 
+	authHandlers := auth.Handlers{
+		auth.CreateScopedBearer(public, cfg.JWTIssuer),
+	}
+
 	html := htmlPages(app)
-	vanilla := vanillaFuncs(app)
+	vanilla := vanillaFuncs(app, authHandlers)
 
-	authHandler := auth.CreateScopedBearer(public, cfg.JWTIssuer)
-
-	rpc := rpc.New(app, log, authHandler, html, vanilla)
+	rpc := rpc.New(app, log, authHandlers, html, vanilla)
 
 	return rpc.Run(cfg.Server)
 }
 
-func vanillaFuncs(app *app.App) *chi.Mux {
+func vanillaFuncs(app *app.App, authHandlers auth.Auth) *chi.Mux {
 	mux := chi.NewRouter()
 
-	mux.Post("/upload", wrap(app, vanilla.UploadFile))
+	mux.Use(auth.Middleware(authHandlers))
+	mux.Post("/upload_file", wrap(app, vanilla.UploadFile))
 
 	return mux
 }

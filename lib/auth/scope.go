@@ -4,11 +4,11 @@ import (
 	"strings"
 )
 
-func Can(requested string, scopes []string) bool {
+func Can(requested string, scopes string) bool {
 	actions := strings.Fields(requested)
 	allowed := make(map[string]struct{})
 
-	for _, scope := range scopes {
+	for _, scope := range strings.Fields(scopes) {
 		if scope == "*:*" {
 			return true
 		}

@@ -11,7 +11,13 @@ import (
 )
 
 func makeClient(keychain keychain.Keychain) auth.Service {
-	return auth.NewClient(rootURL(), cli.AuthHeader(keychain, "auth"))
+	if keychain == nil {
+		return auth.NewClient(rootURL(), nil)
+	}
+
+	authHeader := cli.AuthHeader(keychain, "auth")
+
+	return auth.NewClient(rootURL(), &authHeader)
 }
 
 func rootURL() string {

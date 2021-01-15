@@ -110,9 +110,11 @@ func Run(cfg Config) error {
 
 	html := htmlPages(app)
 
-	authHandler := auth.CreateScopedBearer(sk.Public(), cfg.JWTIssuer)
+	authHandlers := auth.Handlers{
+		auth.CreateScopedBearer(sk.Public(), cfg.JWTIssuer),
+	}
 
-	rpc := rpc.New(app, log, authHandler, html)
+	rpc := rpc.New(app, log, authHandlers, html)
 
 	return rpc.Run(cfg.Server)
 }

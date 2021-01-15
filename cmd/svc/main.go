@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/cuvva/cuvva-public-go/lib/config"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 	"github.com/cuvva/cuvva-public-go/lib/servicecontext"
-	"github.com/cuvva/ksuid-go"
 	"github.com/spf13/cobra"
 
 	auth "dfl/svc/auth/server/cmd"

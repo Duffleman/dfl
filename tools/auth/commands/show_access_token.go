@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	authlib "dfl/lib/auth"
@@ -48,7 +47,7 @@ func ShowAccessToken(keychain keychain.Keychain) *cobra.Command {
 			fmt.Fprintf(os.Stderr, "\n\n")
 			fmt.Fprintf(os.Stderr, "User ID:    %s\n", dflclaims.Subject)
 			fmt.Fprintf(os.Stderr, "Username:   %s\n", dflclaims.Username)
-			fmt.Fprintf(os.Stderr, "Scopes:     %s\n", strings.Join(dflclaims.Scopes, " "))
+			fmt.Fprintf(os.Stderr, "Scopes:     %s\n", dflclaims.Scopes)
 			fmt.Fprintf(os.Stderr, "Client ID:  %s\n", dflclaims.Audience)
 			fmt.Fprintf(os.Stderr, "Issuer:     %s\n", dflclaims.Issuer)
 			fmt.Fprintf(os.Stderr, "Expires at: ")

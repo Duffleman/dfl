@@ -7,55 +7,55 @@ import (
 var suite = []struct {
 	Name   string
 	Action string
-	Scopes []string
+	Scopes string
 	Result bool
 }{
 	{
 		Name:   "match up",
 		Action: "auth:login",
-		Scopes: []string{"auth:*"},
+		Scopes: "auth:*",
 		Result: true,
 	},
 	{
 		Name:   "match exact",
 		Action: "auth:*",
-		Scopes: []string{"auth:*"},
+		Scopes: "auth:*",
 		Result: true,
 	},
 	{
 		Name:   "match within category",
 		Action: "short:upload short:moderate",
-		Scopes: []string{"short:*"},
+		Scopes: "short:*",
 		Result: true,
 	},
 	{
 		Name:   "match within",
 		Action: "short:upload short:meta",
-		Scopes: []string{"short:upload", "short:meta", "short:moderate"},
+		Scopes: "short:upload short:meta short:moderate",
 		Result: true,
 	},
 	{
 		Name:   "do no match down",
 		Action: "auth:*",
-		Scopes: []string{"auth:login"},
+		Scopes: "auth:login",
 		Result: false,
 	},
 	{
 		Name:   "do not match unrelated",
 		Action: "auth:list",
-		Scopes: []string{"auth:login"},
+		Scopes: "auth:login",
 		Result: false,
 	},
 	{
 		Name:   "match in set",
 		Action: "auth:login",
-		Scopes: []string{"auth:login", "auth:list", "dflimg:upload"},
+		Scopes: "auth:login auth:list dflimg:upload",
 		Result: true,
 	},
 	{
 		Name:   "super root works",
 		Action: "auth:login",
-		Scopes: []string{"*:*"},
+		Scopes: "*:*",
 		Result: true,
 	},
 }

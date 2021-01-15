@@ -18,7 +18,7 @@ type User struct {
 	ID        string    `json:"id"`
 	Username  string    `json:"username"`
 	Email     *string   `json:"email"`
-	Scopes    []string  `json:"scopes"`
+	Scopes    string    `json:"scopes"`
 	CreatedAt time.Time `json:"created_at"`
 }
 

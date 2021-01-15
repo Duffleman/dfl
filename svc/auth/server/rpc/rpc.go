@@ -22,7 +22,7 @@ type RPC struct {
 	httpServer *http.Server
 }
 
-func New(app *app.App, log *logrus.Entry, authHandler auth.Handler, htmlPages *chi.Mux) *RPC {
+func New(app *app.App, log *logrus.Entry, authHandlers auth.Auth, htmlPages *chi.Mux) *RPC {
 	rpc := &RPC{
 		app: app,
 		log: log,
@@ -56,7 +56,7 @@ func New(app *app.App, log *logrus.Entry, authHandler auth.Handler, htmlPages *c
 		With(
 			request.RequestID,
 			request.Logger(log),
-			auth.Middleware(authHandler),
+			auth.Middleware(authHandlers),
 			cors.AllowAll().Handler,
 			request.StripPrefix("/1"),
 		).

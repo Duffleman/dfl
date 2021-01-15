@@ -13,14 +13,17 @@ type client struct {
 	*crpc.Client
 }
 
-func NewClient(baseURL, key string) Service {
+func NewClient(baseURL string, key *string) Service {
 	httpClient := &http.Client{
-		Transport: jsonclient.NewAuthenticatedRoundTripper(nil, "Bearer", key),
-		Timeout:   5 * time.Second,
+		Timeout: 5 * time.Second,
+	}
+
+	if key != nil {
+		httpClient.Transport = jsonclient.NewAuthenticatedRoundTripper(nil, "Bearer", *key)
 	}
 
 	return &client{
-		crpc.NewClient(baseURL+"/", httpClient),
+		crpc.NewClient(baseURL+"/1", httpClient),
 	}
 }
 

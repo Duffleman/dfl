@@ -33,6 +33,8 @@ github.com/atotto/clipboard v0.1.2/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn
 github.com/aws/aws-sdk-go v1.34.28/go.mod h1:H7NKnBqNVzoTJpGfLrQkkD+ytBA93eiDYi/+8rV9s48=
 github.com/aws/aws-sdk-go v1.36.27 h1:wc3xLJJHog2SwiqlLnrLUuct/n+dBjB45QhuZw2psVE=
 github.com/aws/aws-sdk-go v1.36.27/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
+github.com/aws/aws-sdk-go v1.36.28 h1:JVRN7BZgwQ31SQCBwG5QM445+ynJU0ruKu+miFIijYY=
+github.com/aws/aws-sdk-go v1.36.28/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0 h1:HWo1m869IqiPhD389kmkxeTalrjNbbJTC8LXupb+sl0=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
@@ -59,8 +61,12 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0/go.mod h1:maD7wRr/U5Z6m/iR4s+kqSMx2CaBsr
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/cuvva/cuvva-public-go v0.0.0-20210115172033-77ee7e54d6e3 h1:kOVLh/ZzgwCUxC0Rm0gxDAWR+NDgG2o4FrND8MuG8NY=
 github.com/cuvva/cuvva-public-go v0.0.0-20210115172033-77ee7e54d6e3/go.mod h1:rsTE/JZe6RB0qfwOgSX4QZAleq8PKXSLqTQqtLEq3tQ=
-github.com/cuvva/ksuid-go v0.0.0-20190704133525-91309d40e0f0 h1:s43SmEuMePf9fGc8lkr2JwI2Gdu+NECqST3n0QFLwP8=
-github.com/cuvva/ksuid-go v0.0.0-20190704133525-91309d40e0f0/go.mod h1:Q87tjWKcgclXB2fTWfX1tKFNndbcdDMFGaSJdTH6JTA=
+github.com/cuvva/cuvva-public-go v0.0.0-20210115174515-805a42b386cb h1:tAPTJ7gq0lENW3n3cY11wYhZRTu4mHhvUvkx9fUO+as=
+github.com/cuvva/cuvva-public-go v0.0.0-20210115174515-805a42b386cb/go.mod h1:rsTE/JZe6RB0qfwOgSX4QZAleq8PKXSLqTQqtLEq3tQ=
+github.com/cuvva/cuvva-public-go/lib/ksuid v0.0.0-20190704133525-91309d40e0f0 h1:s43SmEuMePf9fGc8lkr2JwI2Gdu+NECqST3n0QFLwP8=
+github.com/cuvva/cuvva-public-go/lib/ksuid v0.0.0-20190704133525-91309d40e0f0/go.mod h1:Q87tjWKcgclXB2fTWfX1tKFNndbcdDMFGaSJdTH6JTA=
+github.com/cuvva/cuvva-public-go/lib/ksuid v0.0.0-20210115114127-4c3836d71c40 h1:yPuSYjVaUXgRStC1WH1PbxdixdlXR45Z3VAgkcncuJs=
+github.com/cuvva/cuvva-public-go/lib/ksuid v0.0.0-20210115114127-4c3836d71c40/go.mod h1:X4jcdjCqlC8bZphixUQtWdrtlLHqSMs8OjJ4Pirb93E=
 github.com/danieljoos/wincred v1.1.0 h1:3RNcEpBg4IhIChZdFRSdlQt1QjCp1sMAPIrOnm7Yf8g=
 github.com/danieljoos/wincred v1.1.0/go.mod h1:XYlo+eRTsVA9aHGp7NGjFkPla4m+DCL7hqDjlFjiygg=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

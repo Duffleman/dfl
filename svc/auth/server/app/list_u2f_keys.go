@@ -14,7 +14,7 @@ func (a *App) ListU2FKeys(ctx context.Context, req *auth.ListU2FKeysRequest) ([]
 		return nil, err
 	}
 
-	var credentials []*auth.PublicU2FKey
+	credentials := []*auth.PublicU2FKey{}
 
 	for _, key := range keys {
 		credentials = append(credentials, &auth.PublicU2FKey{
