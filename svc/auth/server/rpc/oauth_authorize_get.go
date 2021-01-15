@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	"dfl/lib/cher"
-	"dfl/lib/ptr"
 	"dfl/lib/rpc"
-	"dfl/lib/slicecontains"
 	"dfl/svc/auth/server/app"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
+	"github.com/cuvva/cuvva-public-go/lib/ptr"
+	"github.com/cuvva/cuvva-public-go/lib/slicecontains"
 )
 
 func AuthorizeGet(a *app.App, w http.ResponseWriter, r *http.Request) error {

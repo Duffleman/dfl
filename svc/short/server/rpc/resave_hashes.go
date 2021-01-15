@@ -4,8 +4,9 @@ import (
 	"net/http"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
 	"dfl/svc/short/server/app"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 func ResaveHashes(a *app.App, w http.ResponseWriter, r *http.Request) error {

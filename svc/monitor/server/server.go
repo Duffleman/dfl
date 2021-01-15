@@ -7,13 +7,13 @@ import (
 	"net/http"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/svc/monitor"
 	"dfl/svc/monitor/server/app"
 	"dfl/svc/monitor/server/lib/cachet"
 	jobslib "dfl/svc/monitor/server/lib/jobs"
 
 	cachetSDK "github.com/andygrunwald/cachet"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/sirupsen/logrus"
 )
 

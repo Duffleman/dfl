@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"os"
 
-	"dfl/lib/cher"
 	"dfl/lib/keychain"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/cuvva/ksuid-go"
 	"github.com/spf13/cobra"
 )

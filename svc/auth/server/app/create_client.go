@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"net/url"
 
-	"dfl/lib/cher"
 	"dfl/svc/auth"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 func (a *App) CreateClient(ctx context.Context, req *auth.CreateClientRequest) (*auth.CreateClientResponse, error) {

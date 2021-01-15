@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/tools/certgen"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 // GenerateCRL creates a new certificate revocation list (saved as a PEM file)

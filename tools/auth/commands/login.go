@@ -10,11 +10,11 @@ import (
 	"os/exec"
 	"runtime"
 
-	"dfl/lib/cher"
 	"dfl/lib/cli"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/dvsekhvalnov/jose2go/base64url"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"

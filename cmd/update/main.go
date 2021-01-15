@@ -9,8 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"dfl/lib/cher"
-
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/spf13/cobra"
 )
 

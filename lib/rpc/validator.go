@@ -8,8 +8,7 @@ import (
 	"net"
 	"net/http"
 
-	"dfl/lib/cher"
-
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/xeipuuv/gojsonschema"
 )
 

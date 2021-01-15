@@ -6,12 +6,12 @@ import (
 	"os"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/lib/cli"
 	dfljwt "dfl/lib/jwt"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/cobra"
 )

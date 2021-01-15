@@ -4,9 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"dfl/lib/cher"
-
 	sq "github.com/Masterminds/squirrel"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 // DB is a wrapper around the PG wrapper for easy function calls

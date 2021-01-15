@@ -6,8 +6,9 @@ require (
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/andygrunwald/cachet v0.0.0-20180404195246-2a1ca51087fd
 	github.com/atotto/clipboard v0.1.2
-	github.com/aws/aws-sdk-go v1.36.23
+	github.com/aws/aws-sdk-go v1.36.27
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/cuvva/cuvva-public-go v0.0.0-20210115172033-77ee7e54d6e3
 	github.com/cuvva/ksuid-go v0.0.0-20190704133525-91309d40e0f0
 	github.com/danieljoos/wincred v1.1.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
@@ -19,15 +20,12 @@ require (
 	github.com/go-ping/ping v0.0.0-20201115131931-3300c582a663
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/gomarkdown/markdown v0.0.0-20201113031856-722100d81a8e
-	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/keybase/go-keychain v0.0.0-20201121013009-976c83ec27a6
 	github.com/koyachi/go-nude v0.0.1
 	github.com/lib/pq v1.9.0
 	github.com/manifoldco/promptui v0.8.0
 	github.com/nishanths/go-xkcd/v2 v2.0.0
-	github.com/onsi/ginkgo v1.14.2 // indirect
-	github.com/onsi/gomega v1.10.4 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.7.0
 	github.com/sirupsen/logrus v1.7.0

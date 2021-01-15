@@ -3,8 +3,9 @@ package app
 import (
 	"context"
 
-	"dfl/lib/cher"
 	"dfl/svc/short"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 // GetResource returns a resource by shortcut or hash. Regardless of it's deleted status

@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
 	dfljwt "dfl/lib/jwt"
 	"dfl/lib/rpc"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/dgrijalva/jwt-go"
 )
 

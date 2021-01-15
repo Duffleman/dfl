@@ -2,12 +2,12 @@ package rpc
 
 import (
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
 	"dfl/lib/rpc"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/app"
 	"net/http"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/xeipuuv/gojsonschema"
 )
 

@@ -7,11 +7,11 @@ import (
 	"time"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
 	dfljwt "dfl/lib/jwt"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/db"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/cuvva/ksuid-go"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dvsekhvalnov/jose2go/base64url"

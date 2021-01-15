@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"dfl/lib/cher"
 	"dfl/lib/rpc"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/app"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/duo-labs/webauthn/protocol"
 	"github.com/xeipuuv/gojsonschema"
 )

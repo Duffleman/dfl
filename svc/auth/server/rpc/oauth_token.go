@@ -8,11 +8,11 @@ import (
 	"net/url"
 	"strings"
 
-	"dfl/lib/ptr"
 	"dfl/lib/rpc"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/app"
 
+	"github.com/cuvva/cuvva-public-go/lib/ptr"
 	"github.com/xeipuuv/gojsonschema"
 )
 

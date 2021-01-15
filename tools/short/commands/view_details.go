@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"dfl/lib/cher"
 	"dfl/lib/keychain"
 	"dfl/svc/short"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/spf13/cobra"
 )
 

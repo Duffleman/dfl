@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"os/user"
 
-	"dfl/lib/cher"
-
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	gokeychain "github.com/keybase/go-keychain"
 )
 

@@ -9,9 +9,9 @@ import (
 	"os"
 	"path"
 
-	"dfl/lib/cher"
 	"dfl/tools/certgen"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"software.sslmate.com/src/go-pkcs12"
 )
 

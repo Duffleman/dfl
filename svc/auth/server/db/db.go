@@ -5,9 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"dfl/lib/cher"
-
 	sq "github.com/Masterminds/squirrel"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 type DB struct {

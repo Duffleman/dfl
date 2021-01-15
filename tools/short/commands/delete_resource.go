@@ -5,10 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/lib/keychain"
 	"dfl/svc/short"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

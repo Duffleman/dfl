@@ -5,11 +5,11 @@ import (
 	"strings"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
 	"dfl/lib/rpc"
 	"dfl/svc/short"
 	"dfl/svc/short/server/app"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/xeipuuv/gojsonschema"
 )
 

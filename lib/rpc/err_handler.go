@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"dfl/lib/cher"
-
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/sirupsen/logrus"
 )
 

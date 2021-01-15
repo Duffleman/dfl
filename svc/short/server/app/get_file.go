@@ -7,9 +7,10 @@ import (
 	"time"
 
 	"dfl/lib/cache"
-	"dfl/lib/cher"
 	"dfl/svc/short"
 	"dfl/svc/short/server/lib/storageproviders"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 const maxFileSize = 128

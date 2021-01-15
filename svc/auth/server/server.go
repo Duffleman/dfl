@@ -7,12 +7,12 @@ import (
 
 	"dfl/lib/key"
 	dflmw "dfl/lib/middleware"
-	"dfl/lib/ptr"
 	rpclib "dfl/lib/rpc"
 	"dfl/svc/auth/server/app"
 	"dfl/svc/auth/server/db"
 	"dfl/svc/auth/server/rpc"
 
+	"github.com/cuvva/cuvva-public-go/lib/ptr"
 	"github.com/duo-labs/webauthn/webauthn"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"

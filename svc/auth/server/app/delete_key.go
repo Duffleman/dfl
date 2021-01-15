@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 
-	"dfl/lib/cher"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 func (a *App) DeleteKey(ctx context.Context, userID, keyID string) error {

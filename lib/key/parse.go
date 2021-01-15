@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 
-	"dfl/lib/cher"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 func MustParseECDSAPublic(inBytes []byte) *ecdsa.PublicKey {

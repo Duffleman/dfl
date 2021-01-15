@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/svc/short"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/lib/pq"
 )
 

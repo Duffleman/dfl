@@ -6,11 +6,11 @@ import (
 	"regexp"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/lib/cli"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )

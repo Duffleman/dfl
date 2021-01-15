@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"dfl/lib/cher"
 	"dfl/tools/certgen/commands"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/spf13/viper"
 )
 
