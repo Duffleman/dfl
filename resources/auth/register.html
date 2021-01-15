@@ -94,7 +94,7 @@
 				const credential = await this.handleCredential(publicKey);
 
 				try {
-					await axios.post('/register_confirm', {
+					await axios.post('/1/2021-01-15/register_confirm', {
 						username: this.username,
 						invite_code: this.inviteCode,
 						challenge_id: challengeId,
@@ -127,7 +127,7 @@
 
 			async registerPrompt(username, inviteCode) {
 				try {
-					return await axios.post('/register_prompt', {
+					return await axios.post('/1/2021-01-15/register_prompt', {
 						username: username,
 						invite_code: inviteCode,
 					});

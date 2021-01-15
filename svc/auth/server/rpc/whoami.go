@@ -1,20 +1,22 @@
 package rpc
 
 import (
-	"net/http"
+	"context"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/rpc"
-	"dfl/svc/auth/server/app"
+	"dfl/svc/auth"
 )
 
-func WhoAmI(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	user := authlib.GetFromContext(r.Context())
+func (r *RPC) WhoAmI(ctx context.Context) (*auth.WhoAmIResponse, error) {
+	authUser := authlib.GetUserContext(ctx)
 
-	res, err := a.WhoAmI(r.Context(), user.ID)
+	user, err := r.app.FindUser(ctx, authUser.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return rpc.WriteOut(w, res)
+	return &auth.WhoAmIResponse{
+		UserID:   user.ID,
+		Username: user.Username,
+	}, nil
 }

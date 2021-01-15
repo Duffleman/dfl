@@ -1,4 +1,4 @@
-package rpc
+package html
 
 import (
 	"net/http"
@@ -7,12 +7,12 @@ import (
 	"dfl/svc/auth/server/app"
 )
 
-func RegisterGet(a *app.App, w http.ResponseWriter, r *http.Request) error {
+func U2FManage(a *app.App, w http.ResponseWriter, r *http.Request) error {
 	return rpc.QuickTemplate(w, map[string]interface{}{
-		"title":          "Register",
-		"activeRegister": true,
+		"title":           "Manage U2F",
+		"activeManageU2F": true,
 	}, []string{
-		"./resources/auth/register.html",
+		"./resources/auth/u2f_manage.html",
 		"./resources/auth/_nav.html",
 		"./resources/auth/layouts/root.html",
 	})

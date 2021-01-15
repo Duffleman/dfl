@@ -6,10 +6,9 @@ require (
 	github.com/Masterminds/squirrel v1.5.0
 	github.com/andygrunwald/cachet v0.0.0-20180404195246-2a1ca51087fd
 	github.com/atotto/clipboard v0.1.2
-	github.com/aws/aws-sdk-go v1.36.27
+	github.com/aws/aws-sdk-go v1.36.28
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/cuvva/cuvva-public-go v0.0.0-20210115172033-77ee7e54d6e3
-	github.com/cuvva/ksuid-go v0.0.0-20190704133525-91309d40e0f0
+	github.com/cuvva/cuvva-public-go v0.0.0-20210115174515-805a42b386cb
 	github.com/danieljoos/wincred v1.1.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/duo-labs/webauthn v0.0.0-20200714211715-1daaee874e43

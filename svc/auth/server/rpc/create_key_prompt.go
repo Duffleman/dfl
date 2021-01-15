@@ -1,12 +1,10 @@
 package rpc
 
 import (
-	"net/http"
+	"context"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/rpc"
 	"dfl/svc/auth"
-	"dfl/svc/auth/server/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/duo-labs/webauthn/protocol"
@@ -29,32 +27,23 @@ var createKeyPromptSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func CreateKeyPrompt(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	if err := rpc.ValidateRequest(r, createKeyPromptSchema); err != nil {
-		return err
+func (r *RPC) CreateKeyPrompt(ctx context.Context, req *auth.CreateKeyPromptRequest) (*auth.CreateKeyPromptResponse, error) {
+	authUser := authlib.GetUserContext(ctx)
+	if authUser.ID != req.UserID && !authUser.Can("auth:create_keys") {
+		return nil, cher.New(cher.AccessDenied, nil)
 	}
 
-	req := &auth.CreateKeyPromptRequest{}
-	if err := rpc.ParseBody(r, req); err != nil {
-		return err
-	}
-
-	authuser := authlib.GetFromContext(r.Context())
-	if authuser.ID != req.UserID && !authuser.Can("auth:create_keys") {
-		return cher.New(cher.AccessDenied, nil)
-	}
-
-	user, err := a.FindUser(r.Context(), req.UserID)
+	user, err := r.app.FindUser(ctx, req.UserID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	waUser, err := a.ConvertUserForWA(r.Context(), user, true)
+	waUser, err := r.app.ConvertUserForWA(ctx, user, true)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	options, session, err := a.WA.BeginRegistration(waUser)
+	options, session, err := r.app.WA.BeginRegistration(waUser)
 
 	for _, key := range waUser.Credentials {
 		options.Response.CredentialExcludeList = append(options.Response.CredentialExcludeList, protocol.CredentialDescriptor{
@@ -63,13 +52,13 @@ func CreateKeyPrompt(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	id, err := a.CreateU2FChallenge(r.Context(), session)
+	id, err := r.app.CreateU2FChallenge(ctx, session)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return rpc.WriteOut(w, &auth.CreateKeyPromptResponse{
+	return &auth.CreateKeyPromptResponse{
 		ID:        id,
 		Challenge: options,
-	})
+	}, nil
 }

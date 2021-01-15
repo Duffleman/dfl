@@ -113,7 +113,7 @@
 
 			async handleWhoAmI() {
 				try {
-					this.promises.whoAmIPromise = axios.post('/whoami', null, {
+					this.promises.whoAmIPromise = axios.post('/1/2021-01-15/whoami', null, {
 						headers: { Authorization: `Bearer ${this.accessToken}` },
 					})
 
@@ -132,7 +132,7 @@
 			},
 
 			async createKey() {
-				this.promises.createKeyPrompt = axios.post('/create_key_prompt', {
+				this.promises.createKeyPrompt = axios.post('/1/2021-01-15/create_key_prompt', {
 					user_id: this.userId,
 				}, {
 					headers: { Authorization: `Bearer ${this.accessToken}` },
@@ -167,7 +167,7 @@
 
 				const credential = await this.handleCredentialRegister(publicKey);
 
-				this.promises.createKeyConfirm = axios.post(`/create_key_confirm`, {
+				this.promises.createKeyConfirm = axios.post(`/1/2021-01-15/create_key_confirm`, {
 					user_id: this.userId,
 					challenge_id: challengeId,
 					key_name: keyName,
@@ -206,7 +206,7 @@
 				let res;
 
 				try {
-					this.promises.listU2fKeys = axios.post('/list_u2f_keys', {
+					this.promises.listU2fKeys = axios.post('/1/2021-01-15/list_u2f_keys', {
 						user_id: userId,
 						include_unsigned: true,
 					}, {
@@ -236,7 +236,7 @@
 				this.loading = true;
 
 				try {
-					await axios.post('/delete_key', {
+					await axios.post('/1/2021-01-15/delete_key', {
 						user_id: this.userId,
 						key_id: keyId,
 					}, {
@@ -273,7 +273,7 @@
 			},
 
 			async signKey(keyId) {
-				this.promises.signKeyPrompts = axios.post('/sign_key_prompt', {
+				this.promises.signKeyPrompts = axios.post('/1/2021-01-15/sign_key_prompt', {
 					user_id: this.userId,
 					key_to_sign: keyId,
 				}, {
@@ -309,7 +309,7 @@
 				this.loading = true;
 
 				try {
-					await axios.post('/sign_key_confirm', {
+					await axios.post('/1/2021-01-15/sign_key_confirm', {
 						user_id: this.userId,
 						challenge_id: challengeId,
 						key_to_sign: keyId,

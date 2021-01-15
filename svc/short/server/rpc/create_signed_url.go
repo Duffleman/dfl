@@ -1,13 +1,10 @@
 package rpc
 
 import (
-	"net/http"
-	"strings"
+	"context"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/rpc"
 	"dfl/svc/short"
-	"dfl/svc/short/server/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/xeipuuv/gojsonschema"
@@ -35,38 +32,11 @@ var createSignedURLSchema = gojsonschema.NewStringLoader(`{
 }`)
 
 // CreateSignedURL creates a signed URL for file uploads
-func CreateSignedURL(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	ctx := r.Context()
-
-	err := rpc.ValidateRequest(r, createSignedURLSchema)
-	if err != nil {
-		return err
+func (r *RPC) CreateSignedURL(ctx context.Context, req *short.CreateSignedURLRequest) (*short.CreateSignedURLResponse, error) {
+	authUser := authlib.GetUserContext(ctx)
+	if !authUser.Can("short:upload") {
+		return nil, cher.New(cher.AccessDenied, nil)
 	}
 
-	req := &short.CreateSignedURLRequest{}
-	err = rpc.ParseBody(r, req)
-	if err != nil {
-		return err
-	}
-
-	authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
-	if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
-		return cher.New(cher.AccessDenied, nil)
-	}
-
-	res, err := a.CreateSignedURL(ctx, authUser.Username, req.Name, req.ContentType)
-	if err != nil {
-		return err
-	}
-
-	accept := r.Header.Get("Accept")
-
-	if strings.Contains(accept, "text/plain") {
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte(res.URL))
-	} else {
-		return rpc.WriteOut(w, res)
-	}
-
-	return nil
+	return r.app.CreateSignedURL(ctx, authUser.Username, req.Name, req.ContentType)
 }

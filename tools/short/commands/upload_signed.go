@@ -156,7 +156,7 @@ func prepareUpload(ctx context.Context, kc keychain.Keychain, filename string, f
 		name = &tmpName
 	}
 
-	return makeClient(kc).CreatedSignedURL(ctx, &short.CreateSignedURLRequest{
+	return makeClient(kc).CreateSignedURL(ctx, &short.CreateSignedURLRequest{
 		ContentType: contentType,
 		Name:        name,
 	})

@@ -1,10 +1,10 @@
-package rpc
+package html
 
 import (
 	"net/http"
 
 	"dfl/svc/short/server/app"
-	"dfl/svc/short/server/rpc/pipeline"
+	"dfl/svc/short/server/html/pipeline"
 
 	"github.com/go-chi/chi"
 )

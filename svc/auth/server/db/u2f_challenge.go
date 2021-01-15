@@ -5,8 +5,8 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 	"github.com/cuvva/cuvva-public-go/lib/ptr"
-	"github.com/cuvva/ksuid-go"
 	"github.com/duo-labs/webauthn/protocol"
 	"github.com/duo-labs/webauthn/webauthn"
 	"github.com/lib/pq"

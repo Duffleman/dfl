@@ -8,7 +8,7 @@ import (
 	"dfl/svc/auth"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/cuvva/ksuid-go"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 	"github.com/duo-labs/webauthn/webauthn"
 	"github.com/dvsekhvalnov/jose2go/base64url"
 )

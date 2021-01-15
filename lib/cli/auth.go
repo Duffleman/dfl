@@ -9,10 +9,6 @@ import (
 )
 
 func AuthHeader(keychain keychain.Keychain, tool string) string {
-	if keychain == nil {
-		return ""
-	}
-
 	var authBytes []byte
 	var err error
 

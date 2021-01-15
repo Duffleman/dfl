@@ -1,10 +1,9 @@
 package rpc
 
 import (
-	"net/http"
+	"context"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/rpc"
 	"dfl/svc/short"
 	"dfl/svc/short/server/app"
 
@@ -34,26 +33,13 @@ var removeShortcutSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func RemoveShortcut(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	ctx := r.Context()
-
-	err := rpc.ValidateRequest(r, removeShortcutSchema)
-	if err != nil {
-		return err
-	}
-
-	req := &short.ChangeShortcutRequest{}
-	err = rpc.ParseBody(r, req)
-	if err != nil {
-		return err
-	}
-
-	authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
-	if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
+func (r *RPC) RemoveShortcut(ctx context.Context, req *short.ChangeShortcutRequest) error {
+	authUser := authlib.GetUserContext(ctx)
+	if !authUser.Can("short:upload") {
 		return cher.New(cher.AccessDenied, nil)
 	}
 
-	qi := a.ParseQueryType(req.Query)
+	qi := r.app.ParseQueryType(req.Query)
 
 	if len(qi) != 1 {
 		return cher.New("multi_query_not_supported", cher.M{"query": qi})
@@ -63,14 +49,14 @@ func RemoveShortcut(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		return cher.New("cannot_query_resource_by_name", cher.M{"query": qi})
 	}
 
-	resource, err := a.GetResource(ctx, qi[0])
+	resource, err := r.app.GetResource(ctx, qi[0])
 	if err != nil {
 		return err
 	}
 
-	if resource.Owner != authUser.Username {
+	if resource.Owner != authUser.Username && !authUser.Can("short:admin") {
 		return cher.New(cher.AccessDenied, nil)
 	}
 
-	return a.RemoveShortcut(ctx, resource, req.Shortcut)
+	return r.app.RemoveShortcut(ctx, resource, req.Shortcut)
 }

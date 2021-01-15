@@ -2,13 +2,11 @@ package rpc
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"net/http"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/rpc"
 	"dfl/svc/auth"
-	"dfl/svc/auth/server/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/duo-labs/webauthn/protocol"
@@ -106,32 +104,23 @@ var signKeyConfirmSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func SignKeyConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	if err := rpc.ValidateRequest(r, signKeyConfirmSchema); err != nil {
-		return err
-	}
-
-	req := &auth.SignKeyConfirmRequest{}
-	if err := rpc.ParseBody(r, req); err != nil {
-		return err
-	}
-
-	authUser := authlib.GetFromContext(r.Context())
+func (r *RPC) SignKeyConfirm(ctx context.Context, req *auth.SignKeyConfirmRequest) error {
+	authUser := authlib.GetUserContext(ctx)
 	if authUser.ID != req.UserID {
 		return cher.New(cher.AccessDenied, nil)
 	}
 
-	user, err := a.FindUser(r.Context(), req.UserID)
+	user, err := r.app.FindUser(ctx, req.UserID)
 	if err != nil {
 		return err
 	}
 
-	waUser, err := a.ConvertUserForWA(r.Context(), user, false)
+	waUser, err := r.app.ConvertUserForWA(ctx, user, false)
 	if err != nil {
 		return err
 	}
 
-	session, err := a.FindU2FChallenge(r.Context(), req.ChallengeID)
+	session, err := r.app.FindU2FChallenge(ctx, req.ChallengeID)
 	if err != nil {
 		return err
 	}
@@ -140,19 +129,19 @@ func SignKeyConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		return cher.New(cher.NotFound, nil) // pretend to not know whats going on
 	}
 
-	parsed, err := ParseCredentialSignKey(req)
+	parsed, err := parseCredentialSignKey(req)
 	if err != nil {
 		return err
 	}
 
-	if _, err := a.WA.ValidateLogin(waUser, *session, parsed); err != nil {
+	if _, err := r.app.WA.ValidateLogin(waUser, *session, parsed); err != nil {
 		return err
 	}
 
-	return a.SignKey(r.Context(), user, req.KeyToSign)
+	return r.app.SignKey(ctx, user, req.KeyToSign)
 }
 
-func ParseCredentialSignKey(req *auth.SignKeyConfirmRequest) (*protocol.ParsedCredentialAssertionData, error) {
+func parseCredentialSignKey(req *auth.SignKeyConfirmRequest) (*protocol.ParsedCredentialAssertionData, error) {
 	mm := map[string]interface{}{
 		"id":    req.WebAuthn.ID,
 		"rawId": req.WebAuthn.RawID,

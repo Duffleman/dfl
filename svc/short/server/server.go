@@ -2,28 +2,27 @@ package server
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"os"
 
+	"dfl/lib/auth"
 	"dfl/lib/cache"
 	"dfl/lib/key"
-	dflmw "dfl/lib/middleware"
 	rpclib "dfl/lib/rpc"
 	"dfl/svc/short/server/app"
 	"dfl/svc/short/server/db"
+	"dfl/svc/short/server/html"
 	"dfl/svc/short/server/lib/storageproviders"
 	"dfl/svc/short/server/rpc"
+	"dfl/svc/short/server/vanilla"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/cuvva/cuvva-public-go/lib/ptr"
+	"github.com/cuvva/cuvva-public-go/lib/clog"
+	"github.com/cuvva/cuvva-public-go/lib/config"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 	"github.com/go-redis/redis"
 	_ "github.com/lib/pq" // required for the PGSQL driver to be loaded
 	"github.com/nishanths/go-xkcd/v2"
-	"github.com/rs/cors"
-	"github.com/sirupsen/logrus"
 	"github.com/speps/go-hashids"
 )
 
@@ -34,11 +33,13 @@ KeKIzFcp4NSDmjdLUjt+8a6/wY3EAqxM
 -----END PUBLIC KEY-----`
 
 type Config struct {
-	Logger *logrus.Logger
+	Logging clog.Config   `json:"logging"`
+	Server  config.Server `json:"server"`
 
-	Port      int    `envconfig:"port"`
-	DSN       string `envconfig:"dsn"`
+	DSN string `envconfig:"dsn"`
+
 	PublicKey string `envconfig:"public_key"`
+	JWTIssuer string `envconfig:"jwt_issuer"`
 
 	Salt    string `envconfig:"salt"`
 	RootURL string `envconfig:"root_url"`
@@ -57,11 +58,19 @@ type Config struct {
 
 func DefaultConfig() Config {
 	return Config{
-		Logger: logrus.New(),
+		Logging: clog.Config{
+			Format: "text",
+			Debug:  true,
+		},
+		Server: config.Server{
+			Addr:     "127.0.0.1:3001",
+			Graceful: 5,
+		},
 
-		Port:      3001,
-		DSN:       "postgresql://postgres@localhost/dflimg?sslmode=disable",
+		DSN: "postgresql://postgres@localhost/dflimg?sslmode=disable",
+
 		PublicKey: publicKey,
+		JWTIssuer: "localhost:3000",
 
 		Salt:    "savour-shingle-sidney-rajah-punk-lead-jenny-scot",
 		RootURL: "http://localhost:3001",
@@ -80,9 +89,7 @@ func DefaultConfig() Config {
 }
 
 func Run(cfg Config) error {
-	cfg.Logger.Formatter = &logrus.JSONFormatter{
-		DisableTimestamp: false,
-	}
+	log := cfg.Logging.Configure()
 
 	var err error
 	var sp storageproviders.StorageProvider
@@ -136,7 +143,7 @@ func Run(cfg Config) error {
 	xkcdClient := xkcd.NewClient()
 
 	app := &app.App{
-		Logger: cfg.Logger,
+		Logger: log,
 
 		SP:     sp,
 		DB:     db,
@@ -148,41 +155,36 @@ func Run(cfg Config) error {
 		RootURL: cfg.RootURL,
 	}
 
-	router := chi.NewRouter()
+	authHandlers := auth.Handlers{
+		auth.CreateScopedBearer(public, cfg.JWTIssuer),
+	}
 
-	router.Use(middleware.RequestID)
-	router.Use(middleware.RealIP)
-	router.Use(middleware.Recoverer)
-	router.Use(cors.AllowAll().Handler)
-	router.Use(dflmw.AuthMiddleware(public, []dflmw.HTTPResource{
-		{Verb: ptr.String(http.MethodGet)},
-		{Verb: ptr.String(http.MethodHead)},
-		{Verb: ptr.String(http.MethodOptions)},
-	}))
+	html := htmlPages(app)
+	vanilla := vanillaFuncs(app, authHandlers)
 
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "") // Needed for redirect to work
-		http.Redirect(w, r, "https://duffleman.co.uk", http.StatusMovedPermanently)
-	})
+	rpc := rpc.New(app, log, authHandlers, html, vanilla)
 
-	router.Get("/robots.txt", wrap(app, rpc.Robots))
+	return rpc.Run(cfg.Server)
+}
 
-	router.Post("/resave_hashes", wrap(app, rpc.ResaveHashes))
-	router.Post("/add_shortcut", wrap(app, rpc.AddShortcut))
-	router.Post("/create_signed_url", wrap(app, rpc.CreateSignedURL))
-	router.Post("/delete_resource", wrap(app, rpc.DeleteResource))
-	router.Post("/list_resources", wrap(app, rpc.ListResources))
-	router.Post("/remove_shortcut", wrap(app, rpc.RemoveShortcut))
-	router.Post("/set_nsfw", wrap(app, rpc.SetNSFW))
-	router.Post("/shorten_url", wrap(app, rpc.ShortenURL))
-	router.Post("/upload_file", wrap(app, rpc.UploadFile))
-	router.Post("/view_details", wrap(app, rpc.ViewDetails))
+func vanillaFuncs(app *app.App, authHandlers auth.Auth) *chi.Mux {
+	mux := chi.NewRouter()
 
-	router.Get("/{query}", wrap(app, rpc.HandleResource))
-	router.Head("/{query}", wrap(app, rpc.HeadResource))
+	mux.Use(auth.Middleware(authHandlers))
+	mux.Post("/upload_file", wrap(app, vanilla.UploadFile))
 
-	cfg.Logger.Infof("Server running on port %d", cfg.Port)
-	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), router)
+	return mux
+}
+
+func htmlPages(app *app.App) *chi.Mux {
+	mux := chi.NewRouter()
+
+	mux.Get("/", wrap(app, html.Index))
+	mux.Get("/robots.txt", wrap(app, html.Robots))
+	mux.Get("/{query}", wrap(app, html.HandleResource))
+	mux.Head("/{query}", wrap(app, html.HeadResource))
+
+	return mux
 }
 
 func wrap(a *app.App, fn func(*app.App, http.ResponseWriter, *http.Request) error) func(http.ResponseWriter, *http.Request) {

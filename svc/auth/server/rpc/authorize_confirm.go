@@ -2,12 +2,10 @@ package rpc
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"net/http"
 
-	"dfl/lib/rpc"
 	"dfl/svc/auth"
-	"dfl/svc/auth/server/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/duo-labs/webauthn/protocol"
@@ -147,53 +145,39 @@ var authorizeConfirmSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func AuthorizeConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	if err := rpc.ValidateRequest(r, authorizeConfirmSchema); err != nil {
-		return err
-	}
-
-	req := &auth.AuthorizeConfirmRequest{}
-	if err := rpc.ParseBody(r, req); err != nil {
-		return err
-	}
-
-	user, err := a.GetUserByName(r.Context(), req.Username)
+func (r *RPC) AuthorizeConfirm(ctx context.Context, req *auth.AuthorizeConfirmRequest) (*auth.AuthorizeConfirmResponse, error) {
+	user, err := r.app.GetUserByName(ctx, req.Username)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	waUser, err := a.ConvertUserForWA(r.Context(), user, false)
+	waUser, err := r.app.ConvertUserForWA(ctx, user, false)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	session, err := a.FindU2FChallenge(r.Context(), req.ChallengeID)
+	session, err := r.app.FindU2FChallenge(ctx, req.ChallengeID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if bytes.Compare(session.UserID, waUser.WebAuthnID()) != 0 {
-		return cher.New(cher.NotFound, nil) // pretend to not know whats going on
+		return nil, cher.New(cher.NotFound, nil) // pretend to not know whats going on
 	}
 
-	parsed, err := ParseCredentialLogin(req)
+	parsed, err := parseCredentialLogin(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if _, err := a.WA.ValidateLogin(waUser, *session, parsed); err != nil {
-		return err
+	if _, err := r.app.WA.ValidateLogin(waUser, *session, parsed); err != nil {
+		return nil, err
 	}
 
-	res, err := a.Authorization(r.Context(), req, user)
-	if err != nil {
-		return err
-	}
-
-	return rpc.WriteOut(w, res)
+	return r.app.Authorization(ctx, req, user)
 }
 
-func ParseCredentialLogin(req *auth.AuthorizeConfirmRequest) (*protocol.ParsedCredentialAssertionData, error) {
+func parseCredentialLogin(req *auth.AuthorizeConfirmRequest) (*protocol.ParsedCredentialAssertionData, error) {
 	mm := map[string]interface{}{
 		"id":    req.WebAuthn.ID,
 		"rawId": req.WebAuthn.RawID,
