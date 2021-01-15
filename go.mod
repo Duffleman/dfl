@@ -9,7 +9,6 @@ require (
 	github.com/aws/aws-sdk-go v1.36.28
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cuvva/cuvva-public-go v0.0.0-20210115174515-805a42b386cb
-	github.com/cuvva/cuvva-public-go/lib/ksuid v0.0.0-20210115114127-4c3836d71c40
 	github.com/danieljoos/wincred v1.1.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/duo-labs/webauthn v0.0.0-20200714211715-1daaee874e43
@@ -36,6 +35,5 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
-	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect
 	software.sslmate.com/src/go-pkcs12 v0.0.0-20201103104416-57fc603b7f52
 )
