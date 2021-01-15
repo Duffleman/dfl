@@ -1,18 +1,16 @@
 package rpc
 
 import (
-	"net/http"
+	"context"
 
-	"dfl/lib/rpc"
 	"dfl/svc/auth"
-	"dfl/svc/auth/server/app"
 
-	"github.com/cuvva/ksuid-go"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 	"github.com/duo-labs/webauthn/protocol"
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var registerSchema = gojsonschema.NewStringLoader(`{
+var registerPromptSchema = gojsonschema.NewStringLoader(`{
 	"type": "object",
 	"additionalProperties": false,
 
@@ -34,18 +32,9 @@ var registerSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func RegisterPrompt(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	if err := rpc.ValidateRequest(r, registerSchema); err != nil {
-		return err
-	}
-
-	req := &auth.RegisterPromptRequest{}
-	if err := rpc.ParseBody(r, req); err != nil {
-		return err
-	}
-
-	if _, err := a.CheckRegistrationValidity(r.Context(), req.Username, req.InviteCode); err != nil {
-		return err
+func (r *RPC) RegisterPrompt(ctx context.Context, req *auth.RegisterPromptRequest) (*auth.RegisterPromptResponse, error) {
+	if _, err := r.app.CheckRegistrationValidity(ctx, req.Username, req.InviteCode); err != nil {
+		return nil, err
 	}
 
 	user := &auth.User{
@@ -53,12 +42,12 @@ func RegisterPrompt(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		Username: req.Username,
 	}
 
-	waUser, err := a.ConvertUserForWA(r.Context(), user, true)
+	waUser, err := r.app.ConvertUserForWA(ctx, user, true)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	options, session, err := a.WA.BeginRegistration(waUser)
+	options, session, err := r.app.WA.BeginRegistration(waUser)
 
 	for _, key := range waUser.Credentials {
 		options.Response.CredentialExcludeList = append(options.Response.CredentialExcludeList, protocol.CredentialDescriptor{
@@ -67,13 +56,13 @@ func RegisterPrompt(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		})
 	}
 
-	id, err := a.CreateU2FChallenge(r.Context(), session)
+	id, err := r.app.CreateU2FChallenge(ctx, session)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return rpc.WriteOut(w, &auth.RegisterPromptResponse{
+	return &auth.RegisterPromptResponse{
 		ID:        id,
 		Challenge: options,
-	})
+	}, nil
 }

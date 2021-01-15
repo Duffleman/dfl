@@ -7,12 +7,11 @@ import (
 	"time"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
-	dfljwt "dfl/lib/jwt"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/db"
 
-	"github.com/cuvva/ksuid-go"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dvsekhvalnov/jose2go/base64url"
 )
@@ -70,8 +69,9 @@ func (a *App) Token(ctx context.Context, req *auth.TokenRequest) (*auth.TokenRes
 	expiresAt := time.Now().Add(calculateExpiryAt(ac.Scope))
 	atID := ksuid.Generate("accesstoken").String()
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES384, dfljwt.DFLClaims{
-		Scope:    ac.Scope,
+	token := jwt.NewWithClaims(jwt.SigningMethodES384, authlib.DFLClaims{
+		Version:  "01",
+		Scopes:   ac.Scope,
 		Username: user.Username,
 		StandardClaims: jwt.StandardClaims{
 			Id:        atID,

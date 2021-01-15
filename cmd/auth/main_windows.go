@@ -13,5 +13,6 @@ func init() {
 	rootCmd.AddCommand(commands.CreateInviteCode(kc))
 	rootCmd.AddCommand(commands.Manage(kc))
 	rootCmd.AddCommand(commands.Register(kc))
+	rootCmd.AddCommand(commands.SetToken(kc))
 	rootCmd.AddCommand(commands.ShowAccessToken(kc))
 }

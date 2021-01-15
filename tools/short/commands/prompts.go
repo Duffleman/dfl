@@ -3,8 +3,7 @@ package commands
 import (
 	"net/url"
 
-	"dfl/lib/cher"
-
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/manifoldco/promptui"
 )
 

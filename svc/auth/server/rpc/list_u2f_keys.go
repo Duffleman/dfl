@@ -1,14 +1,12 @@
 package rpc
 
 import (
-	"net/http"
+	"context"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
-	"dfl/lib/rpc"
 	"dfl/svc/auth"
-	"dfl/svc/auth/server/app"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -33,25 +31,12 @@ var listU2FKeysSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func ListU2FKeys(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	if err := rpc.ValidateRequest(r, listU2FKeysSchema); err != nil {
-		return err
+func (r *RPC) ListU2FKeys(ctx context.Context, req *auth.ListU2FKeysRequest) ([]*auth.PublicU2FKey, error) {
+	authUser := authlib.GetUserContext(ctx)
+
+	if authUser.ID != req.UserID && !authUser.Can("auth:list_keys") {
+		return nil, cher.New(cher.AccessDenied, nil)
 	}
 
-	req := &auth.ListU2FKeysRequest{}
-	if err := rpc.ParseBody(r, req); err != nil {
-		return err
-	}
-
-	user := authlib.GetFromContext(r.Context())
-	if user.ID != req.UserID && !user.Can("auth:list_keys") {
-		return cher.New(cher.AccessDenied, nil)
-	}
-
-	res, err := a.ListU2FKeys(r.Context(), req.UserID, req.IncludeUnsigned)
-	if err != nil {
-		return err
-	}
-
-	return rpc.WriteOut(w, res)
+	return r.app.ListU2FKeys(ctx, req)
 }

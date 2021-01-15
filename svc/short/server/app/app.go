@@ -12,7 +12,7 @@ import (
 
 // App is a struct for the App and it's handlers
 type App struct {
-	Logger *logrus.Logger
+	Logger *logrus.Entry
 
 	DB     *db.DB
 	SP     storageproviders.StorageProvider

@@ -1,9 +1,9 @@
 package pipeline
 
 import (
-	"dfl/lib/cher"
 	"dfl/lib/rpc"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"golang.org/x/sync/errgroup"
 )
 

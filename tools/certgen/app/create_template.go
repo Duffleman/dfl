@@ -6,8 +6,9 @@ import (
 	"math/big"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/tools/certgen"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 // createTemplate will create an x509 certificate to use as a template to create

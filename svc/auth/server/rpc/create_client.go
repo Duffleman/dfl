@@ -1,14 +1,12 @@
 package rpc
 
 import (
-	"net/http"
+	"context"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
-	"dfl/lib/rpc"
 	"dfl/svc/auth"
-	"dfl/svc/auth/server/app"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -39,25 +37,12 @@ var createClientSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func CreateClient(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	if err := rpc.ValidateRequest(r, createClientSchema); err != nil {
-		return err
+func (r *RPC) CreateClient(ctx context.Context, req *auth.CreateClientRequest) (*auth.CreateClientResponse, error) {
+	authUser := authlib.GetUserContext(ctx)
+
+	if !authUser.Can("auth:create_client") {
+		return nil, cher.New(cher.AccessDenied, nil)
 	}
 
-	req := &auth.CreateClientRequest{}
-	if err := rpc.ParseBody(r, req); err != nil {
-		return err
-	}
-
-	user := authlib.GetFromContext(r.Context())
-	if !user.Can("auth:create_client") {
-		return cher.New(cher.AccessDenied, nil)
-	}
-
-	res, err := a.CreateClient(r.Context(), req)
-	if err != nil {
-		return err
-	}
-
-	return rpc.WriteOut(w, res)
+	return r.app.CreateClient(ctx, req)
 }

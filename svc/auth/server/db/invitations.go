@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/svc/auth"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/cuvva/ksuid-go"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 )
 
 func (qw *QueryableWrapper) GetInvitationByCode(ctx context.Context, code string) (*auth.Invitation, error) {

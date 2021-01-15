@@ -9,10 +9,6 @@ import (
 )
 
 func AuthHeader(keychain keychain.Keychain, tool string) string {
-	if keychain == nil {
-		return ""
-	}
-
 	var authBytes []byte
 	var err error
 
@@ -30,5 +26,5 @@ func AuthHeader(keychain keychain.Keychain, tool string) string {
 		panic(err)
 	}
 
-	return fmt.Sprintf("%s %s", res.TokenType, res.AccessToken)
+	return res.AccessToken
 }

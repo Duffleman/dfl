@@ -1,7 +1,7 @@
 package pipeline
 
 import (
-	"dfl/lib/cher"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 // FilterMultiFile filters multi file requests so the rest of the chain doesn't

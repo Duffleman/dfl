@@ -8,8 +8,9 @@ import (
 	"os"
 	"path"
 
-	"dfl/lib/cher"
 	"dfl/tools/certgen"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 // getCertificate will load a certificate from the file system

@@ -6,8 +6,9 @@ import (
 	"os"
 	"path"
 
-	"dfl/lib/cher"
 	"dfl/tools/certgen"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 type pemType string

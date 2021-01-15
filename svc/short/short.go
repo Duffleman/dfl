@@ -8,7 +8,7 @@ import (
 
 type Service interface {
 	AddShortcut(context.Context, *ChangeShortcutRequest) error
-	CreatedSignedURL(context.Context, *CreateSignedURLRequest) (*CreateSignedURLResponse, error)
+	CreateSignedURL(context.Context, *CreateSignedURLRequest) (*CreateSignedURLResponse, error)
 	DeleteResource(context.Context, *IdentifyResource) error
 	ListResources(context.Context, *ListResourcesRequest) ([]*Resource, error)
 	RemoveShortcut(context.Context, *ChangeShortcutRequest) error

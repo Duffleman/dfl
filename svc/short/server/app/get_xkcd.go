@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"dfl/lib/ptr"
 	"dfl/svc/short"
 
+	"github.com/cuvva/cuvva-public-go/lib/ptr"
 	"github.com/nishanths/go-xkcd/v2"
 )
 

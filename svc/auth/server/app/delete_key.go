@@ -2,8 +2,9 @@ package app
 
 import (
 	"context"
+	"dfl/svc/auth"
 
-	"dfl/lib/cher"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 func (a *App) DeleteKey(ctx context.Context, userID, keyID string) error {
@@ -16,12 +17,15 @@ func (a *App) DeleteKey(ctx context.Context, userID, keyID string) error {
 		return cher.New(cher.AccessDenied, nil)
 	}
 
-	allCredentials, err := a.ListU2FKeys(ctx, userID, false)
+	signedKeys, err := a.ListU2FKeys(ctx, &auth.ListU2FKeysRequest{
+		UserID:          userID,
+		IncludeUnsigned: false,
+	})
 	if err != nil {
 		return err
 	}
 
-	if len(allCredentials) == 1 && keyID == allCredentials[0].ID {
+	if len(signedKeys) == 1 && keyID == signedKeys[0].ID {
 		return cher.New("last_signed_key", cher.M{"key_id": keyID})
 	}
 

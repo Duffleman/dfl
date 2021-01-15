@@ -7,11 +7,11 @@ import (
 	"time"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
-	"dfl/lib/ptr"
-	"dfl/lib/slicecontains"
 	"dfl/svc/auth"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
+	"github.com/cuvva/cuvva-public-go/lib/ptr"
+	"github.com/cuvva/cuvva-public-go/lib/slicecontains"
 	"golang.org/x/crypto/bcrypt"
 )
 

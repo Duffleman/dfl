@@ -12,10 +12,10 @@ import (
 	"sync"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/lib/keychain"
 	"dfl/svc/short"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/koyachi/go-nude"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -156,7 +156,7 @@ func prepareUpload(ctx context.Context, kc keychain.Keychain, filename string, f
 		name = &tmpName
 	}
 
-	return makeClient(kc).CreatedSignedURL(ctx, &short.CreateSignedURLRequest{
+	return makeClient(kc).CreateSignedURL(ctx, &short.CreateSignedURLRequest{
 		ContentType: contentType,
 		Name:        name,
 	})

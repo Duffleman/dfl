@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"dfl/lib/jsonclient"
+	"github.com/cuvva/cuvva-public-go/lib/jsonclient"
 )
 
 const userAgentTemplate = "crpc (+https://cuvva.com)"

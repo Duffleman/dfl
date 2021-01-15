@@ -12,8 +12,9 @@ import (
 	"path"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/tools/certgen"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 // getNextSerial gets the next serial number to issue, but does not save it yet

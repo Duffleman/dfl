@@ -4,9 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"dfl/lib/cher"
 	"dfl/svc/short"
 	"dfl/svc/short/server/db"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 var bannedPrefixes = []string{

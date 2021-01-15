@@ -2,14 +2,12 @@ package rpc
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"net/http"
 
-	"dfl/lib/cher"
-	"dfl/lib/rpc"
 	"dfl/svc/auth"
-	"dfl/svc/auth/server/app"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/duo-labs/webauthn/protocol"
 	"github.com/xeipuuv/gojsonschema"
 )
@@ -99,17 +97,8 @@ var registerConfirmSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func RegisterConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	if err := rpc.ValidateRequest(r, registerConfirmSchema); err != nil {
-		return err
-	}
-
-	req := &auth.RegisterConfirmRequest{}
-	if err := rpc.ParseBody(r, req); err != nil {
-		return err
-	}
-
-	session, err := a.FindU2FChallenge(r.Context(), req.ChallengeID)
+func (r *RPC) RegisterConfirm(ctx context.Context, req *auth.RegisterConfirmRequest) error {
+	session, err := r.app.FindU2FChallenge(ctx, req.ChallengeID)
 	if err != nil {
 		return err
 	}
@@ -119,7 +108,7 @@ func RegisterConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		Username: req.Username,
 	}
 
-	waUser, err := a.ConvertUserForWA(r.Context(), user, true)
+	waUser, err := r.app.ConvertUserForWA(ctx, user, true)
 	if err != nil {
 		return err
 	}
@@ -128,24 +117,24 @@ func RegisterConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		return cher.New(cher.NotFound, nil) // pretend to not know whats going on
 	}
 
-	parsed, err := ParseCredentialRegister(req)
+	parsed, err := parseCredentialRegister(req)
 	if err != nil {
 		return err
 	}
 
-	credential, err := a.WA.CreateCredential(waUser, *session, parsed)
+	credential, err := r.app.WA.CreateCredential(waUser, *session, parsed)
 	if err != nil {
 		return err
 	}
 
-	if _, err := a.Register(r.Context(), req, credential); err != nil {
+	if _, err := r.app.Register(ctx, req, credential); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func ParseCredentialRegister(req *auth.RegisterConfirmRequest) (*protocol.ParsedCredentialCreationData, error) {
+func parseCredentialRegister(req *auth.RegisterConfirmRequest) (*protocol.ParsedCredentialCreationData, error) {
 	mm := map[string]interface{}{
 		"id":    req.WebAuthn.ID,
 		"rawId": req.WebAuthn.RawID,

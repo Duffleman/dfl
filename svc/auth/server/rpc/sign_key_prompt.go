@@ -1,14 +1,12 @@
 package rpc
 
 import (
-	"net/http"
+	"context"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
-	"dfl/lib/rpc"
 	"dfl/svc/auth"
-	"dfl/svc/auth/server/app"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -34,47 +32,38 @@ var signKeyPromptSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func SignKeyPrompt(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	if err := rpc.ValidateRequest(r, signKeyPromptSchema); err != nil {
-		return err
+func (r *RPC) SignKeyPrompt(ctx context.Context, req *auth.SignKeyPromptRequest) (*auth.SignKeyPromptResponse, error) {
+	authUser := authlib.GetUserContext(ctx)
+	if authUser.ID != req.UserID {
+		return nil, cher.New(cher.AccessDenied, nil)
 	}
 
-	req := &auth.SignKeyPromptRequest{}
-	if err := rpc.ParseBody(r, req); err != nil {
-		return err
-	}
-
-	authuser := authlib.GetFromContext(r.Context())
-	if authuser.ID != req.UserID {
-		return cher.New(cher.AccessDenied, nil)
-	}
-
-	user, err := a.FindUser(r.Context(), req.UserID)
+	user, err := r.app.FindUser(ctx, req.UserID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := a.CanSign(r.Context(), user.ID, req.KeyToSign); err != nil {
-		return err
+	if err := r.app.CanSign(ctx, user.ID, req.KeyToSign); err != nil {
+		return nil, err
 	}
 
-	waUser, err := a.ConvertUserForWA(r.Context(), user, false)
+	waUser, err := r.app.ConvertUserForWA(ctx, user, false)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	options, session, err := a.WA.BeginLogin(waUser)
+	options, session, err := r.app.WA.BeginLogin(waUser)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	id, err := a.CreateU2FChallenge(r.Context(), session)
+	id, err := r.app.CreateU2FChallenge(ctx, session)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return rpc.WriteOut(w, &auth.SignKeyPromptResponse{
+	return &auth.SignKeyPromptResponse{
 		ID:        id,
 		Challenge: options,
-	})
+	}, nil
 }

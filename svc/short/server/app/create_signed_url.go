@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/svc/short"
 
-	"github.com/cuvva/ksuid-go"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 	pkgerr "github.com/pkg/errors"
 )
 

@@ -3,10 +3,10 @@ package db
 import (
 	"context"
 
-	"dfl/lib/cher"
 	"dfl/svc/auth"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 func (qw *QueryableWrapper) SearchByUsername(ctx context.Context, username string) error {

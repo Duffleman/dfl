@@ -8,8 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/svc/short"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 type XKCDFS struct{}

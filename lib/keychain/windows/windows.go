@@ -5,8 +5,7 @@ package windows
 import (
 	"fmt"
 
-	"dfl/lib/cher"
-
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/danieljoos/wincred"
 )
 

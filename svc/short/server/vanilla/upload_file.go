@@ -1,4 +1,4 @@
-package rpc
+package vanilla
 
 import (
 	"bytes"
@@ -7,18 +7,19 @@ import (
 	"strings"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
 	"dfl/lib/rpc"
 	"dfl/svc/short"
 	"dfl/svc/short/server/app"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 // UploadFile is an RPC handler for uploading a file
 func UploadFile(a *app.App, w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 
-	authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
-	if !authUser.Can("short:upload") && !authUser.Can("short:admin") {
+	authUser := authlib.GetUserContext(ctx)
+	if !authUser.Can("short:upload") {
 		return cher.New(cher.AccessDenied, nil)
 	}
 

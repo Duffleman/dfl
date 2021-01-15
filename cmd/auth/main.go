@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"dfl/lib/cher"
-
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

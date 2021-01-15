@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/svc/short"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	pkgerr "github.com/pkg/errors"
 )
 

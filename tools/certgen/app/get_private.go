@@ -11,8 +11,9 @@ import (
 	"os"
 	"path"
 
-	"dfl/lib/cher"
 	"dfl/tools/certgen"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 // getOrSetPrivate loads a certificate, or creates one if it cannot find one

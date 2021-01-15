@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"dfl/lib/crpc"
-	"dfl/lib/jsonclient"
+	"github.com/cuvva/cuvva-public-go/lib/crpc"
+	"github.com/cuvva/cuvva-public-go/lib/jsonclient"
 )
 
 type client struct {
@@ -15,43 +15,43 @@ type client struct {
 
 func NewClient(baseURL, key string) Service {
 	httpClient := &http.Client{
-		Transport: jsonclient.NewAuthenticatedRoundTripper(nil, key),
+		Transport: jsonclient.NewAuthenticatedRoundTripper(nil, "Bearer", key),
 		Timeout:   5 * time.Second,
 	}
 
 	return &client{
-		crpc.NewClient(baseURL+"/", httpClient),
+		crpc.NewClient(baseURL+"/1", httpClient),
 	}
 }
 
 func (c *client) AddShortcut(ctx context.Context, req *ChangeShortcutRequest) error {
-	return c.Do(ctx, "add_shortcut", req, nil)
+	return c.Do(ctx, "add_shortcut", "2021-01-15", req, nil)
 }
 
-func (c *client) CreatedSignedURL(ctx context.Context, req *CreateSignedURLRequest) (res *CreateSignedURLResponse, err error) {
-	return res, c.Do(ctx, "create_signed_url", req, &res)
+func (c *client) CreateSignedURL(ctx context.Context, req *CreateSignedURLRequest) (res *CreateSignedURLResponse, err error) {
+	return res, c.Do(ctx, "create_signed_url", "2021-01-15", req, &res)
 }
 
 func (c *client) DeleteResource(ctx context.Context, req *IdentifyResource) error {
-	return c.Do(ctx, "delete_resource", req, nil)
+	return c.Do(ctx, "delete_resource", "2021-01-15", req, nil)
 }
 
 func (c *client) ListResources(ctx context.Context, req *ListResourcesRequest) (res []*Resource, err error) {
-	return res, c.Do(ctx, "list_resources", req, &res)
+	return res, c.Do(ctx, "list_resources", "2021-01-15", req, &res)
 }
 
 func (c *client) RemoveShortcut(ctx context.Context, req *ChangeShortcutRequest) error {
-	return c.Do(ctx, "remove_shortcut", req, nil)
+	return c.Do(ctx, "remove_shortcut", "2021-01-15", req, nil)
 }
 
 func (c *client) SetNSFW(ctx context.Context, req *SetNSFWRequest) error {
-	return c.Do(ctx, "set_nsfw", req, nil)
+	return c.Do(ctx, "set_nsfw", "2021-01-15", req, nil)
 }
 
 func (c *client) ShortenURL(ctx context.Context, req *CreateURLRequest) (res *CreateResourceResponse, err error) {
-	return res, c.Do(ctx, "shorten_url", req, &res)
+	return res, c.Do(ctx, "shorten_url", "2021-01-15", req, &res)
 }
 
 func (c *client) ViewDetails(ctx context.Context, req *IdentifyResource) (res *Resource, err error) {
-	return res, c.Do(ctx, "view_details", req, &res)
+	return res, c.Do(ctx, "view_details", "2021-01-15", req, &res)
 }

@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"dfl/lib/cher"
 	"dfl/svc/auth"
 
-	"github.com/cuvva/ksuid-go"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 	"github.com/duo-labs/webauthn/webauthn"
 )
 

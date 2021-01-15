@@ -7,7 +7,7 @@ import (
 
 	"dfl/svc/short"
 
-	"github.com/cuvva/ksuid-go"
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 )
 
 // ShortenURL shortens a URL

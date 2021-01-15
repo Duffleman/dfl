@@ -5,8 +5,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"dfl/lib/cher"
 	"dfl/svc/monitor"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 func ParseData(jsonString []byte) ([]*monitor.Job, error) {

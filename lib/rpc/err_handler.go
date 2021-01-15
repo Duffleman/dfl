@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"dfl/lib/cher"
-
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/sirupsen/logrus"
 )
 
-func HandleError(w http.ResponseWriter, r *http.Request, err error, logger *logrus.Logger) {
+func HandleError(w http.ResponseWriter, r *http.Request, err error, logger *logrus.Entry) {
 	if err == nil {
 		return
 	}
@@ -44,7 +43,7 @@ func HandleError(w http.ResponseWriter, r *http.Request, err error, logger *logr
 	json.NewEncoder(w).Encode(cher.New("unknown", cher.M{"error": err.Error()}))
 }
 
-func logInfo(l *logrus.Logger, err error) {
+func logInfo(l *logrus.Entry, err error) {
 	if l == nil {
 		return
 	}
@@ -52,7 +51,7 @@ func logInfo(l *logrus.Logger, err error) {
 	l.WithError(err).Info(err)
 }
 
-func logWarn(l *logrus.Logger, err error) {
+func logWarn(l *logrus.Entry, err error) {
 	if l == nil {
 		return
 	}

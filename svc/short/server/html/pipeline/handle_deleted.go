@@ -1,7 +1,7 @@
 package pipeline
 
 import (
-	"dfl/lib/cher"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 // HandleDeleted resources, show a 404 if not found

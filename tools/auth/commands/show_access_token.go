@@ -6,12 +6,12 @@ import (
 	"os"
 	"time"
 
-	"dfl/lib/cher"
+	authlib "dfl/lib/auth"
 	"dfl/lib/cli"
-	dfljwt "dfl/lib/jwt"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +32,7 @@ func ShowAccessToken(keychain keychain.Keychain) *cobra.Command {
 			}
 
 			var res auth.TokenResponse
-			var dflclaims dfljwt.DFLClaims
+			var dflclaims authlib.DFLClaims
 
 			if err := json.Unmarshal(authBytes, &res); err != nil {
 				return err
@@ -47,7 +47,7 @@ func ShowAccessToken(keychain keychain.Keychain) *cobra.Command {
 			fmt.Fprintf(os.Stderr, "\n\n")
 			fmt.Fprintf(os.Stderr, "User ID:    %s\n", dflclaims.Subject)
 			fmt.Fprintf(os.Stderr, "Username:   %s\n", dflclaims.Username)
-			fmt.Fprintf(os.Stderr, "Scopes:     %s\n", dflclaims.Scope)
+			fmt.Fprintf(os.Stderr, "Scopes:     %s\n", dflclaims.Scopes)
 			fmt.Fprintf(os.Stderr, "Client ID:  %s\n", dflclaims.Audience)
 			fmt.Fprintf(os.Stderr, "Issuer:     %s\n", dflclaims.Issuer)
 			fmt.Fprintf(os.Stderr, "Expires at: ")

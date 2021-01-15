@@ -123,7 +123,7 @@
 
 			async confirm(username, challengeId, credential) {
 				try {
-					return await axios.post('/authorize_confirm', {
+					return await axios.post('/1/2021-01-15/authorize_confirm', {
 						...params,
 						username: this.username,
 						challenge_id: challengeId,
@@ -151,7 +151,7 @@
 
 			async loginPrompt(username) {
 				try {
-					return await axios.post('/authorize_prompt', {
+					return await axios.post('/1/2021-01-15/authorize_prompt', {
 						username: username,
 					});
 				} catch (error) {

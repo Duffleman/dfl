@@ -3,8 +3,9 @@ package app
 import (
 	"context"
 
-	"dfl/lib/cher"
 	"dfl/svc/short"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
 // DeleteResource deletes a resource

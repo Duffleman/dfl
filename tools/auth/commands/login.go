@@ -10,11 +10,11 @@ import (
 	"os/exec"
 	"runtime"
 
-	"dfl/lib/cher"
 	"dfl/lib/cli"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/dvsekhvalnov/jose2go/base64url"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -22,7 +22,7 @@ import (
 	"github.com/tjarratt/babble"
 )
 
-func Login(clientID, scope string, kc keychain.Keychain) *cobra.Command {
+func Login(clientID, scopes string, kc keychain.Keychain) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "login",
 		Aliases: []string{"l"},
@@ -34,7 +34,7 @@ func Login(clientID, scope string, kc keychain.Keychain) *cobra.Command {
 
 			params := url.Values{
 				"client_id":             []string{clientID},
-				"scope":                 []string{scope},
+				"scope":                 []string{scopes},
 				"response_type":         []string{"code"},
 				"state":                 []string{state},
 				"nonce":                 []string{makeNonce()},
@@ -84,7 +84,7 @@ func Login(clientID, scope string, kc keychain.Keychain) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&scope, "scope", "s", scope, "Scopes to request, space delimited")
+	cmd.Flags().StringVarP(&scopes, "scopes", "s", scopes, "Scopes to request, space delimited")
 
 	return cmd
 }

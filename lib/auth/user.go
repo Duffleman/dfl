@@ -1,13 +1,5 @@
 package auth
 
-import (
-	"context"
-
-	"dfl/lib/rpc"
-)
-
-var UserContextKey rpc.ContextKey = "user"
-
 type AuthUser struct {
 	ID       string
 	Username string
@@ -16,8 +8,4 @@ type AuthUser struct {
 
 func (au AuthUser) Can(action string) bool {
 	return Can(action, au.Scopes)
-}
-
-func GetFromContext(ctx context.Context) AuthUser {
-	return ctx.Value(UserContextKey).(AuthUser)
 }

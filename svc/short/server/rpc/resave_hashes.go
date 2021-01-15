@@ -1,20 +1,18 @@
 package rpc
 
 import (
-	"net/http"
+	"context"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cher"
-	"dfl/svc/short/server/app"
+
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 )
 
-func ResaveHashes(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	ctx := r.Context()
-
-	authUser := ctx.Value(authlib.UserContextKey).(authlib.AuthUser)
+func (r *RPC) ResaveHashes(ctx context.Context) error {
+	authUser := authlib.GetUserContext(ctx)
 	if !authUser.Can("short:admin") {
 		return cher.New(cher.AccessDenied, nil)
 	}
 
-	return a.ResaveHashes(ctx)
+	return r.app.ResaveHashes(ctx)
 }
