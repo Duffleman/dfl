@@ -2,23 +2,21 @@ package server
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 
+	"dfl/lib/auth"
 	"dfl/lib/key"
-	dflmw "dfl/lib/middleware"
 	rpclib "dfl/lib/rpc"
 	"dfl/svc/auth/server/app"
 	"dfl/svc/auth/server/db"
+	"dfl/svc/auth/server/html"
 	"dfl/svc/auth/server/rpc"
 
-	"github.com/cuvva/cuvva-public-go/lib/ptr"
+	"github.com/cuvva/cuvva-public-go/lib/clog"
+	"github.com/cuvva/cuvva-public-go/lib/config"
 	"github.com/duo-labs/webauthn/webauthn"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 	_ "github.com/lib/pq" // required for the PGSQL driver to be loaded
-	"github.com/rs/cors"
-	"github.com/sirupsen/logrus"
 )
 
 const privateKey = `-----BEGIN EC PRIVATE KEY-----
@@ -35,10 +33,10 @@ KeKIzFcp4NSDmjdLUjt+8a6/wY3EAqxM
 -----END PUBLIC KEY-----`
 
 type Config struct {
-	Logger *logrus.Logger
+	Logging clog.Config   `json:"logging"`
+	Server  config.Server `json:"server"`
 
-	Port int    `envconfig:"port"`
-	DSN  string `envconfig:"dsn"`
+	DSN string `envconfig:"dsn"`
 
 	PrivateKey string `envconfig:"private_key"`
 	PublicKey  string `envconfig:"public_key"`
@@ -55,8 +53,14 @@ type WebAuthn struct {
 
 func DefaultConfig() Config {
 	return Config{
-		Logger: logrus.New(),
-		Port:   3000,
+		Logging: clog.Config{
+			Format: "text",
+			Debug:  true,
+		},
+		Server: config.Server{
+			Addr:     "127.0.0.1:3000",
+			Graceful: 5,
+		},
 
 		DSN: "postgresql://postgres@localhost/dflauth?sslmode=disable",
 
@@ -73,9 +77,7 @@ func DefaultConfig() Config {
 }
 
 func Run(cfg Config) error {
-	cfg.Logger.Formatter = &logrus.JSONFormatter{
-		DisableTimestamp: false,
-	}
+	log := cfg.Logging.Configure()
 
 	pgDb, err := sql.Open("postgres", cfg.DSN)
 	if err != nil {
@@ -99,55 +101,31 @@ func Run(cfg Config) error {
 	}
 
 	app := &app.App{
-		Logger:    cfg.Logger,
+		Logger:    log,
 		WA:        web,
 		SK:        sk,
 		DB:        db,
 		JWTIssuer: cfg.JWTIssuer,
 	}
 
-	router := chi.NewRouter()
+	oldStyle := htmlPages(sk.Public(), app)
 
-	router.Use(middleware.RequestID)
-	router.Use(middleware.RealIP)
-	router.Use(middleware.Recoverer)
-	router.Use(cors.AllowAll().Handler)
-	router.Use(dflmw.AuthMiddleware(sk.Public(), []dflmw.HTTPResource{
-		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/")},
-		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/authorize")},
-		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/register")},
-		{Verb: ptr.String(http.MethodGet), Path: ptr.String("/u2f_manage")},
-		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/authorize_confirm")},
-		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/authorize_prompt")},
-		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/register_confirm")},
-		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/register_prompt")},
-		{Verb: ptr.String(http.MethodPost), Path: ptr.String("/token")},
-	}))
+	authHandler := auth.CreateScopedBearer(sk.Public(), cfg.JWTIssuer)
 
-	// Internal
-	router.Get("/", wrap(app, rpc.Index))
-	router.Get("/register", wrap(app, rpc.RegisterGet))
-	router.Get("/u2f_manage", wrap(app, rpc.U2FManageGet))
-	router.Post("/create_client", wrap(app, rpc.CreateClient))
-	router.Post("/create_invite_code", wrap(app, rpc.CreateInviteCode))
-	router.Post("/create_key_confirm", wrap(app, rpc.CreateKeyConfirm))
-	router.Post("/create_key_prompt", wrap(app, rpc.CreateKeyPrompt))
-	router.Post("/delete_key", wrap(app, rpc.DeleteKey))
-	router.Post("/list_u2f_keys", wrap(app, rpc.ListU2FKeys))
-	router.Post("/register_confirm", wrap(app, rpc.RegisterConfirm))
-	router.Post("/register_prompt", wrap(app, rpc.RegisterPrompt))
-	router.Post("/sign_key_confirm", wrap(app, rpc.SignKeyConfirm))
-	router.Post("/sign_key_prompt", wrap(app, rpc.SignKeyPrompt))
-	router.Post("/whoami", wrap(app, rpc.WhoAmI))
+	rpc := rpc.New(app, log, authHandler, oldStyle)
 
-	// OAuth
-	router.Get("/authorize", wrap(app, rpc.AuthorizeGet))
-	router.Post("/authorize_confirm", wrap(app, rpc.AuthorizeConfirm))
-	router.Post("/authorize_prompt", wrap(app, rpc.AuthorizePrompt))
-	router.Post("/token", wrap(app, rpc.Token))
+	return rpc.Run(cfg.Server)
+}
 
-	cfg.Logger.Infof("Server running on port %d", cfg.Port)
-	return http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), router)
+func htmlPages(publicKey interface{}, app *app.App) *chi.Mux {
+	mux := chi.NewRouter()
+
+	mux.Get("/", wrap(app, html.Index))
+	mux.Get("/authorize", wrap(app, html.Authorize))
+	mux.Get("/register", wrap(app, html.Register))
+	mux.Get("/u2f_manage", wrap(app, html.U2FManage))
+
+	return mux
 }
 
 func wrap(a *app.App, fn func(*app.App, http.ResponseWriter, *http.Request) error) func(http.ResponseWriter, *http.Request) {

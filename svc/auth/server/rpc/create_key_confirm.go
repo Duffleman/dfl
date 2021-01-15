@@ -2,12 +2,10 @@ package rpc
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
-	"net/http"
 
-	"dfl/lib/rpc"
 	"dfl/svc/auth"
-	"dfl/svc/auth/server/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/duo-labs/webauthn/protocol"
@@ -93,31 +91,22 @@ var createKeyConfirmSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func CreateKeyConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	if err := rpc.ValidateRequest(r, createKeyConfirmSchema); err != nil {
-		return err
-	}
-
-	req := &auth.CreateKeyConfirmRequest{}
-	if err := rpc.ParseBody(r, req); err != nil {
-		return err
-	}
-
-	user, err := a.FindUser(r.Context(), req.UserID)
+func (r *RPC) CreateKeyConfirm(ctx context.Context, req *auth.CreateKeyConfirmRequest) error {
+	user, err := r.app.FindUser(ctx, req.UserID)
 	if err != nil {
 		return err
 	}
 
-	if err := a.CheckLoginValidity(r.Context(), user); err != nil {
+	if err := r.app.CheckLoginValidity(ctx, user); err != nil {
 		return err
 	}
 
-	waUser, err := a.ConvertUserForWA(r.Context(), user, true)
+	waUser, err := r.app.ConvertUserForWA(ctx, user, true)
 	if err != nil {
 		return err
 	}
 
-	session, err := a.FindU2FChallenge(r.Context(), req.ChallengeID)
+	session, err := r.app.FindU2FChallenge(ctx, req.ChallengeID)
 	if err != nil {
 		return err
 	}
@@ -126,24 +115,24 @@ func CreateKeyConfirm(a *app.App, w http.ResponseWriter, r *http.Request) error 
 		return cher.New(cher.NotFound, nil) // pretend to not know whats going on
 	}
 
-	parsed, err := ParseCredentialCreateKey(req)
+	parsed, err := parseCredentialCreateKey(req)
 	if err != nil {
 		return err
 	}
 
-	credential, err := a.WA.CreateCredential(waUser, *session, parsed)
+	credential, err := r.app.WA.CreateCredential(waUser, *session, parsed)
 	if err != nil {
 		return err
 	}
 
-	if _, err := a.CreateU2FCredential(r.Context(), user.ID, req.ChallengeID, req.KeyName, credential, nil); err != nil {
+	if _, err := r.app.CreateU2FCredential(ctx, user.ID, req.ChallengeID, req.KeyName, credential, nil); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func ParseCredentialCreateKey(req *auth.CreateKeyConfirmRequest) (*protocol.ParsedCredentialCreationData, error) {
+func parseCredentialCreateKey(req *auth.CreateKeyConfirmRequest) (*protocol.ParsedCredentialCreationData, error) {
 	mm := map[string]interface{}{
 		"id":    req.WebAuthn.ID,
 		"rawId": req.WebAuthn.RawID,

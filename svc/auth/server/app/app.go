@@ -8,7 +8,7 @@ import (
 )
 
 type App struct {
-	Logger *logrus.Logger
+	Logger *logrus.Entry
 
 	WA *webauthn.WebAuthn
 	DB *db.DB

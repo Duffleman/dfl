@@ -1,4 +1,4 @@
-package rpc
+package html
 
 import (
 	"net/http"
@@ -7,12 +7,12 @@ import (
 	"dfl/svc/auth/server/app"
 )
 
-func Index(a *app.App, w http.ResponseWriter, r *http.Request) error {
+func Register(a *app.App, w http.ResponseWriter, r *http.Request) error {
 	return rpc.QuickTemplate(w, map[string]interface{}{
-		"title":      "DFL Auth",
-		"activeHome": true,
+		"title":          "Register",
+		"activeRegister": true,
 	}, []string{
-		"./resources/auth/index.html",
+		"./resources/auth/register.html",
 		"./resources/auth/_nav.html",
 		"./resources/auth/layouts/root.html",
 	})

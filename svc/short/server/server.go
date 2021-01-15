@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"dfl/lib/cache"
 	"dfl/lib/key"
@@ -34,7 +35,7 @@ KeKIzFcp4NSDmjdLUjt+8a6/wY3EAqxM
 -----END PUBLIC KEY-----`
 
 type Config struct {
-	Logger *logrus.Logger
+	Logger *logrus.Entry
 
 	Port      int    `envconfig:"port"`
 	DSN       string `envconfig:"dsn"`
@@ -57,7 +58,7 @@ type Config struct {
 
 func DefaultConfig() Config {
 	return Config{
-		Logger: logrus.New(),
+		Logger: logrus.New().WithTime(time.Now()),
 
 		Port:      3001,
 		DSN:       "postgresql://postgres@localhost/dflimg?sslmode=disable",
@@ -80,10 +81,6 @@ func DefaultConfig() Config {
 }
 
 func Run(cfg Config) error {
-	cfg.Logger.Formatter = &logrus.JSONFormatter{
-		DisableTimestamp: false,
-	}
-
 	var err error
 	var sp storageproviders.StorageProvider
 

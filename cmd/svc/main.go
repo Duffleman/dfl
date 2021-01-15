@@ -1,6 +1,11 @@
 package main
 
 import (
+	"os"
+
+	"github.com/cuvva/cuvva-public-go/lib/config"
+	"github.com/cuvva/cuvva-public-go/lib/servicecontext"
+	"github.com/cuvva/ksuid-go"
 	"github.com/spf13/cobra"
 
 	auth "dfl/svc/auth/server/cmd"
@@ -13,6 +18,13 @@ var RootCmd = &cobra.Command{
 	Use:   "dfl",
 	Short: "dfl monobinary for dfl monorepo",
 	Long:  "dfl monobinary contains entrypoints for all dfl services in the monorepo",
+
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		env := config.EnvironmentName(os.Getenv)
+
+		ksuid.SetEnvironment(env)
+		servicecontext.Set(cmd.Use, env)
+	},
 }
 
 func init() {

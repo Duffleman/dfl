@@ -1,4 +1,4 @@
-package rpc
+package html
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ import (
 	"github.com/cuvva/cuvva-public-go/lib/slicecontains"
 )
 
-func AuthorizeGet(a *app.App, w http.ResponseWriter, r *http.Request) error {
+func Authorize(a *app.App, w http.ResponseWriter, r *http.Request) error {
 	params, err := parseAuthorizeParams(r)
 	if err != nil {
 		return err

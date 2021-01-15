@@ -7,7 +7,6 @@ import (
 	"time"
 
 	authlib "dfl/lib/auth"
-	dfljwt "dfl/lib/jwt"
 	"dfl/svc/auth"
 	"dfl/svc/auth/server/db"
 
@@ -70,8 +69,8 @@ func (a *App) Token(ctx context.Context, req *auth.TokenRequest) (*auth.TokenRes
 	expiresAt := time.Now().Add(calculateExpiryAt(ac.Scope))
 	atID := ksuid.Generate("accesstoken").String()
 
-	token := jwt.NewWithClaims(jwt.SigningMethodES384, dfljwt.DFLClaims{
-		Scope:    ac.Scope,
+	token := jwt.NewWithClaims(jwt.SigningMethodES384, authlib.DFLClaims{
+		Scopes:   strings.Fields(ac.Scope), // TODO(gm): come back to this
 		Username: user.Username,
 		StandardClaims: jwt.StandardClaims{
 			Id:        atID,
