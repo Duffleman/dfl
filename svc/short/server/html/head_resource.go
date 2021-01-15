@@ -1,4 +1,4 @@
-package rpc
+package html
 
 import (
 	"net/http"

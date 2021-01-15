@@ -31,7 +31,7 @@ var listU2FKeysSchema = gojsonschema.NewStringLoader(`{
 	}
 }`)
 
-func (r *RPC) ListU2FKeys(ctx context.Context, req *auth.ListU2FKeysRequest) ([]auth.PublicU2FKey, error) {
+func (r *RPC) ListU2FKeys(ctx context.Context, req *auth.ListU2FKeysRequest) ([]*auth.PublicU2FKey, error) {
 	authUser := authlib.GetUserContext(ctx)
 
 	if authUser.ID != req.UserID && !authUser.Can("auth:list_keys") {

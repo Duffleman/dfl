@@ -108,16 +108,16 @@ func Run(cfg Config) error {
 		JWTIssuer: cfg.JWTIssuer,
 	}
 
-	oldStyle := htmlPages(sk.Public(), app)
+	html := htmlPages(app)
 
 	authHandler := auth.CreateScopedBearer(sk.Public(), cfg.JWTIssuer)
 
-	rpc := rpc.New(app, log, authHandler, oldStyle)
+	rpc := rpc.New(app, log, authHandler, html)
 
 	return rpc.Run(cfg.Server)
 }
 
-func htmlPages(publicKey interface{}, app *app.App) *chi.Mux {
+func htmlPages(app *app.App) *chi.Mux {
 	mux := chi.NewRouter()
 
 	mux.Get("/", wrap(app, html.Index))
