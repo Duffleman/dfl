@@ -33,8 +33,8 @@ KeKIzFcp4NSDmjdLUjt+8a6/wY3EAqxM
 -----END PUBLIC KEY-----`
 
 type Config struct {
-	Logging clog.Config   `json:"logging"`
-	Server  config.Server `json:"server"`
+	Logging clog.Config   `envconfig:"logging"`
+	Server  config.Server `envconfig:"server"`
 
 	DSN string `envconfig:"dsn"`
 
