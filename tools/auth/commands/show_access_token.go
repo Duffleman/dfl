@@ -45,6 +45,7 @@ func ShowAccessToken(keychain keychain.Keychain) *cobra.Command {
 			fmt.Fprintf(os.Stdout, res.AccessToken)
 
 			fmt.Fprintf(os.Stderr, "\n\n")
+			fmt.Fprintf(os.Stderr, "Version:    %s\n", dflclaims.Version)
 			fmt.Fprintf(os.Stderr, "User ID:    %s\n", dflclaims.Subject)
 			fmt.Fprintf(os.Stderr, "Username:   %s\n", dflclaims.Username)
 			fmt.Fprintf(os.Stderr, "Scopes:     %s\n", dflclaims.Scopes)
