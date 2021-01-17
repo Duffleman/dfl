@@ -3,14 +3,15 @@ package main
 import (
 	"os"
 
-	"github.com/cuvva/cuvva-public-go/lib/config"
-	"github.com/cuvva/cuvva-public-go/lib/ksuid"
-	"github.com/cuvva/cuvva-public-go/lib/servicecontext"
-	"github.com/spf13/cobra"
+	"dfl/lib/config"
 
 	auth "dfl/svc/auth/server/cmd"
 	monitor "dfl/svc/monitor/server/cmd"
 	short "dfl/svc/short/server/cmd"
+
+	"github.com/cuvva/cuvva-public-go/lib/ksuid"
+	"github.com/cuvva/cuvva-public-go/lib/servicecontext"
+	"github.com/spf13/cobra"
 )
 
 // RootCmd is the initial entrypoint where all services are mounted.
