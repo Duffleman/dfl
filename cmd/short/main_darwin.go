@@ -4,20 +4,24 @@ import (
 	"dfl/lib/keychain/darwin"
 	authCommands "dfl/tools/auth/commands"
 	"dfl/tools/short/commands"
+
+	"github.com/urfave/cli/v2"
 )
 
 func init() {
 	kc := darwin.Keychain{}
 
-	rootCmd.AddCommand(commands.AddShortcut(kc))
-	rootCmd.AddCommand(commands.CopyURL(kc))
-	rootCmd.AddCommand(commands.DeleteResource(kc))
-	rootCmd.AddCommand(commands.RemoveShortcut(kc))
-	rootCmd.AddCommand(commands.Screenshot(kc))
-	rootCmd.AddCommand(commands.SetNSFW(kc))
-	rootCmd.AddCommand(commands.ShortenURL(kc))
-	rootCmd.AddCommand(commands.UploadSigned(kc))
-	rootCmd.AddCommand(commands.ViewDetails(kc))
+	rootCmd.Commands = []*cli.Command{
+		commands.AddShortcut(kc),
+		commands.CopyURL(kc),
+		commands.DeleteResource(kc),
+		commands.RemoveShortcut(kc),
+		commands.Screenshot(kc),
+		commands.SetNSFW(kc),
+		commands.ShortenURL(kc),
+		commands.UploadSigned(kc),
+		commands.ViewDetails(kc),
 
-	rootCmd.AddCommand(authCommands.Login(clientID, "short:upload short:delete", kc))
+		authCommands.Login(clientID, "short:upload short:delete", kc),
+	}
 }

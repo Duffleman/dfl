@@ -8,25 +8,25 @@ import (
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func SetToken(keychain keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:   "set [token]",
-		Short: "Override the token to a new one you manually provide.",
-		Args:  cobra.ExactArgs(1),
+func SetToken(keychain keychain.Keychain) *cli.Command {
+	return &cli.Command{
+		Name:      "set-access-token",
+		Usage:     "Manually set the access token",
+		ArgsUsage: "[token]",
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Action: func(c *cli.Context) error {
 			var dflclaims authlib.DFLClaims
 
-			if token, _ := jwt.ParseWithClaims(args[0], &dflclaims, nil); token == nil {
+			if token, _ := jwt.ParseWithClaims(c.Args().First(), &dflclaims, nil); token == nil {
 				return cher.New("cannot_parse_token", nil)
 			}
 
 			res := auth.TokenResponse{
 				UserID:      dflclaims.Subject,
-				AccessToken: args[0],
+				AccessToken: c.Args().First(),
 				TokenType:   "Bearer",
 				Expires:     int(dflclaims.ExpiresAt),
 			}

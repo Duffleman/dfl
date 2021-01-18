@@ -1,32 +1,28 @@
 package commands
 
 import (
-	"context"
 	"fmt"
 	"regexp"
 	"time"
 
-	"dfl/lib/cli"
+	clilib "dfl/lib/cli"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/manifoldco/promptui"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
 var scopesRegex = regexp.MustCompile(`^(?:[a-z*]+:[a-z*]+\s?)+$`)
 
-func CreateInviteCode(kc keychain.Keychain) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:     "create-invite-code",
+func CreateInviteCode(kc keychain.Keychain) *cli.Command {
+	cmd := &cli.Command{
+		Name:    "create-invite-code",
+		Usage:   "Create an invite code for someone else",
 		Aliases: []string{"cic"},
-		Short:   "Create an invite code for another user to register",
-		Args:    cobra.NoArgs,
 
-		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			ctx := context.Background()
-
+		Action: func(c *cli.Context) (err error) {
 			scopes, code, expiresAt, err := handleInputs()
 			if err != nil {
 				return err
@@ -37,7 +33,7 @@ func CreateInviteCode(kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			res, err := client.CreateInviteCode(ctx, &auth.CreateInviteCodeRequest{
+			res, err := client.CreateInviteCode(c.Context, &auth.CreateInviteCodeRequest{
 				Code:      code,
 				ExpiresAt: expiresAt,
 				Scopes:    scopes,
@@ -46,7 +42,7 @@ func CreateInviteCode(kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			fmt.Println(cli.Success("Success!"))
+			fmt.Println(clilib.Success("Success!"))
 
 			fmt.Printf("Code: %s\n", res.Code)
 			if res.ExpiresAt != nil {

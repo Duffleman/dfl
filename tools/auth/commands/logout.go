@@ -3,23 +3,23 @@ package commands
 import (
 	"fmt"
 
-	"dfl/lib/cli"
+	clilib "dfl/lib/cli"
 	"dfl/lib/keychain"
 
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func Logout(keychain keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:   "logout",
-		Short: "Logout and delete auth credentials",
+func Logout(keychain keychain.Keychain) *cli.Command {
+	return &cli.Command{
+		Name:  "logout",
+		Usage: "Delete your local credentials",
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Action: func(c *cli.Context) error {
 			if err := keychain.DeleteItem("Auth"); err != nil {
 				return err
 			}
 
-			fmt.Println(cli.Success("Logged out!"))
+			fmt.Println(clilib.Success("Logged out!"))
 
 			return nil
 		},

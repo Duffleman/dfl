@@ -9,25 +9,28 @@ import (
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/spf13/viper"
+	"github.com/urfave/cli/v2"
 )
 
 func init() {
 	viper.SetDefault("SECRETS_ROOT_DIR", "/Users/duffleman/Source/infra-secrets/certificates")
 
-	commands.RootCmd.AddCommand(commands.CreateCRLFileCmd)
-	commands.RootCmd.AddCommand(commands.GenerateClientCertificateCmd)
-	commands.RootCmd.AddCommand(commands.GenerateKeyPairCmd)
-	commands.RootCmd.AddCommand(commands.GenerateRootCACmd)
-	commands.RootCmd.AddCommand(commands.GenerateServerCertificateCmd)
-	commands.RootCmd.AddCommand(commands.InteractiveCmd)
-	commands.RootCmd.AddCommand(commands.VersionCmd)
+	commands.RootCmd.Commands = []*cli.Command{
+		commands.CreateCRLFileCmd,
+		commands.GenerateClientCertificateCmd,
+		commands.GenerateKeyPairCmd,
+		commands.GenerateRootCACmd,
+		commands.GenerateServerCertificateCmd,
+		commands.InteractiveCmd,
+		commands.VersionCmd,
+	}
 }
 
 func main() {
 	viper.SetEnvPrefix("CERTGEN")
 	viper.AutomaticEnv()
 
-	if err := commands.RootCmd.Execute(); err != nil {
+	if err := commands.RootCmd.Run(os.Args); err != nil {
 		if c, ok := err.(cher.E); ok {
 			bytes, err := json.MarshalIndent(c, "", "  ")
 			if err != nil {

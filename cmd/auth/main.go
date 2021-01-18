@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/urfave/cli/v2"
 )
 
 const clientID = "client_000000C3N8sN2HPqTVeqfOTsnjBJI"
@@ -19,7 +19,7 @@ func main() {
 
 	viper.AutomaticEnv()
 
-	if err := rootCmd.Execute(); err != nil {
+	if err := rootCmd.Run(os.Args); err != nil {
 		if v, ok := err.(cher.E); ok {
 			bytes, err := json.MarshalIndent(v, "", "  ")
 			if err != nil {
@@ -35,11 +35,7 @@ func main() {
 	}
 }
 
-var rootCmd = &cobra.Command{
-	Use:   "auth",
-	Short: "CLI tool to manage auth for DFL svcs",
-	Long:  "A CLI tool to manage auth things for dfl services",
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
+var rootCmd = &cli.App{
+	Name:  "auth",
+	Usage: "Manage your authentication to DFL services",
 }

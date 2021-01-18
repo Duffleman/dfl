@@ -18,7 +18,7 @@ import (
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/koyachi/go-nude"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -26,27 +26,19 @@ var ignoredFiles = []string{
 	".DS_Store",
 }
 
-func UploadSigned(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "signed-upload [file]",
-		Aliases: []string{"u"},
-		Short:   "Upload a file to a signed URL",
-		Long:    "Upload a file from your local machine to AWS",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 1 || len(args) == 0 {
-				return nil
-			}
+func UploadSigned(kc keychain.Keychain) *cli.Command {
+	return &cli.Command{
+		Name:      "signed-upload",
+		ArgsUsage: "[file]",
+		Aliases:   []string{"u"},
+		Usage:     "Upload a file to a signed URL",
 
-			return cher.New("missing_arguments", nil)
-		},
-
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.Background()
+		Action: func(c *cli.Context) error {
 			mutex := sync.Mutex{}
-			g, gctx := errgroup.WithContext(ctx)
+			g, gctx := errgroup.WithContext(c.Context)
 			startTime := time.Now()
 
-			localFile, err := handleLocalFileInput(args)
+			localFile, err := handleLocalFileInput(c.Args().Slice())
 			if err != nil {
 				return err
 			}
@@ -87,7 +79,7 @@ func UploadSigned(kc keychain.Keychain) *cobra.Command {
 
 					filePrepStart := time.Now()
 
-					resource, err := prepareUpload(ctx, kc, filename, file)
+					resource, err := prepareUpload(c.Context, kc, filename, file)
 					if err != nil {
 						return err
 					}

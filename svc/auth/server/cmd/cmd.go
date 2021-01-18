@@ -4,19 +4,18 @@ import (
 	"dfl/svc/auth/server"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
 // RootCmd is the default command for the upload proxy service executable.
-var RootCmd = &cobra.Command{
-	Use:   "auth",
-	Short: "auth handles all auth related matters",
+var RootCmd = &cli.Command{
+	Name:  "auth",
+	Usage: "auth handles all auth related matters",
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Action: func(c *cli.Context) error {
 		cfg := server.DefaultConfig()
 
-		err := envconfig.Process("auth", &cfg)
-		if err != nil {
+		if err := envconfig.Process("auth", &cfg); err != nil {
 			return err
 		}
 

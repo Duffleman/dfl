@@ -9,34 +9,26 @@ import (
 	"dfl/lib/keychain"
 	"dfl/svc/short"
 
-	"github.com/cuvva/cuvva-public-go/lib/cher"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func AddShortcut(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "add-shortcut [query] [shortcut]",
-		Aliases: []string{"asc"},
-		Short:   "Add a shortcut",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 2 || len(args) == 0 {
-				return nil
-			}
+func AddShortcut(kc keychain.Keychain) *cli.Command {
+	return &cli.Command{
+		Name:      "add-shortcut",
+		Usage:     "Add a shortcut",
+		ArgsUsage: "[query] [shortcut]",
+		Aliases:   []string{"asc"},
 
-			return cher.New("missing_arguments", nil)
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.Background()
-
+		Action: func(c *cli.Context) error {
 			startTime := time.Now()
 
-			query, shortcut, err := handleShortcutInput(args)
+			query, shortcut, err := handleShortcutInput(c.Args().Slice())
 			if err != nil {
 				return err
 			}
 
-			err = addShortcut(ctx, kc, query, shortcut)
+			err = addShortcut(c.Context, kc, query, shortcut)
 			if err != nil {
 				return err
 			}

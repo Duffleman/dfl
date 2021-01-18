@@ -5,22 +5,22 @@ import (
 
 	"dfl/lib/keychain"
 
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func WhoAmI(keychain keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "whoami",
+func WhoAmI(keychain keychain.Keychain) *cli.Command {
+	return &cli.Command{
+		Name:    "whoami",
+		Usage:   "Read the access token and find out what your ID and username is",
 		Aliases: []string{"?"},
-		Short:   "Let's find out who you are",
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Action: func(c *cli.Context) error {
 			client, err := newClient(keychain)
 			if err != nil {
 				return err
 			}
 
-			whoami, err := client.WhoAmI(cmd.Context())
+			whoami, err := client.WhoAmI(c.Context)
 			if err != nil {
 				return err
 			}

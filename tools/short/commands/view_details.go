@@ -8,26 +8,20 @@ import (
 	"dfl/lib/keychain"
 	"dfl/svc/short"
 
-	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func ViewDetails(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "view [query]",
-		Aliases: []string{"v"},
-		Short:   "View details of a resource",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 1 || len(args) == 0 {
-				return nil
-			}
+func ViewDetails(kc keychain.Keychain) *cli.Command {
+	return &cli.Command{
+		Name:      "view",
+		ArgsUsage: "[query]",
+		Aliases:   []string{"v"},
+		Usage:     "View details of a resource",
 
-			return cher.New("missing_arguments", nil)
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Action: func(c *cli.Context) error {
 			ctx := context.Background()
 
-			query, err := handleQueryInput(args)
+			query, err := handleQueryInput(c.Args().Slice())
 			if err != nil {
 				return err
 			}

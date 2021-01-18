@@ -3,18 +3,18 @@ package commands
 import (
 	"dfl/tools/certgen/app"
 
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/urfave/cli/v2"
 )
 
-var GenerateServerCertificateCmd = &cobra.Command{
-	Use:     "generate_server_ceritificate [domain]",
-	Aliases: []string{"gsc"},
-	Short:   "Generate a server certificate",
-	Args:    cobra.ExactArgs(1),
+var GenerateServerCertificateCmd = &cli.Command{
+	Name:      "generate_server_ceritificate",
+	ArgsUsage: "[domain]",
+	Aliases:   []string{"gsc"},
+	Usage:     "Generate a server certificate",
 
-	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
+	Action: func(c *cli.Context) error {
+		name := c.Args().First()
 
 		rootDirectory := viper.GetString("SECRETS_ROOT_DIR")
 

@@ -5,8 +5,8 @@ import (
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/manifoldco/promptui"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -17,13 +17,12 @@ const (
 	CRL     = "Revocation list"
 )
 
-var InteractiveCmd = &cobra.Command{
-	Use:     "interactive",
+var InteractiveCmd = &cli.Command{
+	Name:    "interactive",
 	Aliases: []string{"i"},
-	Short:   "Start an interactive console",
-	Args:    cobra.NoArgs,
+	Usage:   "Start an interactive console",
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Action: func(c *cli.Context) error {
 		rootDirectory := viper.GetString("SECRETS_ROOT_DIR")
 
 		app := &app.App{

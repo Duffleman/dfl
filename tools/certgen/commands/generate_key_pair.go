@@ -3,18 +3,18 @@ package commands
 import (
 	"dfl/tools/certgen/app"
 
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/urfave/cli/v2"
 )
 
-var GenerateKeyPairCmd = &cobra.Command{
-	Use:     "generate_key_pair [name]",
-	Aliases: []string{"gkp"},
-	Short:   "Generate a public and private key pair",
-	Args:    cobra.ExactArgs(1),
+var GenerateKeyPairCmd = &cli.Command{
+	Name:      "generate_key_pair",
+	ArgsUsage: "[name]",
+	Aliases:   []string{"gkp"},
+	Usage:     "Generate a public and private key pair",
 
-	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
+	Action: func(c *cli.Context) error {
+		name := c.Args().First()
 
 		rootDirectory := viper.GetString("SECRETS_ROOT_DIR")
 

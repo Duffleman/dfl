@@ -7,22 +7,22 @@ import (
 	"time"
 
 	authlib "dfl/lib/auth"
-	"dfl/lib/cli"
+	clilib "dfl/lib/cli"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func ShowAccessToken(keychain keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "show-access-token",
+func ShowAccessToken(keychain keychain.Keychain) *cli.Command {
+	return &cli.Command{
+		Name:    "Show access token",
+		Usage:   "Show the currently stored access token",
 		Aliases: []string{"sat"},
-		Short:   "Show the currently stored access token",
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Action: func(c *cli.Context) error {
 			var authBytes []byte
 			var err error
 
@@ -61,9 +61,9 @@ func ShowAccessToken(keychain keychain.Keychain) *cobra.Command {
 			var style func(string) string
 
 			if now.After(expiresAt) {
-				style = cli.Danger
+				style = clilib.Danger
 			} else {
-				style = cli.Success
+				style = clilib.Success
 			}
 
 			fmt.Fprintf(os.Stderr, style(expiresAt.Format(time.RFC3339)))

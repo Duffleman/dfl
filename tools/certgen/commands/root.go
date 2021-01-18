@@ -5,19 +5,25 @@ import (
 
 	"dfl/tools/certgen"
 
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-var RootCmd = &cobra.Command{
-	Use:  "certgen [command]",
-	Long: "certgen manages and generates certificates for you.",
+var RootCmd = &cli.App{
+	Name:  "certgen",
+	Usage: "certgen manages and generates certificates for you.",
+
+	Commands: []*cli.Command{
+		VersionCmd,
+	},
 }
 
-var VersionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print the version number of certgen",
-	Long:  `I don't always drink beer. But when I do, I drink certgen...`,
-	Run: func(cmd *cobra.Command, args []string) {
+var VersionCmd = &cli.Command{
+	Name:  "version",
+	Usage: "Print the version number of certgen",
+
+	Action: func(c *cli.Context) error {
 		fmt.Printf("certgen v%s\n", certgen.Version)
+
+		return nil
 	},
 }

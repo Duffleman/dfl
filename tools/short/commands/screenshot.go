@@ -11,20 +11,19 @@ import (
 	"dfl/lib/keychain"
 
 	"github.com/cuvva/cuvva-public-go/lib/ksuid"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
 const screenshotCmd = "screencapture -i"
 const timeout = 1 * time.Minute
 
-func Screenshot(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:   "screenshot",
-		Short: "Take a screenshot & upload it",
-		Long:  "Take a screenshot and upload it to a DFLIMG server",
-		Args:  cobra.ExactArgs(0),
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			ctx, cancel := context.WithTimeout(context.Background(), timeout)
+func Screenshot(kc keychain.Keychain) *cli.Command {
+	return &cli.Command{
+		Name:  "screenshot",
+		Usage: "Take a screenshot & upload it",
+
+		Action: func(c *cli.Context) error {
+			ctx, cancel := context.WithTimeout(c.Context, timeout)
 			defer cancel()
 
 			tmpName := fmt.Sprintf("%s-*.png", ksuid.Generate("file").String())
@@ -50,7 +49,7 @@ func Screenshot(kc keychain.Keychain) *cobra.Command {
 				return nil
 			}
 
-			return UploadSigned(kc).RunE(cmd, []string{out.Name()})
+			return UploadSigned(kc).Action(c)
 		},
 	}
 }

@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/json"
@@ -10,25 +9,34 @@ import (
 	"os/exec"
 	"runtime"
 
-	"dfl/lib/cli"
+	clilib "dfl/lib/cli"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/dvsekhvalnov/jose2go/base64url"
 	"github.com/manifoldco/promptui"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/tjarratt/babble"
+	"github.com/urfave/cli/v2"
 )
 
-func Login(clientID, scopes string, kc keychain.Keychain) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:     "login",
+func Login(clientID, scopes string, kc keychain.Keychain) *cli.Command {
+	cmd := &cli.Command{
+		Name:    "login",
+		Usage:   "Login to the DFL auth server",
 		Aliases: []string{"l"},
-		Short:   "Login",
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:        "scopes",
+				Usage:       "Which scopes should we request?",
+				Value:       scopes,
+				Destination: &scopes,
+			},
+		},
+
+		Action: func(c *cli.Context) error {
 			original, hashed := makeCodeChallenge()
 			state := makeState()
 
@@ -46,12 +54,12 @@ func Login(clientID, scopes string, kc keychain.Keychain) *cobra.Command {
 
 			url := fmt.Sprintf("%s/authorize?%s", rootURL, params.Encode())
 
-			fmt.Printf("%s: %s", cli.Warning("Careful"), "Ensure the state matches: ")
-			fmt.Println(cli.Success(state))
+			fmt.Printf("%s: %s", clilib.Warning("Careful"), "Ensure the state matches: ")
+			fmt.Println(clilib.Success(state))
 
 			err := openBrowser(url)
 			if err != nil {
-				fmt.Printf("%s: %s", cli.Warning("Warning"), "Cannot open your browser for you, type in the URL yourself.")
+				fmt.Printf("%s: %s", clilib.Warning("Warning"), "Cannot open your browser for you, type in the URL yourself.")
 			}
 
 			authToken, err := authTokenPrompt.Run()
@@ -64,7 +72,7 @@ func Login(clientID, scopes string, kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			res, err := client.Token(context.Background(), &auth.TokenRequest{
+			res, err := client.Token(c.Context, &auth.TokenRequest{
 				ClientID:     clientID,
 				GrantType:    "authorization_code",
 				Code:         authToken,
@@ -83,13 +91,11 @@ func Login(clientID, scopes string, kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			fmt.Println(cli.Success("Logged in!"))
+			fmt.Println(clilib.Success("Logged in!"))
 
 			return nil
 		},
 	}
-
-	cmd.Flags().StringVarP(&scopes, "scopes", "s", scopes, "Scopes to request, space delimited")
 
 	return cmd
 }
