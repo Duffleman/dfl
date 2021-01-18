@@ -15,4 +15,5 @@ func init() {
 	rootCmd.AddCommand(commands.Register(kc))
 	rootCmd.AddCommand(commands.SetToken(kc))
 	rootCmd.AddCommand(commands.ShowAccessToken(kc))
+	rootCmd.AddCommand(commands.WhoAmI(kc))
 }
