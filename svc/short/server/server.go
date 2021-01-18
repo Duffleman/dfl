@@ -114,6 +114,10 @@ func Run(cfg Config) error {
 		return err
 	}
 
+	if err := pgDb.Ping(); err != nil {
+		return err
+	}
+
 	public := key.MustParseECDSAPublic([]byte(cfg.PublicKey))
 
 	db := db.New(pgDb)
