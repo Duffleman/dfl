@@ -59,7 +59,12 @@ func addShortcut(ctx context.Context, kc keychain.Keychain, query, shortcut stri
 		Shortcut: shortcut,
 	}
 
-	return makeClient(kc).AddShortcut(ctx, body)
+	client, err := newClient(kc)
+	if err != nil {
+		return err
+	}
+
+	return client.AddShortcut(ctx, body)
 }
 
 func handleShortcutInput(args []string) (string, string, error) {

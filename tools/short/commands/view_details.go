@@ -32,7 +32,12 @@ func ViewDetails(kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			res, err := makeClient(kc).ViewDetails(ctx, &short.IdentifyResource{
+			client, err := newClient(kc)
+			if err != nil {
+				return err
+			}
+
+			res, err := client.ViewDetails(ctx, &short.IdentifyResource{
 				Query: query,
 			})
 			if err != nil {

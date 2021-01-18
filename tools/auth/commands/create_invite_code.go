@@ -32,7 +32,12 @@ func CreateInviteCode(kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			res, err := makeClient(kc).CreateInviteCode(ctx, &auth.CreateInviteCodeRequest{
+			client, err := newClient(kc)
+			if err != nil {
+				return err
+			}
+
+			res, err := client.CreateInviteCode(ctx, &auth.CreateInviteCodeRequest{
 				Code:      code,
 				ExpiresAt: expiresAt,
 				Scopes:    scopes,

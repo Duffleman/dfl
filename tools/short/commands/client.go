@@ -23,8 +23,13 @@ func notify(title, body string) {
 	}
 }
 
-func makeClient(keychain keychain.Keychain) short.Service {
-	return short.NewClient(rootURL(), cli.AuthHeader(keychain, "short"))
+func newClient(keychain keychain.Keychain) (short.Service, error) {
+	bearerToken, err := cli.AuthHeader(keychain, "short")
+	if err != nil {
+		return nil, err
+	}
+
+	return short.NewClient(rootURL(), bearerToken), nil
 }
 
 func rootURL() string {

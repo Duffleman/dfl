@@ -49,7 +49,12 @@ func SetNSFW(kc keychain.Keychain) *cobra.Command {
 }
 
 func toggleNSFW(ctx context.Context, kc keychain.Keychain, query string) (string, error) {
-	res, err := makeClient(kc).ViewDetails(ctx, &short.IdentifyResource{
+	client, err := newClient(kc)
+	if err != nil {
+		return "", err
+	}
+
+	res, err := client.ViewDetails(ctx, &short.IdentifyResource{
 		Query: query,
 	})
 	if err != nil {
@@ -62,7 +67,7 @@ func toggleNSFW(ctx context.Context, kc keychain.Keychain, query string) (string
 		newState = "OFF"
 	}
 
-	return newState, makeClient(kc).SetNSFW(ctx, &short.SetNSFWRequest{
+	return newState, client.SetNSFW(ctx, &short.SetNSFWRequest{
 		IdentifyResource: short.IdentifyResource{
 			Query: query,
 		},

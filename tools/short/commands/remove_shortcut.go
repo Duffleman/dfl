@@ -56,5 +56,10 @@ func removeShortcut(ctx context.Context, kc keychain.Keychain, query, shortcut s
 		Shortcut: shortcut,
 	}
 
-	return makeClient(kc).RemoveShortcut(ctx, body)
+	client, err := newClient(kc)
+	if err != nil {
+		return err
+	}
+
+	return client.RemoveShortcut(ctx, body)
 }

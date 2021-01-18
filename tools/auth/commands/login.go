@@ -59,7 +59,12 @@ func Login(clientID, scopes string, kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			res, err := makeClient(nil).Token(context.Background(), &auth.TokenRequest{
+			client, err := newClient(nil)
+			if err != nil {
+				return err
+			}
+
+			res, err := client.Token(context.Background(), &auth.TokenRequest{
 				ClientID:     clientID,
 				GrantType:    "authorization_code",
 				Code:         authToken,

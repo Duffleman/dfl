@@ -35,7 +35,12 @@ func ShortenURL(kc keychain.Keychain) *cobra.Command {
 				return err
 			}
 
-			body, err := makeClient(kc).ShortenURL(ctx, &short.CreateURLRequest{
+			client, err := newClient(kc)
+			if err != nil {
+				return err
+			}
+
+			body, err := client.ShortenURL(ctx, &short.CreateURLRequest{
 				URL: url,
 			})
 			if err != nil {

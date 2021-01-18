@@ -54,7 +54,12 @@ func deleteResource(ctx context.Context, kc keychain.Keychain, urlStr string) er
 		Query: urlStr,
 	}
 
-	return makeClient(kc).DeleteResource(ctx, body)
+	client, err := newClient(kc)
+	if err != nil {
+		return err
+	}
+
+	return client.DeleteResource(ctx, body)
 }
 
 func handleQueryInput(args []string) (string, error) {
