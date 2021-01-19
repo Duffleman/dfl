@@ -47,15 +47,18 @@ var rootCmd = &cli.App{
 	},
 
 	Before: func(c *cli.Context) error {
-		if err := envconfig.Process("certgen", &app.Conf); err != nil {
+		var config app.Config
+
+		if err := envconfig.Process("certgen", &config); err != nil {
 			log.Fatal(err)
 		}
 
 		app := &app.App{
-			RootDirectory: app.Conf.RootDir,
+			RootDirectory: config.RootDir,
 		}
 
 		c.Context = context.WithValue(c.Context, clilib.AppKey, app)
+		c.Context = context.WithValue(c.Context, clilib.ConfigKey, config)
 
 		return nil
 	},
