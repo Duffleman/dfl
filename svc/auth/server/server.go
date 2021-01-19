@@ -84,6 +84,10 @@ func Run(cfg Config) error {
 		return err
 	}
 
+	if err := pgDb.Ping(); err != nil {
+		return err
+	}
+
 	db := db.New(pgDb)
 
 	sk := app.NewSK(
