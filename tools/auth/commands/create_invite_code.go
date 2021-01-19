@@ -6,8 +6,8 @@ import (
 	"time"
 
 	clilib "dfl/lib/cli"
-	"dfl/lib/keychain"
 	"dfl/svc/auth"
+	"dfl/tools/auth/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/manifoldco/promptui"
@@ -16,44 +16,37 @@ import (
 
 var scopesRegex = regexp.MustCompile(`^(?:[a-z*]+:[a-z*]+\s?)+$`)
 
-func CreateInviteCode(kc keychain.Keychain) *cli.Command {
-	cmd := &cli.Command{
-		Name:    "create-invite-code",
-		Usage:   "Create an invite code for someone else",
-		Aliases: []string{"cic"},
+var CreateInviteCode = &cli.Command{
+	Name:    "create-invite-code",
+	Usage:   "Create an invite code for someone else",
+	Aliases: []string{"cic"},
 
-		Action: func(c *cli.Context) (err error) {
-			scopes, code, expiresAt, err := handleInputs()
-			if err != nil {
-				return err
-			}
+	Action: func(c *cli.Context) (err error) {
+		scopes, code, expiresAt, err := handleInputs()
+		if err != nil {
+			return err
+		}
 
-			client, err := newClient(kc)
-			if err != nil {
-				return err
-			}
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
-			res, err := client.CreateInviteCode(c.Context, &auth.CreateInviteCodeRequest{
-				Code:      code,
-				ExpiresAt: expiresAt,
-				Scopes:    scopes,
-			})
-			if err != nil {
-				return err
-			}
+		res, err := app.Client.CreateInviteCode(c.Context, &auth.CreateInviteCodeRequest{
+			Code:      code,
+			ExpiresAt: expiresAt,
+			Scopes:    scopes,
+		})
+		if err != nil {
+			return err
+		}
 
-			fmt.Println(clilib.Success("Success!"))
+		fmt.Println(clilib.Success("Success!"))
 
-			fmt.Printf("Code: %s\n", res.Code)
-			if res.ExpiresAt != nil {
-				fmt.Printf("Expires at: %s\n", res.ExpiresAt.Format(time.RFC3339))
-			}
+		fmt.Printf("Code: %s\n", res.Code)
+		if res.ExpiresAt != nil {
+			fmt.Printf("Expires at: %s\n", res.ExpiresAt.Format(time.RFC3339))
+		}
 
-			return nil
-		},
-	}
-
-	return cmd
+		return nil
+	},
 }
 
 func handleInputs() (scopes string, code *string, expiresAt *time.Time, err error) {

@@ -18,10 +18,10 @@ const (
 
 type Keychain struct{}
 
-func (k Keychain) NewItem(name string, data []byte) error {
+func (k Keychain) createQueryItem(name string, read bool) (*gokeychain.Item, error) {
 	user, err := user.Current()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	item := gokeychain.NewItem()
@@ -30,11 +30,30 @@ func (k Keychain) NewItem(name string, data []byte) error {
 	item.SetLabel(fmt.Sprintf("%s %s", prefix, name))
 	item.SetAccessGroup(accessGroup)
 	item.SetAccount(user.Username)
-	item.SetData(data)
 	item.SetSynchronizable(gokeychain.SynchronizableAny)
-	item.SetAccessible(gokeychain.AccessibleWhenUnlockedThisDeviceOnly)
+	item.SetAccessible(gokeychain.AccessibleAlways)
 
-	if err := gokeychain.AddItem(item); err != nil {
+	if read {
+		item.SetReturnData(true)
+		item.SetReturnAttributes(true)
+	}
+
+	return &item, nil
+}
+
+func (k Keychain) NewItem(name string, data []byte) error {
+	item, err := k.createQueryItem(name, false)
+	if err != nil {
+		return err
+	}
+
+	return k.newItem(item, data)
+}
+
+func (k Keychain) newItem(item *gokeychain.Item, data []byte) error {
+	item.SetData(data)
+
+	if err := gokeychain.AddItem(*item); err != nil {
 		return err
 	}
 
@@ -42,66 +61,73 @@ func (k Keychain) NewItem(name string, data []byte) error {
 }
 
 func (k Keychain) UpsertItem(name string, data []byte) error {
-	item, err := k.GetItem(name)
-	if err != nil {
-		// if unknown error, or not_found
-		if v, ok := err.(cher.E); !ok || v.Code != cher.NotFound {
-			return err
-		}
-	}
-
-	if item != nil {
-		if err := k.DeleteItem(name); err != nil {
-			return err
-		}
-	}
-
-	return k.NewItem(name, data)
-}
-
-func (k Keychain) GetItem(name string) (data []byte, err error) {
-	user, err := user.Current()
-	if err != nil {
-		return nil, err
-	}
-
-	query := gokeychain.NewItem()
-	query.SetSecClass(gokeychain.SecClassGenericPassword)
-	query.SetService(service)
-	query.SetAccount(user.Username)
-	query.SetLabel(fmt.Sprintf("%s %s", prefix, name))
-	query.SetAccessGroup(accessGroup)
-	query.SetReturnData(true)
-	query.SetReturnAttributes(true)
-
-	results, err := gokeychain.QueryItem(query)
-	if err != nil {
-		fmt.Println("test")
-		if err == gokeychain.ErrorItemNotFound {
-			return nil, cher.New(cher.NotFound, nil)
-		}
-
-		return nil, err
-	}
-
-	if len(results) != 1 {
-		return nil, cher.New(cher.NotFound, nil)
-	}
-
-	return results[0].Data, nil
-}
-
-func (k Keychain) DeleteItem(name string) error {
-	user, err := user.Current()
+	item, err := k.createQueryItem(name, false)
 	if err != nil {
 		return err
 	}
 
-	item := gokeychain.NewItem()
-	item.SetSecClass(gokeychain.SecClassGenericPassword)
-	item.SetService(service)
-	item.SetAccount(user.Username)
-	item.SetLabel(fmt.Sprintf("%s %s", prefix, name))
+	var existingItem *gokeychain.QueryResult
 
-	return gokeychain.DeleteItem(item)
+	existingItem, err = k.getItem(name)
+	if v, ok := err.(cher.E); err != nil && (!ok || v.Code != cher.NotFound) {
+		return err
+	}
+
+	if existingItem == nil {
+		return k.newItem(item, data)
+	}
+
+	newItem, err := k.createQueryItem(name, false)
+	if err != nil {
+		return err
+	}
+
+	newItem.SetData(data)
+
+	return gokeychain.UpdateItem(*item, *newItem)
+}
+
+func (k Keychain) getItem(name string) (*gokeychain.QueryResult, error) {
+	query, err := k.createQueryItem(name, true)
+	if err != nil {
+		return nil, err
+	}
+
+	results, err := gokeychain.QueryItem(*query)
+	if err != nil || len(results) == 0 {
+		if err == gokeychain.ErrorItemNotFound || len(results) == 0 {
+			return nil, cher.New(cher.NotFound, nil, cher.Coerce(err))
+		}
+
+		return nil, err
+	}
+
+	if len(results) > 1 {
+		return nil, cher.New("multiple_results", nil)
+	}
+
+	return &results[0], nil
+}
+
+func (k Keychain) GetItem(name string) (data []byte, err error) {
+	item, err := k.getItem(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return item.Data, nil
+}
+
+func (k Keychain) DeleteItem(name string) error {
+	item, err := k.createQueryItem(name, false)
+	if err != nil {
+		return err
+	}
+
+	err = gokeychain.DeleteItem(*item)
+	if err == gokeychain.ErrorItemNotFound {
+		return cher.New(cher.NotFound, nil)
+	}
+
+	return err
 }

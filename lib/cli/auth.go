@@ -2,11 +2,11 @@ package cli
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 
+	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/cuvva/cuvva-public-go/lib/ptr"
 )
 
@@ -19,8 +19,11 @@ func AuthHeader(keychain keychain.Keychain, tool string) (*string, error) {
 	}
 
 	authBytes, err = keychain.GetItem("Auth")
-	if err != nil || len(authBytes) == 0 {
-		fmt.Printf("%s%s%s", "Run `", tool, " login` first!")
+	if err != nil {
+		if v, ok := err.(cher.E); ok && v.Code == cher.NotFound {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
@@ -28,7 +31,6 @@ func AuthHeader(keychain keychain.Keychain, tool string) (*string, error) {
 
 	err = json.Unmarshal(authBytes, &res)
 	if err != nil {
-		fmt.Printf("%s%s%s", "Run `", tool, " login` again.")
 		return nil, err
 	}
 

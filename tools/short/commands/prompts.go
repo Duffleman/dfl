@@ -7,17 +7,6 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-var queryPrompt = promptui.Prompt{
-	Label: "Query",
-	Validate: func(input string) error {
-		if len(input) >= 1 {
-			return nil
-		}
-
-		return cher.New("missing_query", nil)
-	},
-}
-
 var filePrompt = promptui.Prompt{
 	Label: "File",
 	Validate: func(input string) error {

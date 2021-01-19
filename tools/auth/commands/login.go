@@ -21,7 +21,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func Login(clientID, scopes string, kc keychain.Keychain) *cli.Command {
+func Login(clientID, scopes string) *cli.Command {
 	cmd := &cli.Command{
 		Name:    "login",
 		Usage:   "Login to the DFL auth server",
@@ -67,12 +67,9 @@ func Login(clientID, scopes string, kc keychain.Keychain) *cli.Command {
 				return err
 			}
 
-			client, err := newClient(nil)
-			if err != nil {
-				return err
-			}
+			app := c.Context.Value(clilib.AppKey).(App)
 
-			res, err := client.Token(c.Context, &auth.TokenRequest{
+			res, err := app.GetAuthClient().Token(c.Context, &auth.TokenRequest{
 				ClientID:     clientID,
 				GrantType:    "authorization_code",
 				Code:         authToken,
@@ -87,7 +84,7 @@ func Login(clientID, scopes string, kc keychain.Keychain) *cli.Command {
 				return err
 			}
 
-			if err := kc.UpsertItem("Auth", authBytes); err != nil {
+			if err := app.GetKeychain().UpsertItem("Auth", authBytes); err != nil {
 				return err
 			}
 
@@ -167,4 +164,11 @@ func openBrowser(url string) error {
 	}
 
 	return err
+}
+
+// JUST for this command
+// Because this is the ONLY command that runs across CLIs
+type App interface {
+	GetAuthClient() auth.Service
+	GetKeychain() keychain.Keychain
 }

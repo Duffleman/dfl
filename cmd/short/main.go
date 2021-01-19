@@ -1,9 +1,16 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
+
+	clilib "dfl/lib/cli"
+	"dfl/lib/keychain"
+	authCommands "dfl/tools/auth/commands"
+	"dfl/tools/short/app"
+	"dfl/tools/short/commands"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/spf13/viper"
@@ -36,7 +43,36 @@ func main() {
 	}
 }
 
-var rootCmd = &cli.App{
-	Name:  "short",
-	Usage: "CLI tool to upload images to a short server",
+var rootCmd *cli.App
+
+func makeRoot(kc keychain.Keychain) {
+	rootCmd = &cli.App{
+		Name:  "short",
+		Usage: "CLI tool to upload images to a short server",
+
+		Commands: []*cli.Command{
+			commands.AddShortcut,
+			commands.CopyURL,
+			commands.DeleteResource,
+			commands.RemoveShortcut,
+			commands.Screenshot,
+			commands.SetNSFW,
+			commands.ShortenURL,
+			commands.UploadSigned,
+			commands.ViewDetails,
+
+			authCommands.Login(clientID, "short:upload short:delete"),
+		},
+
+		Before: func(c *cli.Context) error {
+			app, err := app.New(kc)
+			if err != nil {
+				return err
+			}
+
+			c.Context = context.WithValue(c.Context, clilib.AppKey, app)
+
+			return nil
+		},
+	}
 }

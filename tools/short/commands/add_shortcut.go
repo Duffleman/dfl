@@ -1,70 +1,52 @@
 package commands
 
 import (
-	"context"
 	"fmt"
-	"strings"
 	"time"
 
-	"dfl/lib/keychain"
-	"dfl/svc/short"
+	clilib "dfl/lib/cli"
+	"dfl/tools/short/app"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
-func AddShortcut(kc keychain.Keychain) *cli.Command {
-	return &cli.Command{
-		Name:      "add-shortcut",
-		Usage:     "Add a shortcut",
-		ArgsUsage: "[query] [shortcut]",
-		Aliases:   []string{"asc"},
+var AddShortcut = &cli.Command{
+	Name:      "add-shortcut",
+	Usage:     "Add a shortcut",
+	ArgsUsage: "[query] [shortcut]",
+	Aliases:   []string{"asc"},
 
-		Action: func(c *cli.Context) error {
-			startTime := time.Now()
+	Action: func(c *cli.Context) error {
+		startTime := time.Now()
 
-			query, shortcut, err := handleShortcutInput(c.Args().Slice())
-			if err != nil {
-				return err
-			}
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
-			err = addShortcut(c.Context, kc, query, shortcut)
-			if err != nil {
-				return err
-			}
+		query, shortcut, err := handleShortcutInput(app, c.Args().Slice())
+		if err != nil {
+			return err
+		}
 
-			writeClipboard(fmt.Sprintf("%s/:%s", rootURL(), shortcut))
-			notify("Added shortcut", fmt.Sprintf("%s/:%s", rootURL(), shortcut))
+		err = app.AddShortcut(c.Context, query, shortcut)
+		if err != nil {
+			return err
+		}
 
-			log.Infof("Done in %s", time.Now().Sub(startTime))
+		clilib.WriteClipboard(fmt.Sprintf("%s/:%s", app.RootURL, shortcut))
+		clilib.Notify("Added shortcut", fmt.Sprintf("%s/:%s", app.RootURL, shortcut))
 
-			return nil
-		},
-	}
+		log.Infof("Done in %s", time.Now().Sub(startTime))
+
+		return nil
+	},
 }
 
-func addShortcut(ctx context.Context, kc keychain.Keychain, query, shortcut string) error {
-	body := &short.ChangeShortcutRequest{
-		IdentifyResource: short.IdentifyResource{
-			Query: query,
-		},
-		Shortcut: shortcut,
-	}
-
-	client, err := newClient(kc)
-	if err != nil {
-		return err
-	}
-
-	return client.AddShortcut(ctx, body)
-}
-
-func handleShortcutInput(args []string) (string, string, error) {
+func handleShortcutInput(app *app.App, args []string) (string, string, error) {
 	if len(args) == 2 {
-		return strings.TrimPrefix(args[0], rootURL()), args[1], nil
+		return app.Trim(args[0]), args[1], nil
 	}
 
-	query, err := queryPrompt.Run()
+	query, err := app.CleanInput([]string{})
 	if err != nil {
 		return "", "", err
 	}
@@ -74,5 +56,5 @@ func handleShortcutInput(args []string) (string, string, error) {
 		return "", "", err
 	}
 
-	return strings.TrimPrefix(query, rootURL()), shortcut, nil
+	return query, shortcut, nil
 }

@@ -1,9 +1,15 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
+
+	clilib "dfl/lib/cli"
+	"dfl/lib/keychain"
+	"dfl/tools/auth/app"
+	"dfl/tools/auth/commands"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/spf13/viper"
@@ -35,7 +41,33 @@ func main() {
 	}
 }
 
-var rootCmd = &cli.App{
-	Name:  "auth",
-	Usage: "Manage your authentication to DFL services",
+var rootCmd *cli.App
+
+func makeRoot(kc keychain.Keychain) {
+	rootCmd = &cli.App{
+		Name:  "auth",
+		Usage: "Manage your authentication to DFL services",
+
+		Commands: []*cli.Command{
+			commands.CreateInviteCode,
+			commands.Login(clientID, "auth:login"),
+			commands.Logout,
+			commands.Manage,
+			commands.Register,
+			commands.SetToken,
+			commands.ShowAccessToken,
+			commands.WhoAmI,
+		},
+
+		Before: func(c *cli.Context) error {
+			app, err := app.New(kc)
+			if err != nil {
+				return err
+			}
+
+			c.Context = context.WithValue(c.Context, clilib.AppKey, app)
+
+			return nil
+		},
+	}
 }

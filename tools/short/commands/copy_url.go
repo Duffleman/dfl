@@ -6,34 +6,30 @@ import (
 	"net/http"
 	"os"
 
-	"dfl/lib/keychain"
-
 	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 	"github.com/urfave/cli/v2"
 )
 
-func CopyURL(kc keychain.Keychain) *cli.Command {
-	return &cli.Command{
-		Name:      "copy",
-		ArgsUsage: "[url]",
-		Aliases:   []string{"c"},
-		Usage:     "Copy from a URL",
+var CopyURL = &cli.Command{
+	Name:      "copy",
+	ArgsUsage: "[url]",
+	Aliases:   []string{"c"},
+	Usage:     "Copy from a URL",
 
-		Action: func(c *cli.Context) error {
-			url, err := handleURLInput(c.Args().Slice())
-			if err != nil {
-				return err
-			}
+	Action: func(c *cli.Context) error {
+		url, err := handleURLInput(c.Args().Slice())
+		if err != nil {
+			return err
+		}
 
-			filePath, err := downloadFile(url)
-			if err != nil {
-				return err
-			}
-			defer os.Remove(*filePath)
+		filePath, err := downloadFile(url)
+		if err != nil {
+			return err
+		}
+		defer os.Remove(*filePath)
 
-			return UploadSigned(kc).Action(c)
-		},
-	}
+		return UploadSigned.Action(c)
+	},
 }
 
 func downloadFile(urlStr string) (*string, error) {
