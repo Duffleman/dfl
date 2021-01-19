@@ -28,7 +28,7 @@ var CopyURL = &cli.Command{
 		}
 		defer os.Remove(*filePath)
 
-		return UploadSigned.Action(c)
+		return c.App.Run([]string{"short", "signed-upload", *filePath})
 	},
 }
 

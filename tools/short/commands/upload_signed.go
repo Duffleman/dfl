@@ -30,7 +30,7 @@ var ignoredFiles = []string{
 var UploadSigned = &cli.Command{
 	Name:      "signed-upload",
 	ArgsUsage: "[file]",
-	Aliases:   []string{"u"},
+	Aliases:   []string{"u", "upload-signed"},
 	Usage:     "Upload a file to a signed URL",
 
 	Action: func(c *cli.Context) error {

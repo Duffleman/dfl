@@ -96,6 +96,10 @@ func (k Keychain) getItem(name string) (*gokeychain.QueryResult, error) {
 	results, err := gokeychain.QueryItem(*query)
 	if err != nil || len(results) == 0 {
 		if err == gokeychain.ErrorItemNotFound || len(results) == 0 {
+			if err == nil {
+				return nil, cher.New(cher.NotFound, nil)
+			}
+
 			return nil, cher.New(cher.NotFound, nil, cher.Coerce(err))
 		}
 

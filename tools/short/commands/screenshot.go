@@ -13,7 +13,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const screenshotCmd = "screencapture -i"
 const timeout = 1 * time.Minute
 
 var Screenshot = &cli.Command{
@@ -47,6 +46,6 @@ var Screenshot = &cli.Command{
 			return nil
 		}
 
-		return UploadSigned.Action(c)
+		return c.App.Run([]string{"short", "signed-upload", out.Name()})
 	},
 }

@@ -53,6 +53,10 @@ func makeRoot(kc keychain.Keychain) {
 		},
 
 		Before: func(c *cli.Context) error {
+			if len(c.Args().Slice()) == 0 {
+				return nil
+			}
+
 			var config clilib.Config
 
 			if err := envconfig.Process("DFL", &config); err != nil {
