@@ -12,13 +12,14 @@ import (
 	"sync"
 	"time"
 
-	"dfl/lib/keychain"
+	clilib "dfl/lib/cli"
 	"dfl/svc/short"
+	"dfl/tools/short/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/koyachi/go-nude"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -26,127 +27,119 @@ var ignoredFiles = []string{
 	".DS_Store",
 }
 
-func UploadSigned(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "signed-upload [file]",
-		Aliases: []string{"u"},
-		Short:   "Upload a file to a signed URL",
-		Long:    "Upload a file from your local machine to AWS",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 1 || len(args) == 0 {
+var UploadSigned = &cli.Command{
+	Name:      "signed-upload",
+	ArgsUsage: "[file]",
+	Aliases:   []string{"u", "upload-signed"},
+	Usage:     "Upload a file to a signed URL",
+
+	Action: func(c *cli.Context) error {
+		startTime := time.Now()
+		mutex := sync.Mutex{}
+		g, gctx := errgroup.WithContext(c.Context)
+
+		app := c.Context.Value(clilib.AppKey).(*app.App)
+
+		localFile, err := handleLocalFileInput(c.Args().Slice())
+		if err != nil {
+			return err
+		}
+
+		filePaths, err := scanDirectory(localFile)
+		if err != nil {
+			return err
+		}
+
+		if len(filePaths) == 0 {
+			return cher.New("no_files", nil)
+		}
+
+		all := []string{}
+
+		singleFile := len(filePaths) == 1
+
+		for _, fn := range filePaths {
+			filename := fn
+
+			g.Go(func() error {
+				log.Infof("Handling file: %s", filename)
+				innerStart := time.Now()
+
+				isNude, err := nude.IsNude(filename)
+				if err != nil {
+					return err
+				}
+
+				if isNude {
+					log.Infof("Nudity detected in %s", filename)
+				}
+
+				file, err := ioutil.ReadFile(filename)
+				if err != nil {
+					return err
+				}
+
+				filePrepStart := time.Now()
+
+				resource, err := prepareUpload(c.Context, app, filename, file)
+				if err != nil {
+					return err
+				}
+
+				log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
+
+				if isNude {
+					log.Infof("Marking file as NSFW (%s)", resource.Hash)
+
+					g.Go(func() error {
+						_, err := app.ToggleNSFW(gctx, resource.Hash)
+						return err
+					})
+				}
+
+				mutex.Lock()
+				all = append(all, resource.Hash)
+				mutex.Unlock()
+
+				if singleFile {
+					clilib.WriteClipboard(resource.URL)
+					clilib.Notify("File prepared", resource.URL)
+				}
+
+				err = sendFileAWS(resource.SignedLink, file)
+				if err != nil {
+					return err
+				}
+
+				if singleFile {
+					clilib.Notify("File uploaded", resource.URL)
+				} else {
+					log.Infof("File uploaded: %s", resource.URL)
+				}
+
+				log.Infof("File handled in %s", time.Now().Sub(innerStart))
+
 				return nil
-			}
+			})
+		}
 
-			return cher.New("missing_arguments", nil)
-		},
+		if err := g.Wait(); err != nil {
+			return err
+		}
 
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.Background()
-			mutex := sync.Mutex{}
-			g, gctx := errgroup.WithContext(ctx)
-			startTime := time.Now()
+		if !singleFile {
+			jointURL := fmt.Sprintf("%s/%s", app.RootURL, strings.Join(all, ","))
+			log.Infof("Download TAR at: %s", jointURL)
+			clilib.WriteClipboard(jointURL)
+		}
 
-			localFile, err := handleLocalFileInput(args)
-			if err != nil {
-				return err
-			}
+		log.Infof("Done in %s", time.Now().Sub(startTime))
 
-			filePaths, err := scanDirectory(localFile)
-			if err != nil {
-				return err
-			}
-
-			if len(filePaths) == 0 {
-				return cher.New("no_files", nil)
-			}
-
-			all := []string{}
-
-			singleFile := len(filePaths) == 1
-
-			for _, fn := range filePaths {
-				filename := fn
-
-				g.Go(func() error {
-					log.Infof("Handling file: %s", filename)
-					innerStart := time.Now()
-
-					isNude, err := nude.IsNude(filename)
-					if err != nil {
-						return err
-					}
-
-					if isNude {
-						log.Infof("Nudity detected in %s", filename)
-					}
-
-					file, err := ioutil.ReadFile(filename)
-					if err != nil {
-						return err
-					}
-
-					filePrepStart := time.Now()
-
-					resource, err := prepareUpload(ctx, kc, filename, file)
-					if err != nil {
-						return err
-					}
-
-					log.Infof("File prepared: %s (%s)", resource.URL, time.Now().Sub(filePrepStart))
-
-					if isNude {
-						log.Infof("Marking file as NSFW (%s)", resource.Hash)
-
-						g.Go(func() error {
-							_, err := toggleNSFW(gctx, kc, resource.Hash)
-							return err
-						})
-					}
-
-					mutex.Lock()
-					all = append(all, resource.Hash)
-					mutex.Unlock()
-
-					if singleFile {
-						writeClipboard(resource.URL)
-						notify("File prepared", resource.URL)
-					}
-
-					err = sendFileAWS(resource.SignedLink, file)
-					if err != nil {
-						return err
-					}
-
-					if singleFile {
-						notify("File uploaded", resource.URL)
-					} else {
-						log.Infof("File uploaded: %s", resource.URL)
-					}
-
-					log.Infof("File handled in %s", time.Now().Sub(innerStart))
-
-					return nil
-				})
-			}
-
-			if err := g.Wait(); err != nil {
-				return err
-			}
-
-			if !singleFile {
-				jointURL := fmt.Sprintf("%s%s", rootURL(), strings.Join(all, ","))
-				log.Infof("Download TAR at: %s", jointURL)
-				writeClipboard(jointURL)
-			}
-
-			log.Infof("Done in %s", time.Now().Sub(startTime))
-
-			return nil
-		},
-	}
+		return nil
+	},
 }
 
-func prepareUpload(ctx context.Context, kc keychain.Keychain, filename string, file []byte) (*short.CreateSignedURLResponse, error) {
+func prepareUpload(ctx context.Context, app *app.App, filename string, file []byte) (*short.CreateSignedURLResponse, error) {
 	contentType := http.DetectContentType(file)
 
 	var name *string
@@ -156,7 +149,7 @@ func prepareUpload(ctx context.Context, kc keychain.Keychain, filename string, f
 		name = &tmpName
 	}
 
-	return makeClient(kc).CreateSignedURL(ctx, &short.CreateSignedURLRequest{
+	return app.Client.CreateSignedURL(ctx, &short.CreateSignedURLRequest{
 		ContentType: contentType,
 		Name:        name,
 	})

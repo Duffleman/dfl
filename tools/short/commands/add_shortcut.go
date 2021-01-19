@@ -1,73 +1,52 @@
 package commands
 
 import (
-	"context"
 	"fmt"
-	"strings"
 	"time"
 
-	"dfl/lib/keychain"
-	"dfl/svc/short"
+	clilib "dfl/lib/cli"
+	"dfl/tools/short/app"
 
-	"github.com/cuvva/cuvva-public-go/lib/cher"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func AddShortcut(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "add-shortcut [query] [shortcut]",
-		Aliases: []string{"asc"},
-		Short:   "Add a shortcut",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 2 || len(args) == 0 {
-				return nil
-			}
+var AddShortcut = &cli.Command{
+	Name:      "add-shortcut",
+	Usage:     "Add a shortcut",
+	ArgsUsage: "[query] [shortcut]",
+	Aliases:   []string{"asc"},
 
-			return cher.New("missing_arguments", nil)
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.Background()
+	Action: func(c *cli.Context) error {
+		startTime := time.Now()
 
-			startTime := time.Now()
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
-			query, shortcut, err := handleShortcutInput(args)
-			if err != nil {
-				return err
-			}
+		query, shortcut, err := handleShortcutInput(app, c.Args().Slice())
+		if err != nil {
+			return err
+		}
 
-			err = addShortcut(ctx, kc, query, shortcut)
-			if err != nil {
-				return err
-			}
+		err = app.AddShortcut(c.Context, query, shortcut)
+		if err != nil {
+			return err
+		}
 
-			writeClipboard(fmt.Sprintf("%s/:%s", rootURL(), shortcut))
-			notify("Added shortcut", fmt.Sprintf("%s/:%s", rootURL(), shortcut))
+		clilib.WriteClipboard(fmt.Sprintf("%s/:%s", app.RootURL, shortcut))
+		clilib.Notify("Added shortcut", fmt.Sprintf("%s/:%s", app.RootURL, shortcut))
 
-			log.Infof("Done in %s", time.Now().Sub(startTime))
+		log.Infof("Done in %s", time.Now().Sub(startTime))
 
-			return nil
-		},
-	}
+		return nil
+	},
 }
 
-func addShortcut(ctx context.Context, kc keychain.Keychain, query, shortcut string) error {
-	body := &short.ChangeShortcutRequest{
-		IdentifyResource: short.IdentifyResource{
-			Query: query,
-		},
-		Shortcut: shortcut,
-	}
-
-	return makeClient(kc).AddShortcut(ctx, body)
-}
-
-func handleShortcutInput(args []string) (string, string, error) {
+func handleShortcutInput(app *app.App, args []string) (string, string, error) {
 	if len(args) == 2 {
-		return strings.TrimPrefix(args[0], rootURL()), args[1], nil
+		return app.Trim(args[0]), args[1], nil
 	}
 
-	query, err := queryPrompt.Run()
+	query, err := app.CleanInput([]string{})
 	if err != nil {
 		return "", "", err
 	}
@@ -77,5 +56,5 @@ func handleShortcutInput(args []string) (string, string, error) {
 		return "", "", err
 	}
 
-	return strings.TrimPrefix(query, rootURL()), shortcut, nil
+	return query, shortcut, nil
 }

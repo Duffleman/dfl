@@ -2,55 +2,50 @@ package commands
 
 import (
 	"context"
+	clilib "dfl/lib/cli"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"time"
 
-	"dfl/lib/keychain"
-
 	"github.com/cuvva/cuvva-public-go/lib/ksuid"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-const screenshotCmd = "screencapture -i"
 const timeout = 1 * time.Minute
 
-func Screenshot(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:   "screenshot",
-		Short: "Take a screenshot & upload it",
-		Long:  "Take a screenshot and upload it to a DFLIMG server",
-		Args:  cobra.ExactArgs(0),
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			ctx, cancel := context.WithTimeout(context.Background(), timeout)
-			defer cancel()
+var Screenshot = &cli.Command{
+	Name:  "screenshot",
+	Usage: "Take a screenshot & upload it",
 
-			tmpName := fmt.Sprintf("%s-*.png", ksuid.Generate("file").String())
-			out, err := ioutil.TempFile("", tmpName)
-			if err != nil {
-				return err
-			}
-			defer out.Close()
+	Action: func(c *cli.Context) error {
+		ctx, cancel := context.WithTimeout(c.Context, timeout)
+		defer cancel()
 
-			err = exec.CommandContext(ctx, "screencapture", "-i", out.Name()).Run()
-			if err != nil {
-				return err
-			}
-			defer os.Remove(out.Name())
+		tmpName := fmt.Sprintf("%s-*.png", ksuid.Generate("file").String())
+		out, err := ioutil.TempFile("", tmpName)
+		if err != nil {
+			return err
+		}
+		defer out.Close()
 
-			tmpFile, err := os.Stat(out.Name())
-			if os.IsNotExist(err) {
-				return nil
-			}
+		err = exec.CommandContext(ctx, "screencapture", "-i", out.Name()).Run()
+		if err != nil {
+			return err
+		}
+		defer os.Remove(out.Name())
 
-			if tmpFile.Size() == 0 {
-				notify("Cancelled", "No image was captured.")
-				return nil
-			}
+		tmpFile, err := os.Stat(out.Name())
+		if os.IsNotExist(err) {
+			return nil
+		}
 
-			return UploadSigned(kc).RunE(cmd, []string{out.Name()})
-		},
-	}
+		if tmpFile.Size() == 0 {
+			clilib.Notify("Cancelled", "No image was captured.")
+			return nil
+		}
+
+		return c.App.Run([]string{"short", "signed-upload", out.Name()})
+	},
 }

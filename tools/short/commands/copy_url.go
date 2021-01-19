@@ -6,41 +6,30 @@ import (
 	"net/http"
 	"os"
 
-	"dfl/lib/keychain"
-
-	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/cuvva/cuvva-public-go/lib/ksuid"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func CopyURL(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "copy [url]",
-		Aliases: []string{"c"},
-		Short:   "Copy from a URL",
-		Long:    "Copy from a URL to the dflimg server",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 1 || len(args) == 0 {
-				return nil
-			}
+var CopyURL = &cli.Command{
+	Name:      "copy",
+	ArgsUsage: "[url]",
+	Aliases:   []string{"c"},
+	Usage:     "Copy from a URL",
 
-			return cher.New("missing_arguments", nil)
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			url, err := handleURLInput(args)
-			if err != nil {
-				return err
-			}
+	Action: func(c *cli.Context) error {
+		url, err := handleURLInput(c.Args().Slice())
+		if err != nil {
+			return err
+		}
 
-			filePath, err := downloadFile(url)
-			if err != nil {
-				return err
-			}
-			defer os.Remove(*filePath)
+		filePath, err := downloadFile(url)
+		if err != nil {
+			return err
+		}
+		defer os.Remove(*filePath)
 
-			return UploadSigned(kc).RunE(cmd, []string{*filePath})
-		},
-	}
+		return c.App.Run([]string{"short", "signed-upload", *filePath})
+	},
 }
 
 func downloadFile(urlStr string) (*string, error) {

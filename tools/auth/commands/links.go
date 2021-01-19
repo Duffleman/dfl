@@ -2,33 +2,33 @@ package commands
 
 import (
 	"fmt"
-	"strings"
 
-	"github.com/spf13/cobra"
+	clilib "dfl/lib/cli"
+	"dfl/tools/auth/app"
 
-	"dfl/lib/keychain"
+	"github.com/urfave/cli/v2"
 )
 
-func Manage(keychain keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "manage",
-		Aliases: []string{"m"},
-		Short:   "Manage credentials online",
+var Manage = &cli.Command{
+	Name:    "manage",
+	Usage:   "Manage your U2F tokens",
+	Aliases: []string{"m"},
 
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return openBrowser(fmt.Sprintf("%s/u2f_manage", strings.TrimSuffix(rootURL(), "/")))
-		},
-	}
+	Action: func(c *cli.Context) error {
+		app := c.Context.Value(clilib.AppKey).(*app.App)
+
+		return openBrowser(fmt.Sprintf("%s/u2f_manage", app.RootURL))
+	},
 }
 
-func Register(keychain keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "register",
-		Aliases: []string{"r"},
-		Short:   "Register for an account",
+var Register = &cli.Command{
+	Name:    "register",
+	Usage:   "Register for an account",
+	Aliases: []string{"r"},
 
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return openBrowser(fmt.Sprintf("%s/register", strings.TrimSuffix(rootURL(), "/")))
-		},
-	}
+	Action: func(c *cli.Context) error {
+		app := c.Context.Value(clilib.AppKey).(*app.App)
+
+		return openBrowser(fmt.Sprintf("%s/register", app.RootURL))
+	},
 }

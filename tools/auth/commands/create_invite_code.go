@@ -1,58 +1,52 @@
 package commands
 
 import (
-	"context"
 	"fmt"
 	"regexp"
 	"time"
 
-	"dfl/lib/cli"
-	"dfl/lib/keychain"
+	clilib "dfl/lib/cli"
 	"dfl/svc/auth"
+	"dfl/tools/auth/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/manifoldco/promptui"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
 var scopesRegex = regexp.MustCompile(`^(?:[a-z*]+:[a-z*]+\s?)+$`)
 
-func CreateInviteCode(kc keychain.Keychain) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:     "create-invite-code",
-		Aliases: []string{"cic"},
-		Short:   "Create an invite code for another user to register",
-		Args:    cobra.NoArgs,
+var CreateInviteCode = &cli.Command{
+	Name:    "create-invite-code",
+	Usage:   "Create an invite code for someone else",
+	Aliases: []string{"cic"},
 
-		RunE: func(cmd *cobra.Command, args []string) (err error) {
-			ctx := context.Background()
+	Action: func(c *cli.Context) (err error) {
+		scopes, code, expiresAt, err := handleInputs()
+		if err != nil {
+			return err
+		}
 
-			scopes, code, expiresAt, err := handleInputs()
-			if err != nil {
-				return err
-			}
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
-			res, err := makeClient(kc).CreateInviteCode(ctx, &auth.CreateInviteCodeRequest{
-				Code:      code,
-				ExpiresAt: expiresAt,
-				Scopes:    scopes,
-			})
-			if err != nil {
-				return err
-			}
+		res, err := app.Client.CreateInviteCode(c.Context, &auth.CreateInviteCodeRequest{
+			Code:      code,
+			ExpiresAt: expiresAt,
+			Scopes:    scopes,
+		})
+		if err != nil {
+			return err
+		}
 
-			fmt.Println(cli.Success("Success!"))
+		fmt.Println(clilib.Success("Success!"))
 
-			fmt.Printf("Code: %s\n", res.Code)
-			if res.ExpiresAt != nil {
-				fmt.Printf("Expires at: %s\n", res.ExpiresAt.Format(time.RFC3339))
-			}
+		fmt.Printf("Code: %s\n", res.Code)
+		if res.ExpiresAt != nil {
+			fmt.Printf("Expires at: %s\n", res.ExpiresAt.Format(time.RFC3339))
+		}
 
-			return nil
-		},
-	}
-
-	return cmd
+		return nil
+	},
 }
 
 func handleInputs() (scopes string, code *string, expiresAt *time.Time, err error) {

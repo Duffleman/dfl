@@ -1,52 +1,44 @@
 package commands
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 
-	"dfl/lib/keychain"
+	clilib "dfl/lib/cli"
 	"dfl/svc/short"
+	"dfl/tools/short/app"
 
-	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func ViewDetails(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "view [query]",
-		Aliases: []string{"v"},
-		Short:   "View details of a resource",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 1 || len(args) == 0 {
-				return nil
-			}
+var ViewDetails = &cli.Command{
+	Name:      "view",
+	ArgsUsage: "[query]",
+	Aliases:   []string{"v"},
+	Usage:     "View details of a resource",
 
-			return cher.New("missing_arguments", nil)
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.Background()
+	Action: func(c *cli.Context) error {
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
-			query, err := handleQueryInput(args)
-			if err != nil {
-				return err
-			}
+		query, err := app.CleanInput(c.Args().Slice())
+		if err != nil {
+			return err
+		}
 
-			res, err := makeClient(kc).ViewDetails(ctx, &short.IdentifyResource{
-				Query: query,
-			})
-			if err != nil {
-				return err
-			}
+		res, err := app.Client.ViewDetails(c.Context, &short.IdentifyResource{
+			Query: query,
+		})
+		if err != nil {
+			return err
+		}
 
-			b, err := json.MarshalIndent(res, "", "  ")
-			if err != nil {
-				return err
-			}
+		b, err := json.MarshalIndent(res, "", "  ")
+		if err != nil {
+			return err
+		}
 
-			fmt.Println(string(b))
+		fmt.Println(string(b))
 
-			return nil
-		},
-	}
+		return nil
+	},
 }

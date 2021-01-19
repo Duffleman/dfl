@@ -4,18 +4,17 @@ import (
 	"dfl/svc/monitor/server"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-var RootCmd = &cobra.Command{
-	Use:   "monitor",
-	Short: "monitor handles all the service monitoring",
+var RootCmd = &cli.Command{
+	Name:  "monitor",
+	Usage: "monitor handles all the service monitoring",
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Action: func(c *cli.Context) error {
 		cfg := server.DefaultConfig()
 
-		err := envconfig.Process("monitor", &cfg)
-		if err != nil {
+		if err := envconfig.Process("monitor", &cfg); err != nil {
 			return err
 		}
 

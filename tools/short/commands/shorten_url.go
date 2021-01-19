@@ -1,53 +1,41 @@
 package commands
 
 import (
-	"context"
 	"time"
 
-	"dfl/lib/keychain"
-	"dfl/svc/short"
+	clilib "dfl/lib/cli"
+	"dfl/tools/short/app"
 
-	"github.com/cuvva/cuvva-public-go/lib/cher"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func ShortenURL(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "shorten [url]",
-		Aliases: []string{"s"},
-		Short:   "Shorten a URL",
-		Long:    "Shorten a URL",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 1 || len(args) == 0 {
-				return nil
-			}
+var ShortenURL = &cli.Command{
+	Name:      "shorten",
+	ArgsUsage: "[url]",
+	Aliases:   []string{"s"},
+	Usage:     "Shorten a URL",
 
-			return cher.New("missing_arguments", nil)
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.Background()
+	Action: func(c *cli.Context) error {
+		startTime := time.Now()
 
-			startTime := time.Now()
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
-			url, err := handleURLInput(args)
-			if err != nil {
-				return err
-			}
+		url, err := handleURLInput(c.Args().Slice())
+		if err != nil {
+			return err
+		}
 
-			body, err := makeClient(kc).ShortenURL(ctx, &short.CreateURLRequest{
-				URL: url,
-			})
-			if err != nil {
-				return err
-			}
+		body, err := app.ShortenURL(c.Context, url)
+		if err != nil {
+			return err
+		}
 
-			writeClipboard(body.URL)
-			notify("URL Shortened", body.URL)
+		clilib.WriteClipboard(body.URL)
+		clilib.Notify("URL Shortened", body.URL)
 
-			log.Infof("Done in %s: %s", time.Now().Sub(startTime), body.URL)
+		log.Infof("Done in %s: %s", time.Now().Sub(startTime), body.URL)
 
-			return nil
-		},
-	}
+		return nil
+	},
 }

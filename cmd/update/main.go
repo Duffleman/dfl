@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
 const repoOwner = "Duffleman"
@@ -21,12 +21,11 @@ var prefixes = map[string]string{
 	"windows.amd64": "win64",
 }
 
-var rootCmd = &cobra.Command{
-	Use:   "update",
-	Short: "CLI tool to manage CLI updates",
-	Long:  "A CLI tool to manage updating other DFL CLI tools",
+var rootCmd = &cli.App{
+	Name:  "update",
+	Usage: "CLI tool to manage CLI updates",
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Action: func(c *cli.Context) error {
 		prefix := fmt.Sprintf("%s.%s", runtime.GOOS, runtime.GOARCH)
 
 		binPrefix, ok := prefixes[prefix]
@@ -94,7 +93,7 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := rootCmd.Run(os.Args); err != nil {
 		if v, ok := err.(cher.E); ok {
 			bytes, err := json.MarshalIndent(v, "", "  ")
 			if err != nil {

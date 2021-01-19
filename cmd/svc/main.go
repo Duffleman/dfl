@@ -11,31 +11,32 @@ import (
 
 	"github.com/cuvva/cuvva-public-go/lib/ksuid"
 	"github.com/cuvva/cuvva-public-go/lib/servicecontext"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
 // RootCmd is the initial entrypoint where all services are mounted.
-var RootCmd = &cobra.Command{
-	Use:   "dfl",
-	Short: "dfl monobinary for dfl monorepo",
-	Long:  "dfl monobinary contains entrypoints for all dfl services in the monorepo",
+var RootCmd = &cli.App{
+	Name:  "dfl",
+	Usage: "dfl monobinary for dfl monorepo",
 
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	Commands: []*cli.Command{
+		auth.RootCmd,
+		monitor.RootCmd,
+		short.RootCmd,
+	},
+
+	Before: func(c *cli.Context) error {
 		env := config.EnvironmentName(os.Getenv)
 
 		ksuid.SetEnvironment(env)
-		servicecontext.Set(cmd.Use, env)
+		servicecontext.Set(c.Command.Name, env)
+
+		return nil
 	},
 }
 
-func init() {
-	RootCmd.AddCommand(auth.RootCmd)
-	RootCmd.AddCommand(monitor.RootCmd)
-	RootCmd.AddCommand(short.RootCmd)
-}
-
 func main() {
-	if err := RootCmd.Execute(); err != nil {
+	if err := RootCmd.Run(os.Args); err != nil {
 		panic(err)
 	}
 }

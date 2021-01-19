@@ -3,25 +3,30 @@ package commands
 import (
 	"fmt"
 
-	"dfl/lib/cli"
-	"dfl/lib/keychain"
+	clilib "dfl/lib/cli"
+	"dfl/tools/auth/app"
 
-	"github.com/spf13/cobra"
+	"github.com/cuvva/cuvva-public-go/lib/cher"
+	"github.com/urfave/cli/v2"
 )
 
-func Logout(keychain keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:   "logout",
-		Short: "Logout and delete auth credentials",
+var Logout = &cli.Command{
+	Name:  "logout",
+	Usage: "Delete your local credentials",
 
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := keychain.DeleteItem("Auth"); err != nil {
-				return err
+	Action: func(c *cli.Context) error {
+		app := c.Context.Value(clilib.AppKey).(*app.App)
+
+		if err := app.Keychain.DeleteItem("Auth"); err != nil {
+			if v, ok := err.(cher.E); ok && v.Code == cher.NotFound {
+				return cher.New("not_logged_in", nil)
 			}
 
-			fmt.Println(cli.Success("Logged out!"))
+			return err
+		}
 
-			return nil
-		},
-	}
+		fmt.Println(clilib.Success("Logged out!"))
+
+		return nil
+	},
 }

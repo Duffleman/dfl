@@ -1,71 +1,46 @@
 package commands
 
 import (
-	"context"
 	"time"
 
-	"dfl/lib/keychain"
-	"dfl/svc/short"
+	clilib "dfl/lib/cli"
+	"dfl/tools/short/app"
 
-	"github.com/cuvva/cuvva-public-go/lib/cher"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func SetNSFW(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "nsfw [query]",
-		Aliases: []string{"n"},
-		Short:   "Toggle the NSFW flag",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 1 || len(args) == 0 {
-				return nil
-			}
+var SetNSFW = &cli.Command{
+	Name:      "nsfw",
+	ArgsUsage: "[query]",
+	Aliases:   []string{"n"},
+	Usage:     "Toggle the NSFW flag",
 
-			return cher.New("missing_arguments", nil)
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.Background()
+	Action: func(c *cli.Context) error {
+		startTime := time.Now()
 
-			startTime := time.Now()
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
-			query, err := handleQueryInput(args)
-			if err != nil {
-				return err
-			}
+		query, err := app.CleanInput(c.Args().Slice())
+		if err != nil {
+			return err
+		}
 
-			newState, err := toggleNSFW(ctx, kc, query)
-			if err != nil {
-				return err
-			}
+		newState := "ON"
 
-			log.Infof("NSFW flag is now %s", newState)
+		newValue, err := app.ToggleNSFW(c.Context, query)
+		if err != nil {
+			return err
+		}
 
-			log.Infof("Done in %s", time.Now().Sub(startTime))
+		if !newValue {
+			newState = "OFF"
+		}
 
-			return nil
-		},
-	}
-}
+		log.Infof("NSFW flag is now %s", newState)
 
-func toggleNSFW(ctx context.Context, kc keychain.Keychain, query string) (string, error) {
-	res, err := makeClient(kc).ViewDetails(ctx, &short.IdentifyResource{
-		Query: query,
-	})
-	if err != nil {
-		return "", err
-	}
+		log.Infof("Done in %s", time.Now().Sub(startTime))
 
-	newState := "ON"
-
-	if res.NSFW {
-		newState = "OFF"
-	}
-
-	return newState, makeClient(kc).SetNSFW(ctx, &short.SetNSFWRequest{
-		IdentifyResource: short.IdentifyResource{
-			Query: query,
-		},
-		NSFW: !res.NSFW,
-	})
+		return nil
+	},
 }

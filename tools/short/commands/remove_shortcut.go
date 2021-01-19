@@ -1,60 +1,40 @@
 package commands
 
 import (
-	"context"
 	"time"
 
-	"dfl/lib/keychain"
-	"dfl/svc/short"
+	clilib "dfl/lib/cli"
+	"dfl/tools/short/app"
 
-	"github.com/cuvva/cuvva-public-go/lib/cher"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
-func RemoveShortcut(kc keychain.Keychain) *cobra.Command {
-	return &cobra.Command{
-		Use:     "remove-shortcut [query] [shortcut]",
-		Aliases: []string{"rsc"},
-		Short:   "Remove a shortcut",
-		Args: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 2 || len(args) == 0 {
-				return nil
-			}
+var RemoveShortcut = &cli.Command{
+	Name:      "remove-shortcut",
+	ArgsUsage: "[query] [shortcut]",
+	Aliases:   []string{"rsc"},
+	Usage:     "Remove a shortcut",
 
-			return cher.New("missing_arguments", nil)
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.Background()
+	Action: func(c *cli.Context) error {
+		startTime := time.Now()
 
-			startTime := time.Now()
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
-			query, shortcut, err := handleShortcutInput(args)
-			if err != nil {
-				return err
-			}
+		query, shortcut, err := handleShortcutInput(app, c.Args().Slice())
+		if err != nil {
+			return err
+		}
 
-			err = removeShortcut(ctx, kc, query, shortcut)
-			if err != nil {
-				return err
-			}
+		err = app.RemoveShortcut(c.Context, query, shortcut)
+		if err != nil {
+			return err
+		}
 
-			notify("Removed shortcut", shortcut)
+		clilib.Notify("Removed shortcut", shortcut)
 
-			log.Infof("Done in %s", time.Now().Sub(startTime))
+		log.Infof("Done in %s", time.Now().Sub(startTime))
 
-			return nil
-		},
-	}
-}
-
-func removeShortcut(ctx context.Context, kc keychain.Keychain, query, shortcut string) error {
-	body := &short.ChangeShortcutRequest{
-		IdentifyResource: short.IdentifyResource{
-			Query: query,
-		},
-		Shortcut: shortcut,
-	}
-
-	return makeClient(kc).RemoveShortcut(ctx, body)
+		return nil
+	},
 }

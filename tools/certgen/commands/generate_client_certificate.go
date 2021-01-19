@@ -1,37 +1,36 @@
 package commands
 
 import (
+	clilib "dfl/lib/cli"
 	"dfl/tools/certgen/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"github.com/urfave/cli/v2"
 )
 
-func init() {
-	GenerateClientCertificateCmd.Flags().StringP("password", "p", "", "What should the password be?")
-	GenerateClientCertificateCmd.MarkFlagRequired("password")
-}
+var GenerateClientCertificateCmd = &cli.Command{
+	Name:      "generate_client_ceritificate",
+	ArgsUsage: "[hostname]",
+	Aliases:   []string{"gcc"},
+	Usage:     "Generate a client certificate",
 
-var GenerateClientCertificateCmd = &cobra.Command{
-	Use:     "generate_client_ceritificate [hostname]",
-	Aliases: []string{"gcc"},
-	Short:   "Generate a client certificate",
-	Args:    cobra.ExactArgs(1),
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:     "password",
+			Usage:    "Password for the exported certificate",
+			Required: true,
+		},
+	},
 
-	RunE: func(cmd *cobra.Command, args []string) error {
-		name := args[0]
+	Action: func(c *cli.Context) error {
+		name := c.Args().First()
 
-		password, err := cmd.Flags().GetString("password")
-		if err != nil || password == "" {
+		password := c.String("password")
+		if password == "" {
 			return cher.New("no_password_given", nil)
 		}
 
-		rootDirectory := viper.GetString("SECRETS_ROOT_DIR")
-
-		app := &app.App{
-			RootDirectory: rootDirectory,
-		}
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
 		return app.GenerateClientCertificate(name, password)
 	},

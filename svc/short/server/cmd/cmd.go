@@ -4,19 +4,18 @@ import (
 	"dfl/svc/short/server"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/spf13/cobra"
+	"github.com/urfave/cli/v2"
 )
 
 // RootCmd is the default command for the upload proxy service executable.
-var RootCmd = &cobra.Command{
-	Use:   "short",
-	Short: "short handles all short URLs for files and URLs",
+var RootCmd = &cli.Command{
+	Name:  "short",
+	Usage: "short handles all short URLs for files and URLs",
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Action: func(c *cli.Context) error {
 		cfg := server.DefaultConfig()
 
-		err := envconfig.Process("short", &cfg)
-		if err != nil {
+		if err := envconfig.Process("short", &cfg); err != nil {
 			return err
 		}
 

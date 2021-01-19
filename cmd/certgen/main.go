@@ -1,44 +1,65 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 
+	clilib "dfl/lib/cli"
+	"dfl/tools/certgen/app"
 	"dfl/tools/certgen/commands"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/spf13/viper"
+	"github.com/kelseyhightower/envconfig"
+	log "github.com/sirupsen/logrus"
+	"github.com/urfave/cli/v2"
 )
 
-func init() {
-	viper.SetDefault("SECRETS_ROOT_DIR", "/Users/duffleman/Source/infra-secrets/certificates")
-
-	commands.RootCmd.AddCommand(commands.CreateCRLFileCmd)
-	commands.RootCmd.AddCommand(commands.GenerateClientCertificateCmd)
-	commands.RootCmd.AddCommand(commands.GenerateKeyPairCmd)
-	commands.RootCmd.AddCommand(commands.GenerateRootCACmd)
-	commands.RootCmd.AddCommand(commands.GenerateServerCertificateCmd)
-	commands.RootCmd.AddCommand(commands.InteractiveCmd)
-	commands.RootCmd.AddCommand(commands.VersionCmd)
-}
-
 func main() {
-	viper.SetEnvPrefix("CERTGEN")
-	viper.AutomaticEnv()
-
-	if err := commands.RootCmd.Execute(); err != nil {
+	if err := rootCmd.Run(os.Args); err != nil {
 		if c, ok := err.(cher.E); ok {
 			bytes, err := json.MarshalIndent(c, "", "  ")
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 
 			fmt.Println(string(bytes))
 			os.Exit(1)
 		}
 
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
+}
+
+var rootCmd = &cli.App{
+	Name:  "certgen",
+	Usage: "certgen manages and generates certificates for you.",
+
+	Commands: []*cli.Command{
+		commands.CreateCRLFileCmd,
+		commands.GenerateClientCertificateCmd,
+		commands.GenerateKeyPairCmd,
+		commands.GenerateRootCACmd,
+		commands.GenerateServerCertificateCmd,
+		commands.InteractiveCmd,
+		commands.VersionCmd,
+	},
+
+	Before: func(c *cli.Context) error {
+		var config app.Config
+
+		if err := envconfig.Process("certgen", &config); err != nil {
+			log.Fatal(err)
+		}
+
+		app := &app.App{
+			RootDirectory: config.RootDir,
+		}
+
+		c.Context = context.WithValue(c.Context, clilib.AppKey, app)
+		c.Context = context.WithValue(c.Context, clilib.ConfigKey, config)
+
+		return nil
+	},
 }

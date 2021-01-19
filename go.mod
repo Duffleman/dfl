@@ -29,9 +29,8 @@ require (
 	github.com/rs/cors v1.7.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/speps/go-hashids v2.0.0+incompatible
-	github.com/spf13/cobra v1.1.1
-	github.com/spf13/viper v1.7.1
 	github.com/tjarratt/babble v0.0.0-20191209142150-eecdf8c2339d
+	github.com/urfave/cli/v2 v2.3.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
