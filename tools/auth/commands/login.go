@@ -16,7 +16,6 @@ import (
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/dvsekhvalnov/jose2go/base64url"
 	"github.com/manifoldco/promptui"
-	"github.com/spf13/viper"
 	"github.com/tjarratt/babble"
 	"github.com/urfave/cli/v2"
 )
@@ -37,6 +36,8 @@ func Login(clientID, scopes string) *cli.Command {
 		},
 
 		Action: func(c *cli.Context) error {
+			app := c.Context.Value(clilib.AppKey).(App)
+
 			original, hashed := makeCodeChallenge()
 			state := makeState()
 
@@ -50,9 +51,7 @@ func Login(clientID, scopes string) *cli.Command {
 				"code_challenge":        []string{hashed},
 			}
 
-			rootURL := viper.GetString("AUTH_URL")
-
-			url := fmt.Sprintf("%s/authorize?%s", rootURL, params.Encode())
+			url := fmt.Sprintf("%s/authorize?%s", app.GetAuthURL(), params.Encode())
 
 			fmt.Printf("%s: %s", clilib.Warning("Careful"), "Ensure the state matches: ")
 			fmt.Println(clilib.Success(state))
@@ -66,8 +65,6 @@ func Login(clientID, scopes string) *cli.Command {
 			if err != nil {
 				return err
 			}
-
-			app := c.Context.Value(clilib.AppKey).(App)
 
 			res, err := app.GetAuthClient().Token(c.Context, &auth.TokenRequest{
 				ClientID:     clientID,
@@ -171,4 +168,5 @@ func openBrowser(url string) error {
 type App interface {
 	GetAuthClient() auth.Service
 	GetKeychain() keychain.Keychain
+	GetAuthURL() string
 }

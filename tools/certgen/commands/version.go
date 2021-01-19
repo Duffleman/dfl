@@ -8,15 +8,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var RootCmd = &cli.App{
-	Name:  "certgen",
-	Usage: "certgen manages and generates certificates for you.",
-
-	Commands: []*cli.Command{
-		VersionCmd,
-	},
-}
-
 var VersionCmd = &cli.Command{
 	Name:  "version",
 	Usage: "Print the version number of certgen",

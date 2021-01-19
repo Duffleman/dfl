@@ -1,9 +1,9 @@
 package commands
 
 import (
+	clilib "dfl/lib/cli"
 	"dfl/tools/certgen/app"
 
-	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 )
 
@@ -13,11 +13,7 @@ var GenerateRootCACmd = &cli.Command{
 	Usage:   "Generate a new root CA",
 
 	Action: func(c *cli.Context) error {
-		rootDirectory := viper.GetString("SECRETS_ROOT_DIR")
-
-		app := &app.App{
-			RootDirectory: rootDirectory,
-		}
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
 		return app.GenerateRootCA()
 	},

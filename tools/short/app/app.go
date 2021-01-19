@@ -2,14 +2,11 @@ package app
 
 import (
 	"fmt"
-	"strings"
 
 	"dfl/lib/cli"
 	"dfl/lib/keychain"
 	"dfl/svc/auth"
 	"dfl/svc/short"
-
-	"github.com/spf13/viper"
 )
 
 type App struct {
@@ -20,14 +17,11 @@ type App struct {
 	AuthClient auth.Service
 }
 
-func New(kc keychain.Keychain) (*App, error) {
+func New(rootURL, authURL string, kc keychain.Keychain) (*App, error) {
 	bearerToken, err := cli.AuthHeader(kc, "short")
 	if err != nil {
 		return nil, err
 	}
-
-	rootURL := strings.TrimSuffix(viper.GetString("SHORT_URL"), "/")
-	authURL := strings.TrimSuffix(viper.GetString("AUTH_URL"), "/")
 
 	client, err := short.NewClient(fmt.Sprintf("%s/", rootURL), bearerToken), nil
 	if err != nil {
@@ -54,4 +48,8 @@ func (a *App) GetAuthClient() auth.Service {
 
 func (a *App) GetKeychain() keychain.Keychain {
 	return a.Keychain
+}
+
+func (a *App) GetAuthURL() string {
+	return a.AuthURL
 }

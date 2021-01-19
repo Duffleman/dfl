@@ -3,9 +3,9 @@ package commands
 import (
 	"crypto/x509"
 
+	clilib "dfl/lib/cli"
 	"dfl/tools/certgen/app"
 
-	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 )
 
@@ -21,11 +21,7 @@ var CreateCRLFileCmd = &cli.Command{
 	Usage:   "Create a CRL file",
 
 	Action: func(c *cli.Context) error {
-		rootDirectory := viper.GetString("SECRETS_ROOT_DIR")
-
-		app := &app.App{
-			RootDirectory: rootDirectory,
-		}
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
 		return app.GenerateCRL()
 	},

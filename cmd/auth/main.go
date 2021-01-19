@@ -12,32 +12,25 @@ import (
 	"dfl/tools/auth/commands"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/spf13/viper"
+	"github.com/kelseyhightower/envconfig"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
 const clientID = "client_000000C3N8sN2HPqTVeqfOTsnjBJI"
 
 func main() {
-	// Load env variables
-	viper.SetEnvPrefix("DFL")
-	viper.SetDefault("AUTH_URL", "https://auth.dfl.mn")
-
-	viper.AutomaticEnv()
-
 	if err := rootCmd.Run(os.Args); err != nil {
 		if v, ok := err.(cher.E); ok {
 			bytes, err := json.MarshalIndent(v, "", "  ")
 			if err != nil {
-				fmt.Println(err)
+				log.Fatal(err)
 			}
 
 			fmt.Println(string(bytes))
 		} else {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
-
-		os.Exit(1)
 	}
 }
 
@@ -60,12 +53,19 @@ func makeRoot(kc keychain.Keychain) {
 		},
 
 		Before: func(c *cli.Context) error {
-			app, err := app.New(kc)
+			var config clilib.Config
+
+			if err := envconfig.Process("DFL", &config); err != nil {
+				return err
+			}
+
+			app, err := app.New(config.AuthURL, kc)
 			if err != nil {
 				return err
 			}
 
 			c.Context = context.WithValue(c.Context, clilib.AppKey, app)
+			c.Context = context.WithValue(c.Context, clilib.ConfigKey, config)
 
 			return nil
 		},

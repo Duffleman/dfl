@@ -1,11 +1,11 @@
 package commands
 
 import (
+	clilib "dfl/lib/cli"
 	"dfl/tools/certgen/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
 	"github.com/manifoldco/promptui"
-	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 )
 
@@ -23,11 +23,7 @@ var InteractiveCmd = &cli.Command{
 	Usage:   "Start an interactive console",
 
 	Action: func(c *cli.Context) error {
-		rootDirectory := viper.GetString("SECRETS_ROOT_DIR")
-
-		app := &app.App{
-			RootDirectory: rootDirectory,
-		}
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
 		_, certType, err := certificateTypesPrompt.Run()
 		if err != nil {

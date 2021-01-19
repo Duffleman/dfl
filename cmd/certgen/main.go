@@ -1,21 +1,42 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 
+	clilib "dfl/lib/cli"
+	"dfl/tools/certgen/app"
 	"dfl/tools/certgen/commands"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/spf13/viper"
+	"github.com/kelseyhightower/envconfig"
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
-func init() {
-	viper.SetDefault("SECRETS_ROOT_DIR", "/Users/duffleman/Source/infra-secrets/certificates")
+func main() {
+	if err := rootCmd.Run(os.Args); err != nil {
+		if c, ok := err.(cher.E); ok {
+			bytes, err := json.MarshalIndent(c, "", "  ")
+			if err != nil {
+				log.Fatal(err)
+			}
 
-	commands.RootCmd.Commands = []*cli.Command{
+			fmt.Println(string(bytes))
+			os.Exit(1)
+		}
+
+		log.Fatal(err)
+	}
+}
+
+var rootCmd = &cli.App{
+	Name:  "certgen",
+	Usage: "certgen manages and generates certificates for you.",
+
+	Commands: []*cli.Command{
 		commands.CreateCRLFileCmd,
 		commands.GenerateClientCertificateCmd,
 		commands.GenerateKeyPairCmd,
@@ -23,25 +44,19 @@ func init() {
 		commands.GenerateServerCertificateCmd,
 		commands.InteractiveCmd,
 		commands.VersionCmd,
-	}
-}
+	},
 
-func main() {
-	viper.SetEnvPrefix("CERTGEN")
-	viper.AutomaticEnv()
-
-	if err := commands.RootCmd.Run(os.Args); err != nil {
-		if c, ok := err.(cher.E); ok {
-			bytes, err := json.MarshalIndent(c, "", "  ")
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Println(string(bytes))
-			os.Exit(1)
+	Before: func(c *cli.Context) error {
+		if err := envconfig.Process("certgen", &app.Conf); err != nil {
+			log.Fatal(err)
 		}
 
-		fmt.Println(err)
-		os.Exit(1)
-	}
+		app := &app.App{
+			RootDirectory: app.Conf.RootDir,
+		}
+
+		c.Context = context.WithValue(c.Context, clilib.AppKey, app)
+
+		return nil
+	},
 }

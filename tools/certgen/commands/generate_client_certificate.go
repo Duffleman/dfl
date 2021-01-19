@@ -1,10 +1,10 @@
 package commands
 
 import (
+	clilib "dfl/lib/cli"
 	"dfl/tools/certgen/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 )
 
@@ -30,11 +30,7 @@ var GenerateClientCertificateCmd = &cli.Command{
 			return cher.New("no_password_given", nil)
 		}
 
-		rootDirectory := viper.GetString("SECRETS_ROOT_DIR")
-
-		app := &app.App{
-			RootDirectory: rootDirectory,
-		}
+		app := c.Context.Value(clilib.AppKey).(*app.App)
 
 		return app.GenerateClientCertificate(name, password)
 	},

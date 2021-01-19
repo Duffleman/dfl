@@ -13,20 +13,13 @@ import (
 	"dfl/tools/short/commands"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
-	"github.com/spf13/viper"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/urfave/cli/v2"
 )
 
 const clientID = "client_000000C3NCrPNP0CxPAK3M1uMjeTY"
 
 func main() {
-	// Load env variables
-	viper.SetEnvPrefix("DFL")
-	viper.SetDefault("AUTH_URL", "https://auth.dfl.mn")
-	viper.SetDefault("SHORT_URL", "https://dfl.mn")
-
-	viper.AutomaticEnv()
-
 	if err := rootCmd.Run(os.Args); err != nil {
 		if v, ok := err.(cher.E); ok {
 			bytes, err := json.MarshalIndent(v, "", "  ")
@@ -65,12 +58,19 @@ func makeRoot(kc keychain.Keychain) {
 		},
 
 		Before: func(c *cli.Context) error {
-			app, err := app.New(kc)
+			var config clilib.Config
+
+			if err := envconfig.Process("DFL", &config); err != nil {
+				return err
+			}
+
+			app, err := app.New(config.ShortURL, config.AuthURL, kc)
 			if err != nil {
 				return err
 			}
 
 			c.Context = context.WithValue(c.Context, clilib.AppKey, app)
+			c.Context = context.WithValue(c.Context, clilib.ConfigKey, config)
 
 			return nil
 		},
