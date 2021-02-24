@@ -2,19 +2,17 @@ package html
 
 import (
 	"bytes"
-	"io/ioutil"
+	_ "embed"
 	"net/http"
 	"time"
 
 	"dfl/svc/short/server/app"
 )
 
-func Robots(_ *app.App, w http.ResponseWriter, r *http.Request) error {
-	fileContent, err := ioutil.ReadFile("./resources/robots.txt")
-	if err != nil {
-		return err
-	}
+//go:embed robots.txt
+var fileContent []byte
 
+func Robots(_ *app.App, w http.ResponseWriter, r *http.Request) error {
 	modTime, err := time.Parse(time.RFC3339, "2019-10-02T12:00:00Z")
 	if err != nil {
 		return err
