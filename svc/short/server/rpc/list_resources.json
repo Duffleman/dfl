@@ -1,0 +1,30 @@
+{
+	"type": "object",
+	"additionalProperties": false,
+
+	"required": [
+		"include_deleted"
+	],
+
+	"properties": {
+		"include_deleted": {
+			"type": "boolean"
+		},
+
+		"username": {
+			"type": "string",
+			"minLength": 1
+		},
+
+		"limit": {
+			"type": "number",
+			"minimum": 1,
+			"maximum": 100
+		},
+
+		"filter_mime": {
+			"type": "string",
+			"minLength": 1
+		}
+	}
+}

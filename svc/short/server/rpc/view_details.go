@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/short"
@@ -10,21 +11,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var viewDetailsSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"query"
-	],
-
-	"properties": {
-		"query": {
-			"type": "string",
-			"minLength": 3
-		}
-	}
-}`)
+//go:embed view_details.json
+var viewDetailsJSON string
+var viewDetailsSchema = gojsonschema.NewStringLoader(viewDetailsJSON)
 
 func (r *RPC) ViewDetails(ctx context.Context, req *short.IdentifyResource) (*short.Resource, error) {
 	authUser := authlib.GetUserContext(ctx)

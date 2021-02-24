@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/short"
@@ -11,26 +12,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var setNSFWSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"query",
-		"nsfw"
-	],
-
-	"properties": {
-		"query": {
-			"type": "string",
-			"minLength": 3
-		},
-
-		"nsfw": {
-			"type": "boolean"
-		}
-	}
-}`)
+//go:embed set_nsfw.json
+var setNSFWJSON string
+var setNSFWSchema = gojsonschema.NewStringLoader(setNSFWJSON)
 
 func (r *RPC) SetNSFW(ctx context.Context, req *short.SetNSFWRequest) error {
 	authUser := authlib.GetUserContext(ctx)

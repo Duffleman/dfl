@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/short"
@@ -11,27 +12,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var addShortcutSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"query",
-		"shortcut"
-	],
-
-	"properties": {
-		"query": {
-			"type": "string",
-			"minLength": 3
-		},
-
-		"shortcut": {
-			"type": "string",
-			"minLength": 3
-		}
-	}
-}`)
+//go:embed add_shortcut.json
+var addShortcutJSON string
+var addShortcutSchema = gojsonschema.NewStringLoader(addShortcutJSON)
 
 func (r *RPC) AddShortcut(ctx context.Context, req *short.ChangeShortcutRequest) error {
 	authUser := authlib.GetUserContext(ctx)

@@ -1,0 +1,21 @@
+{
+	"type": "object",
+	"additionalProperties": false,
+
+	"required": [
+		"query",
+		"shortcut"
+	],
+
+	"properties": {
+		"query": {
+			"type": "string",
+			"minLength": 3
+		},
+
+		"shortcut": {
+			"type": "string",
+			"minLength": 3
+		}
+	}
+}

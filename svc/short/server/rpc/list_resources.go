@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/short"
@@ -10,36 +11,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var listResourcesSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"include_deleted"
-	],
-
-	"properties": {
-		"include_deleted": {
-			"type": "boolean"
-		},
-
-		"username": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"limit": {
-			"type": "number",
-			"minimum": 1,
-			"maximum": 100
-		},
-
-		"filter_mime": {
-			"type": "string",
-			"minLength": 1
-		}
-	}
-}`)
+//go:embed list_resources.json
+var listResourcesJSON string
+var listResourcesSchema = gojsonschema.NewStringLoader(listResourcesJSON)
 
 func (r *RPC) ListResources(ctx context.Context, req *short.ListResourcesRequest) ([]*short.Resource, error) {
 	authUser := authlib.GetUserContext(ctx)
