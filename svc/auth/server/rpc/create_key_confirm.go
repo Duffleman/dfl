@@ -3,6 +3,7 @@ package rpc
 import (
 	"bytes"
 	"context"
+	_ "embed"
 	"encoding/json"
 
 	"dfl/svc/auth"
@@ -12,84 +13,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var createKeyConfirmSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"user_id",
-		"challenge_id",
-		"webauthn"
-	],
-
-	"properties": {
-		"user_id": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"key_name": {
-			"type": ["null", "string"],
-			"minLength": 1
-		},
-
-		"challenge_id": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"webauthn": {
-			"type": "object",
-			"additionalProperties": false,
-
-			"required": [
-				"id",
-				"raw_id",
-				"type",
-				"response"
-			],
-
-			"properties": {
-				"id": {
-					"type": "string",
-					"minLength": 1
-				},
-
-				"raw_id": {
-					"type": "string",
-					"minLength": 1
-				},
-
-				"type": {
-					"type": "string",
-					"minLength": 1
-				},
-
-				"response": {
-					"type": "object",
-					"additionalProperties": false,
-
-					"required": [
-						"attestation_object",
-						"client_data_json"
-					],
-
-					"properties": {
-						"attestation_object": {
-							"type": "string",
-							"minLength": 1
-						},
-
-						"client_data_json": {
-							"type": "string",
-							"minLength": 1
-						}
-					}
-				}
-			}
-		}
-	}
-}`)
+//go:embed create_key_confirm.json
+var createKeyConfirmJSON string
+var createKeyConfirmSchema = gojsonschema.NewStringLoader(createKeyConfirmJSON)
 
 func (r *RPC) CreateKeyConfirm(ctx context.Context, req *auth.CreateKeyConfirmRequest) error {
 	user, err := r.app.FindUser(ctx, req.UserID)

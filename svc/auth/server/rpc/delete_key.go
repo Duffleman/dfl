@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/auth"
@@ -10,27 +11,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var deleteKeySchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"user_id",
-		"key_id"
-	],
-
-	"properties": {
-		"user_id": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"key_id": {
-			"type": "string",
-			"minLength": 1
-		}
-	}
-}`)
+//go:embed delete_key.json
+var deleteKeyJSON string
+var deleteKeySchema = gojsonschema.NewStringLoader(deleteKeyJSON)
 
 func (r *RPC) DeleteKey(ctx context.Context, req *auth.DeleteKeyRequest) error {
 	authUser := authlib.GetUserContext(ctx)

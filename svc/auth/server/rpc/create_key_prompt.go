@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/auth"
@@ -11,21 +12,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var createKeyPromptSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"user_id"
-	],
-
-	"properties": {
-		"user_id": {
-			"type": "string",
-			"minLength": 1
-		}
-	}
-}`)
+//go:embed create_key_prompt.json
+var createKeyPromptJSON string
+var createKeyPromptSchema = gojsonschema.NewStringLoader(createKeyPromptJSON)
 
 func (r *RPC) CreateKeyPrompt(ctx context.Context, req *auth.CreateKeyPromptRequest) (*auth.CreateKeyPromptResponse, error) {
 	authUser := authlib.GetUserContext(ctx)

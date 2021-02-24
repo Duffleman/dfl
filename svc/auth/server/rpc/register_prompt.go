@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	"dfl/svc/auth"
 
@@ -10,27 +11,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var registerPromptSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"username",
-		"invite_code"
-	],
-
-	"properties": {
-		"username": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"invite_code": {
-			"type": "string",
-			"minLength": 1
-		}
-	}
-}`)
+//go:embed register_prompt.json
+var registerPromptJSON string
+var registerPromptSchema = gojsonschema.NewStringLoader(registerPromptJSON)
 
 func (r *RPC) RegisterPrompt(ctx context.Context, req *auth.RegisterPromptRequest) (*auth.RegisterPromptResponse, error) {
 	if _, err := r.app.CheckRegistrationValidity(ctx, req.Username, req.InviteCode); err != nil {

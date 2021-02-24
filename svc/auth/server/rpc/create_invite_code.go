@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/auth"
@@ -10,33 +11,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var createInviteCodeSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"scopes",
-		"code",
-		"expires_at"
-	],
-
-	"properties": {
-		"scopes": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"code": {
-			"type": ["string", "null"],
-			"minLength": 1
-		},
-
-		"expires_at": {
-			"type": ["string", "null"],
-			"format": "date-time"
-		}
-	}
-}`)
+//go:embed create_invite_code.json
+var createInviteCodeJSON string
+var createInviteCodeSchema = gojsonschema.NewStringLoader(createInviteCodeJSON)
 
 func (r *RPC) CreateInviteCode(ctx context.Context, req *auth.CreateInviteCodeRequest) (*auth.CreateInviteCodeResponse, error) {
 	authUser := authlib.GetUserContext(ctx)

@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/auth"
@@ -10,26 +11,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var listU2FKeysSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"user_id",
-		"include_unsigned"
-	],
-
-	"properties": {
-		"user_id": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"include_unsigned": {
-			"type": "boolean"
-		}
-	}
-}`)
+//go:embed list_u2f_keys.json
+var listU2FKeysJSON string
+var listU2FKeysSchema = gojsonschema.NewStringLoader(listU2FKeysJSON)
 
 func (r *RPC) ListU2FKeys(ctx context.Context, req *auth.ListU2FKeysRequest) ([]*auth.PublicU2FKey, error) {
 	authUser := authlib.GetUserContext(ctx)
