@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"net/http"
 
-	"dfl/lib/auth"
+	authlib "dfl/lib/auth"
 	"dfl/lib/key"
 	rpclib "dfl/lib/rpc"
+	"dfl/lib/templates"
+	"dfl/svc/auth"
 	"dfl/svc/auth/server/app"
 	"dfl/svc/auth/server/db"
 	"dfl/svc/auth/server/html"
@@ -104,18 +106,24 @@ func Run(cfg Config) error {
 		return err
 	}
 
+	template, err := templates.New(auth.ResourcesFS)
+	if err != nil {
+		return err
+	}
+
 	app := &app.App{
 		Logger:    log,
 		WA:        web,
 		SK:        sk,
 		DB:        db,
+		Template:  template,
 		JWTIssuer: cfg.JWTIssuer,
 	}
 
 	html := htmlPages(app)
 
-	authHandlers := auth.Handlers{
-		auth.CreateScopedBearer(sk.Public(), cfg.JWTIssuer),
+	authHandlers := authlib.Handlers{
+		authlib.CreateScopedBearer(sk.Public(), cfg.JWTIssuer),
 	}
 
 	rpc := rpc.New(app, log, authHandlers, html)

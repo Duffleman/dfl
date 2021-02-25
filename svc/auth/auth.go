@@ -2,10 +2,14 @@ package auth
 
 import (
 	"context"
+	"embed"
 	"time"
 
 	"github.com/duo-labs/webauthn/webauthn"
 )
+
+//go:embed resources/*
+var ResourcesFS embed.FS
 
 type Service interface {
 	CreateClient(context.Context, *CreateClientRequest) (*CreateClientResponse, error)

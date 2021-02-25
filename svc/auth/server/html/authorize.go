@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"dfl/lib/rpc"
 	"dfl/svc/auth/server/app"
 
 	"github.com/cuvva/cuvva-public-go/lib/cher"
@@ -37,14 +36,11 @@ func Authorize(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return rpc.QuickTemplate(w, map[string]interface{}{
+	return a.Template.Display(w, "authorize.html", map[string]interface{}{
 		"title":       "Authenticate",
 		"client_name": client.Name,
 		"params":      string(paramBytes),
 		"scopes":      strings.Fields(params.Scope),
-	}, []string{
-		"./resources/auth/authorize.html",
-		"./resources/auth/layouts/root.html",
 	})
 }
 
