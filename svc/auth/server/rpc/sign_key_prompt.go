@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/auth"
@@ -10,27 +11,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var signKeyPromptSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"user_id",
-		"key_to_sign"
-	],
-
-	"properties": {
-		"user_id": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"key_to_sign": {
-			"type": "string",
-			"minLength": 1
-		}
-	}
-}`)
+//go:embed sign_key_prompt.json
+var signKeyPromptJSON string
+var signKeyPromptSchema = gojsonschema.NewStringLoader(signKeyPromptJSON)
 
 func (r *RPC) SignKeyPrompt(ctx context.Context, req *auth.SignKeyPromptRequest) (*auth.SignKeyPromptResponse, error) {
 	authUser := authlib.GetUserContext(ctx)

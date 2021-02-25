@@ -1,0 +1,20 @@
+{
+	"type": "object",
+	"additionalProperties": false,
+
+	"required": [
+		"user_id",
+		"include_unsigned"
+	],
+
+	"properties": {
+		"user_id": {
+			"type": "string",
+			"minLength": 1
+		},
+
+		"include_unsigned": {
+			"type": "boolean"
+		}
+	}
+}

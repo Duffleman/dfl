@@ -1,0 +1,27 @@
+{
+	"type": "object",
+	"additionalProperties": false,
+
+	"required": [
+		"scopes",
+		"code",
+		"expires_at"
+	],
+
+	"properties": {
+		"scopes": {
+			"type": "string",
+			"minLength": 1
+		},
+
+		"code": {
+			"type": ["string", "null"],
+			"minLength": 1
+		},
+
+		"expires_at": {
+			"type": ["string", "null"],
+			"format": "date-time"
+		}
+	}
+}

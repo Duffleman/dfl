@@ -2,27 +2,16 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	"dfl/svc/auth"
 
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var authorizePromptSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"username"
-	],
-
-	"properties": {
-		"username": {
-			"type": "string",
-			"minLength": 1
-		}
-	}
-}`)
+//go:embed authorize_prompt.json
+var authorizePromptJSON string
+var authorizePromptSchema = gojsonschema.NewStringLoader(authorizePromptJSON)
 
 func (r *RPC) AuthorizePrompt(ctx context.Context, req *auth.AuthorizePromptRequest) (*auth.AuthorizePromptResponse, error) {
 	user, err := r.app.GetUserByName(ctx, req.Username)

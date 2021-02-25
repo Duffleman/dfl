@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/short"
@@ -10,21 +11,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var shortenURLSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"url"
-	],
-
-	"properties": {
-		"url": {
-			"type": "string",
-			"minLength": 1
-		}
-	}
-}`)
+//go:embed shorten_url.json
+var shortenURLJSON string
+var shortenURLSchema = gojsonschema.NewStringLoader(shortenURLJSON)
 
 func (r *RPC) ShortenURL(ctx context.Context, req *short.CreateURLRequest) (*short.CreateResourceResponse, error) {
 	authUser := authlib.GetUserContext(ctx)

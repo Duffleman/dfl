@@ -3,6 +3,7 @@ package rpc
 import (
 	"bytes"
 	"context"
+	_ "embed"
 	"encoding/json"
 
 	authlib "dfl/lib/auth"
@@ -13,96 +14,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var signKeyConfirmSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"user_id",
-		"key_to_sign",
-		"challenge_id",
-		"webauthn"
-	],
-
-	"properties": {
-		"user_id": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"key_to_sign": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"challenge_id": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"webauthn": {
-			"type": "object",
-			"additionalProperties": false,
-
-			"required": [
-				"id",
-				"raw_id",
-				"type",
-				"response"
-			],
-
-			"properties": {
-				"id": {
-					"type": "string",
-					"minLength": 1
-				},
-
-				"raw_id": {
-					"type": "string",
-					"minLength": 1
-				},
-
-				"type": {
-					"type": "string",
-					"minLength": 1
-				},
-
-				"response": {
-					"type": "object",
-					"additionalProperties": false,
-
-					"required": [
-						"authenticator_data",
-						"client_data_json",
-						"signature",
-						"user_handle"
-					],
-
-					"properties": {
-						"authenticator_data": {
-							"type": "string",
-							"minLength": 1
-						},
-
-						"client_data_json": {
-							"type": "string",
-							"minLength": 1
-						},
-
-						"signature": {
-							"type": "string",
-							"minLength": 1
-						},
-
-						"user_handle": {
-							"type": "string"
-						}
-					}
-				}
-			}
-		}
-	}
-}`)
+//go:embed sign_key_confirm.json
+var signKeyConfirmJSON string
+var signKeyConfirmSchema = gojsonschema.NewStringLoader(signKeyConfirmJSON)
 
 func (r *RPC) SignKeyConfirm(ctx context.Context, req *auth.SignKeyConfirmRequest) error {
 	authUser := authlib.GetUserContext(ctx)

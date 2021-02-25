@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/auth"
@@ -10,32 +11,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var createClientSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"name",
-		"redirect_uris"
-	],
-
-	"properties": {
-		"name": {
-			"type": "string",
-			"minLength": 3
-		},
-
-		"redirect_uris": {
-			"type": "array",
-			"minItems": 0,
-
-			"items": {
-				"type": "string",
-				"minLength": 1
-			}
-		}
-	}
-}`)
+//go:embed create_client.json
+var createClientJSON string
+var createClientSchema = gojsonschema.NewStringLoader(createClientJSON)
 
 func (r *RPC) CreateClient(ctx context.Context, req *auth.CreateClientRequest) (*auth.CreateClientResponse, error) {
 	authUser := authlib.GetUserContext(ctx)

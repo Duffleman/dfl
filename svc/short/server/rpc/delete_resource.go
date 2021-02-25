@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	_ "embed"
 
 	authlib "dfl/lib/auth"
 	"dfl/svc/short"
@@ -11,21 +12,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var deleteResourceSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"query"
-	],
-
-	"properties": {
-		"query": {
-			"type": "string",
-			"minLength": 3
-		}
-	}
-}`)
+//go:embed delete_resource.json
+var deleteResourceJSON string
+var deleteResourceSchema = gojsonschema.NewStringLoader(deleteResourceJSON)
 
 func (r *RPC) DeleteResource(ctx context.Context, req *short.IdentifyResource) error {
 	authUser := authlib.GetUserContext(ctx)

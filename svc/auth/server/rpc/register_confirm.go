@@ -3,6 +3,7 @@ package rpc
 import (
 	"bytes"
 	"context"
+	_ "embed"
 	"encoding/json"
 
 	"dfl/svc/auth"
@@ -12,90 +13,9 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-var registerConfirmSchema = gojsonschema.NewStringLoader(`{
-	"type": "object",
-	"additionalProperties": false,
-
-	"required": [
-		"username",
-		"invite_code",
-		"challenge_id",
-		"webauthn"
-	],
-
-	"properties": {
-		"username": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"invite_code": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"key_name": {
-			"type": ["null", "string"],
-			"minLength": 1
-		},
-
-		"challenge_id": {
-			"type": "string",
-			"minLength": 1
-		},
-
-		"webauthn": {
-			"type": "object",
-			"additionalProperties": false,
-
-			"required": [
-				"id",
-				"raw_id",
-				"type",
-				"response"
-			],
-
-			"properties": {
-				"id": {
-					"type": "string",
-					"minLength": 1
-				},
-
-				"raw_id": {
-					"type": "string",
-					"minLength": 1
-				},
-
-				"type": {
-					"type": "string",
-					"minLength": 1
-				},
-
-				"response": {
-					"type": "object",
-					"additionalProperties": false,
-
-					"required": [
-						"attestation_object",
-						"client_data_json"
-					],
-
-					"properties": {
-						"attestation_object": {
-							"type": "string",
-							"minLength": 1
-						},
-
-						"client_data_json": {
-							"type": "string",
-							"minLength": 1
-						}
-					}
-				}
-			}
-		}
-	}
-}`)
+//go:embed register_confirm.json
+var registerConfirmJSON string
+var registerConfirmSchema = gojsonschema.NewStringLoader(registerConfirmJSON)
 
 func (r *RPC) RegisterConfirm(ctx context.Context, req *auth.RegisterConfirmRequest) error {
 	session, err := r.app.FindU2FChallenge(ctx, req.ChallengeID)
