@@ -2,23 +2,29 @@ package templates
 
 import (
 	"embed"
+	"fmt"
 	"net/http"
 	"text/template"
 )
 
 type Template struct {
-	*template.Template
+	fs   embed.FS
+	base *template.Template
 }
 
-func New(fs embed.FS) (*Template, error) {
-	tpl, err := template.New("").Delims("[[", "]]").ParseFS(fs, "resources/*")
-	if err != nil {
-		return nil, err
-	}
+func New(fs embed.FS) *Template {
+	tpl := template.New("").Delims("[[", "]]")
 
-	return &Template{tpl}, nil
+	return &Template{fs, tpl}
 }
 
 func (t *Template) Display(w http.ResponseWriter, pageName string, data map[string]interface{}) error {
-	return t.ExecuteTemplate(w, pageName, data)
+	pagePath := fmt.Sprintf("resources/%s.html", pageName)
+
+	tpl, err := t.base.ParseFS(t.fs, "resources/root.html", "resources/_nav.html", pagePath)
+	if err != nil {
+		return err
+	}
+
+	return tpl.ExecuteTemplate(w, "root", data)
 }

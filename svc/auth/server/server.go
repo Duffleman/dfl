@@ -106,17 +106,12 @@ func Run(cfg Config) error {
 		return err
 	}
 
-	template, err := templates.New(auth.ResourcesFS)
-	if err != nil {
-		return err
-	}
-
 	app := &app.App{
 		Logger:    log,
 		WA:        web,
 		SK:        sk,
 		DB:        db,
-		Template:  template,
+		Template:  templates.New(auth.ResourcesFS),
 		JWTIssuer: cfg.JWTIssuer,
 	}
 

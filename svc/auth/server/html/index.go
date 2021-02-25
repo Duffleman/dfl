@@ -7,7 +7,7 @@ import (
 )
 
 func Index(a *app.App, w http.ResponseWriter, r *http.Request) error {
-	return a.Template.Display(w, "index.html", map[string]interface{}{
+	return a.Template.Display(w, "index", map[string]interface{}{
 		"title":      "DFL Auth",
 		"activeHome": true,
 	})

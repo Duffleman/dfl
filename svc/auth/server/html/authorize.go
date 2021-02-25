@@ -36,7 +36,7 @@ func Authorize(a *app.App, w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return a.Template.Display(w, "authorize.html", map[string]interface{}{
+	return a.Template.Display(w, "authorize", map[string]interface{}{
 		"title":       "Authenticate",
 		"client_name": client.Name,
 		"params":      string(paramBytes),
