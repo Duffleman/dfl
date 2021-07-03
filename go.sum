@@ -291,8 +291,8 @@ github.com/mwitkow/go-conntrack v0.0.0-20161129095857-cc309e4a2223/go.mod h1:qRW
 github.com/nbio/st v0.0.0-20140626010706-e9e8d9816f32/go.mod h1:9wM+0iRr9ahx58uYLpLIr5fm8diHn0JbqRycJi6w0Ms=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
-github.com/nishanths/go-xkcd/v2 v2.0.0 h1:LN7val0KWgs/6mr2xZfLJU0s3CCNVRt68kE9XQlDxjI=
-github.com/nishanths/go-xkcd/v2 v2.0.0/go.mod h1:c01h22uhXC+B+8w8Rw6OsOclmjm0t4jD1tK3dhCFTus=
+github.com/nishanths/go-xkcd/v2 v2.0.1 h1:rRPqdEZ7ZdP9/ycEWBF7V2BIL4BXYCrqVNGFjqKtOBY=
+github.com/nishanths/go-xkcd/v2 v2.0.1/go.mod h1:c01h22uhXC+B+8w8Rw6OsOclmjm0t4jD1tK3dhCFTus=
 github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d h1:VhgPp6v9qf9Agr/56bj7Y/xa04UccTW04VP0Qed4vnQ=
 github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d/go.mod h1:YUTz3bUH2ZwIWBy3CJBeOBEugqcmXREj14T+iG/4k4U=
 github.com/nxadm/tail v1.4.4 h1:DQuhQpB1tVlglWS2hLQ5OV6B5r8aGxSrPc5Qo6uTN78=
