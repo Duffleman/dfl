@@ -24,7 +24,7 @@ require (
 	github.com/koyachi/go-nude v0.0.1
 	github.com/lib/pq v1.9.0
 	github.com/manifoldco/promptui v0.8.0
-	github.com/nishanths/go-xkcd/v2 v2.0.0
+	github.com/nishanths/go-xkcd/v2 v2.0.1
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.8.0
 	github.com/sirupsen/logrus v1.8.0
