@@ -27,7 +27,7 @@ require (
 	github.com/nishanths/go-xkcd/v2 v2.0.1
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.8.0
-	github.com/sirupsen/logrus v1.8.0
+	github.com/sirupsen/logrus v1.8.1
 	github.com/speps/go-hashids v2.0.0+incompatible
 	github.com/tjarratt/babble v0.0.0-20191209142150-eecdf8c2339d
 	github.com/urfave/cli/v2 v2.3.0
