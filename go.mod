@@ -13,7 +13,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/duo-labs/webauthn v0.0.0-20200714211715-1daaee874e43
 	github.com/dvsekhvalnov/jose2go v0.0.0-20201001154944-b09cfaf05951
-	github.com/fatih/color v1.10.0
+	github.com/fatih/color v1.12.0
 	github.com/gen2brain/beeep v0.0.0-20200526185328-e9c15c258e28
 	github.com/go-chi/chi v1.5.4
 	github.com/go-ping/ping v0.0.0-20201115131931-3300c582a663
