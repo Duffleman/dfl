@@ -8,7 +8,7 @@ import (
 
 func Index(_ *app.App, w http.ResponseWriter, r *http.Request) error {
 	w.Header().Set("Content-Type", "") // Needed for redirect to work
-	http.Redirect(w, r, "https://duffleman.co.uk", http.StatusMovedPermanently)
+	http.Redirect(w, r, "https://duffle.one", http.StatusMovedPermanently)
 
 	return nil
 }
