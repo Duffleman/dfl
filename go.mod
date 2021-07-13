@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go v1.39.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cuvva/cuvva-public-go v0.0.0-20210115174515-805a42b386cb
-	github.com/danieljoos/wincred v1.1.0
+	github.com/danieljoos/wincred v1.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/duo-labs/webauthn v0.0.0-20200714211715-1daaee874e43
 	github.com/dvsekhvalnov/jose2go v0.0.0-20201001154944-b09cfaf05951
